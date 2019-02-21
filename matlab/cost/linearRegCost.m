@@ -1,5 +1,5 @@
-function [J, grad] = linearReg(X, y, theta, lambda)
-%linearReg 线性回归正则化代价函数
+function [J, grad] = linearRegCost(X, y, theta, lambda)
+%linearRegCost 线性回归正则化代价函数
 
 [m, n] = size(X);
 
