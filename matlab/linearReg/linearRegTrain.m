@@ -6,7 +6,7 @@ function [theta, maxIter, Jval] = linearRegTrain(X, y, lambda, initTheta)
 % initTheta 初始化theta
 
 % 定义代价函数
-costFunction = @(t) linearRegCostFunction(X, y, t, lambda);
+costFunction = @(t) linearRegCost(X, y, t, lambda);
 
 % 训练参数
 maxIter = 1024;
