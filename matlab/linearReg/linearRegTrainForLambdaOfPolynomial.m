@@ -17,13 +17,11 @@ mVal = size(XVal, 1);
 [normNoneConstX, noneIndexOrigin, noneIndexNorm, mu, sigma] = ...
     featurePolynomialParam(X, p);
 
-% 获取真实的多项式训练集
-realPolyX = [ones(m, 1) normNoneConstX];
-
 % 获取交叉验证集的多项式特征
-polyXVal = mapFeature2polynomial(XVal(:, noneIndexOrigin), p);
-muPolyXVal = bsxfun(@minus, polyXVal(:, noneIndexNorm), mu);
-normPolyXVal = bsxfun(@rdivide, muPolyXVal, sigma);
+normPolyXVal = mapFeatureWithParam(XVal, p, noneIndexOrigin, noneIndexNorm, mu, sigma);
+
+% 获取真实的多项式训练集&交叉验证集
+realPolyX = [ones(m, 1) normNoneConstX];
 realPolyXVal = [ones(mVal, 1) normPolyXVal];
 
 % 初始化theta
