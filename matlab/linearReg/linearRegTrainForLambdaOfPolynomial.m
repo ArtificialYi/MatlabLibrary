@@ -7,18 +7,17 @@ function [errorTrain, errorVal, noneIndexOrigin, noneIndexNorm, mu, sigma] = ...
 % yVal 交叉验证集的结果
 % p 多项式次数
 % lambdaVec 正则化向量
+addpath('./lib');
 
 % 参数准备
 m = size(X, 1);
 mVal = size(XVal, 1);
 
-% 清空X的常量
-[noneConstX, noneIndexOrigin] = trimConst(X);
+% 多项式数据准备
+[normNoneConstX, noneIndexOrigin, noneIndexNorm, mu, sigma] = ...
+    featurePolynomialParam(X, p);
 
-% 获取X的多项式特征
-polyX = mapFeature2polynomial(noneConstX, p);
-[normNoneConstX, mu, sigma, noneIndexNorm] = ...
-    featureNormalize(polyX);
+% 获取真实的多项式训练集
 realPolyX = [ones(m, 1) normNoneConstX];
 
 % 获取交叉验证集的多项式特征
