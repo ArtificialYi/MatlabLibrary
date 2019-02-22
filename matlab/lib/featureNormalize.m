@@ -1,9 +1,12 @@
-function [normNoneConstX, mu, sigma] = featureNormalize(X)
+function [normNoneConstX, mu, sigma, noneIndex] = featureNormalize(X)
 %featureNormalize 特征缩放
 % X 原始数据集
 
+% 添加引用
+addpath('./base');
+
 % 清除常量变量
-noneConstX = trimConst(X);
+[noneConstX, noneIndex] = trimConst(X);
 
 % 减去平均值
 mu = mean(noneConstX);
