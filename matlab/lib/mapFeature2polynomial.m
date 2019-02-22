@@ -2,10 +2,12 @@ function out = mapFeature2polynomial(X, p)
 % mapFeature 多项式扩充特征
 % X 原始数据
 % p 多项式次数
-
 %   获取大小
-[m, n] = size(X);
 
+% 读取base目录下的方法
+addpath('./base');
+
+[m, n] = size(X);
 %   初始化结果矩阵
 tmpN = zeros(1, p - 1);
 for i=2:p
