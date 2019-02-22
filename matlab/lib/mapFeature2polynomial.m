@@ -3,16 +3,15 @@ function out = mapFeature2polynomial(X, p)
 % X 原始数据
 % p 多项式次数
 
-%   获取有效特征
-noneConstX = trimConst(X);
-[m, n] = size(noneConstX);
+%   获取大小
+[m, n] = size(X);
 
 %   初始化结果矩阵
 tmpN = zeros(1, p - 1);
 for i=2:p
     tmpN(i - 1) = numOfPolynomialFeature(n, i);
 end
-out = [noneConstX, zeros(m, sum(tmpN))];
+out = [X, zeros(m, sum(tmpN))];
 
 %   为结果赋值
 tmpOutCol = n;
@@ -22,7 +21,7 @@ for i=2:p
     featureNum = size(powerMatrix, 1);
     
     % 使原始数据和排列组合的行数保持一致
-    repeatNoneConstX = repeatMatrix(noneConstX, featureNum);
+    repeatNoneConstX = repeatMatrix(X, featureNum);
     multiPowerMatrix = multiMatrix(powerMatrix, m);
     
     % 开始计算
@@ -37,7 +36,5 @@ for i=2:p
     tmpOutCol = tmpOutCol + featureNum;
 end
 
-% 去除无用特征
-out = trimConst(out);
 end
 
