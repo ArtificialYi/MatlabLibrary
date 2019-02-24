@@ -1,6 +1,7 @@
 function [J, grad] = linearRegCost(X, y, theta, lambda)
 %linearRegCost 线性回归正则化代价函数
 
+% 数据的大小
 [m, n] = size(X);
 
 % 模型函数计算结果
