@@ -1,3 +1,5 @@
 function [h] = linearHypothesis(X, theta)
-    h = X * theta;
+%linearHypothesis 线性回归假设函数
+    
+h = X * theta;
 end
