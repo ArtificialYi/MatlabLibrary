@@ -95,7 +95,7 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
 
     % 找到theta
     w = ((alpha'.*Y') * X)';
-    JError = svmCost(X, Y, w, b, C);
+    JError = svmCost(X, Y, w, b, 1/C);
     fprintf('Iter:%d, error:%f\n', timeTmp, JError);
     
     % 连续误差小于某个范围，确定已经收敛
