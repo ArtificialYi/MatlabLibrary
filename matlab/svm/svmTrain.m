@@ -92,7 +92,7 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     % 获取误差
     timeTmp = timeTmp + 1;
     tolTmp = tolMatrix(index1, index2);
-    fprintf('当前迭代次数为:%d, 当前误差为:%f\n', timeTmp, tolTmp);
+    fprintf('Iter:%d, error:%f\n', timeTmp, tolTmp);
     
     % 连续误差小于某个范围，确定已经收敛
     if tolTmp < tol
