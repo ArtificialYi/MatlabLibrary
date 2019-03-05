@@ -92,7 +92,11 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     % 获取误差
     timeTmp = timeTmp + 1;
     tolTmp = tolMatrix(index1, index2);
-    fprintf('Iter:%d, error:%f\n', timeTmp, tolTmp);
+
+    % 找到theta
+    w = ((alpha'.*Y') * X)';
+    JError = svmCost(X, Y, w, b, C);
+    fprintf('Iter:%d, error:%f\n', timeTmp, JError);
     
     % 连续误差小于某个范围，确定已经收敛
     if tolTmp < tol
