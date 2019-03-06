@@ -36,6 +36,17 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     % 获取两两误差和误差梯度 m*m
     EMinus = E - E';
     
+    % 寻找违反KKT条件的所有点
+    % 寻找对的点调整alpha
+    posPoint = E.*Y.*alpha;
+    posPoint(posPoint<0)=0;
+    % 寻找错误的点调整alpha
+    negPoint = E.*Y.*(C-alpha);
+    negPoint(negPoint>0)=0;
+    % 将有问题的点整理出来
+    point = abs(negPoint+posPoint);
+    pointMatrix = point + point';
+
     % 找到leftMatrix和rightMatrix
     sMatrix = Y * Y';
     % leftMatrix
@@ -65,6 +76,7 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     tolMatrix = abs(alphaNewMatrix - alpha');
     % 将边界误差设置为0
     tolMatrix = tril(tolMatrix, -1) + tril(tolMatrix', -1)';
+    tolMatrix = tolMatrix .* pointMatrix;
     
     % 取出最大的一个误差，开始计算
     [indexMax] = find(tolMatrix==max(max(tolMatrix)));
@@ -113,5 +125,6 @@ model.w = w;
 model.b = b;
 model.maxTime = timeTmp;
 model.alpha = alpha;
+model.point = point;
 
 end
