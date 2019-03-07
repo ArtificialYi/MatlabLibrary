@@ -6,8 +6,12 @@ function [errorTrainVec, errorValVec] = ...
 errorTrainVec = zeros(length(CVec), 1);
 errorValVec = zeros(length(CVec), 1);
 
+% 初始化alpha
+m = size(XTrain, 1);
+alpha = zeros(m, 1);
+
 for i = 1:length(CVec)
-    modelTmp = svmTrain(XTrain, YTrain, CVec(i), tol, maxIter);
+    modelTmp = svmTrain(XTrain, YTrain, CVec(i), alpha, tol, maxIter);
     errorTrainVec(i) = svmCost(XTrain, YTrain, modelTmp.w, modelTmp.b, 0);
     errorValVec(i) = svmCost(XVal, YVal, modelTmp.w, modelTmp.b, 0);
 end
