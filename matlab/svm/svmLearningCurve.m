@@ -27,8 +27,9 @@ for i=1:realSplit
     currentIndex = floor(m * i / realSplit);
     XTmp = X(1:currentIndex, :);
     yTmp = y(1:currentIndex);
-    
-    modelTmp = svmTrain(XTmp, yTmp, C, tol, maxIter);
+    alphaTmp = zeros(currentIndex, 1);
+
+    modelTmp = svmTrain(XTmp, yTmp, C, alphaTmp, tol, maxIter);
     
     realSplitVec(i) = currentIndex;
     
