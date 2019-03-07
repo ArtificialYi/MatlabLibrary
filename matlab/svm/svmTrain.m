@@ -55,6 +55,7 @@ rightMatrix = zeros(m, m);
 % alpha相关
 alphaNewMatrix = zeros(m, m);
 alphaErrorVec = zeros(m, 1);
+alphaError = alpha'*Y;
 
 % 随机数
 destiny = zeros(m, m);
