@@ -1,5 +1,5 @@
-function [model] = svmTrain(X, Y, C, tol, maxIter)
-%svmTrain SVM基础模型训练函数-SMO算法
+function [model] = svmTrain(X, Y, C, alpha, tol, maxIter)
+%svmTrain SVM基础模型训练函数-SMO算法，C越大，收敛概率越低
 % X 原始数据
 % Y 结果集
 % C 最大容许误差值
@@ -13,10 +13,8 @@ Y(Y==0) = -1;
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
 tol = max(floatErrorUnit, tol);
-floatErrorMax = min(C/2, min(floatErrorUnit*m, tol));
+floatErrorMax = min(floatErrorUnit, tol);
 
-% 初始化alpha
-alpha = zeros(m, 1);
 % 初始化核函数 m*m
 K = X * X';
 % 初始化数据差 m*m
@@ -159,6 +157,9 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     timeTmp = timeTmp + 1;
     tolTmp = tolMatrix(index1, index2);
 
+    % 获取新的b
+    b = -sum(K*(alpha.*Y)-Y) / m;
+
     % 如果alpha浮点误差超过误差极限了，尝试重新计算alpha
     alphaError = alpha'*Y;
     tolError = abs(alphaError);
@@ -173,17 +174,16 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
         sumAlpha = m - 2*alphaErrorNum;
         if sumAlpha > 0
             % 可正可负中的值
-            alpha2 = -(alpha1==0).*Y*(alphaError/sumAlpha/2);
-            alpha3 = alpha1*(tolError/sumAlpha/2) + alpha2;
+            alpha2 = -(alpha1==0).*Y*(alphaError/sumAlpha);
+            alpha3 = alpha1*(tolError/sumAlpha) + alpha2;
             alpha = alpha + alpha3;
+            b = -sum(K*(alpha.*Y)-Y) / m;
             fprintf('success:\n%.20f\n%.20f\n', alphaError, alpha'*Y);
         else
             fprintf('modify float fail:%d\n', sumAlpha);
         end
     end
     
-    % 获取新的b
-    b = -sum(K*(alpha.*Y)-Y) / m;
 
     % 找到theta
     w = ((alpha'.*Y') * X)';
