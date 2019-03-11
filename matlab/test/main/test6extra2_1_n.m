@@ -1,14 +1,14 @@
-%% Çå¿Õ¹¤×÷Çø
+%% ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½ï¿½ï¿½
 clear; close all; clc;
 
-%% ¶ÁÈ¡Ô­Ê¼Êý¾Ý-³éÏó³ö²âÊÔ¼¯¡¢ÑµÁ·¼¯
-% ¶ÁÈ¡Ô­Ê¼Êý¾Ý
+%% ï¿½ï¿½È¡Ô­Ê¼ï¿½ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½
+% ï¿½ï¿½È¡Ô­Ê¼ï¿½ï¿½ï¿½ï¿½
 data = load('../resource/ex3data1.mat');
 XOrigin = data.X;
 YOrigin = data.y;
 m = size(XOrigin, 1);
 
-% ¶þÖµ·ÖÀàÆ÷
+% ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 classNum = 10;
 maxClass = ceil(log2(classNum));
 YOriginMatrix = zeros(m, maxClass);
@@ -22,22 +22,22 @@ end
 trainPoint = 0.7;
 valPoint = 0.3;
 
-% ½«Ô­Ê¼Êý¾Ý×ª»¯ÎªËæ»úµÄÈý¸ö¼¯ºÏ
+% ï¿½ï¿½Ô­Ê¼ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 indexVecRand = randperm(m);
 [XTrain, YTrain, XVal, YVal, XTest, YTest] = ...
     splitOriginData(XOrigin, YOrigin, indexVecRand, trainPoint, valPoint);
 
-% ½»²æÑéÖ¤¼¯µÄÊý¾Ý
+% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 mVal = size(XVal, 1);
 
-% ÌØÕ÷¹éÒ»»¯
+% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 [XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
 XOriginNorm = ...
     mapFeatureWithParam(XOrigin, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
-%% ÌØÕ÷¹éÒ»»¯-ÑµÁ·Ä£ÐÍ-40×é£¯2min 80×é£¯5min 160×é£¯15min 320×é/30min
+%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½-Ñµï¿½ï¿½Ä£ï¿½ï¿½-40ï¿½é£¯2min 80ï¿½é£¯5min 160ï¿½é£¯15min 320ï¿½ï¿½/30min
 CTrain = 1;
 tolTrain = 1e-5;
 maxIterTrain = 1;
@@ -48,22 +48,22 @@ modelOriginTmp = ...
     svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1, gpuNum);
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
-    [modelOriginMatrix(i)] = svmTrain(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);
-    fprintf('µÚ%d×éµÄ%d´ÎÑµÁ·Íê±Ï.\n', i, maxIterTrain);
+    [modelOriginMatrix(i)] = svmTrainGPU(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);
+    fprintf('ç¬¬%dç»„%dæ¬¡è¿ç®—ç»“æŸ.\n', i, maxIterTrain);
 end
 
-%% ÑµÁ·½á¹ûÕ¹Ê¾
+%% ç»“æžœå±•ç¤º
 for i=1:maxClass
-    fprintf('alphaµÄ×î´óÖµÎª:%f\n', max(modelOriginMatrix(i).alpha));
-    fprintf('wµÄ½á¹ûÎª:\n');
-    fprintf('bµÄ½á¹ûÎª:%f\n', modelOriginMatrix(i).b);
-    fprintf('pointµÄºÍÎª:%f\n×ÜµÄ´íÎóµÄµãÊýÎª:%d\n', sum(modelOriginMatrix(i).point), sum(modelOriginMatrix(i).point>tolTrain));
-    fprintf('ÏòÁ¿Îó²îÎª£º%.20f\n', modelOriginMatrix(i).error);
-    fprintf('ÕæÊµ¾«¶ÈÎª:%.20f\n', modelOriginMatrix(i).tol);
-    fprintf('¸¡µãÎó²îÎª:%.20f\n', modelOriginMatrix(i).floatError);
+    fprintf('alpha:%f\n', max(modelOriginMatrix(i).alpha));
+    fprintf('w:\n');
+    fprintf('b:%f\n', modelOriginMatrix(i).b);
+    fprintf('point:%f\né”™è¯¯ç‚¹æ•°:%d\n', sum(modelOriginMatrix(i).point), sum(modelOriginMatrix(i).point>tolTrain));
+    fprintf('è¯¯å·®å€¼%.20f\n', modelOriginMatrix(i).error);
+    fprintf('ç²¾åº¦:%.20f\n', modelOriginMatrix(i).tol);
+    fprintf('ç²¾åº¦è¯¯å·®:%.20f\n', modelOriginMatrix(i).floatError);
 end
 
-%% ¹éÒ»ºóµÄÊý¾Ý´¦Àí
+%% ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½
 XTestTmp = [vecX1Repeat vecX2Multi];
 nTestTmp = size(XTestTmp, 2);
 
