@@ -143,12 +143,12 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     tolMatrixGPU(:) = tolMatrixGPU .* pointMatrixGPU;
     
     % 取出最大的一个误差，开始计算
-    [indexMax] = find(tolMatrixGPU==max(max(tolMatrixGPU)));
-    if length(indexMax) > 1
-        indexMax = indexMax(1);
+    [indexMaxGPU] = find(tolMatrixGPU==max(max(tolMatrixGPU)));
+    if length(indexMaxGPU) > 1
+        indexMaxGPU = indexMaxGPU(1);
     end
-    index2 = ceil(indexMax / mGPU);
-    index1 = indexMax - (index2-1)*mGPU;
+    index2GPU = ceil(indexMaxGPU / mGPU);
+    index1GPU = indexMaxGPU - (index2GPU-1)*mGPU;
     
     exist = existsOnGPU(alphaNewMatrixGPU);
     fprintf('min&max是否已经移动至GPU中:%d\n', exist);
@@ -166,70 +166,68 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
         break;
     end
     
-    alphaOld1 = alpha(index1);
-    alphaOld2 = alpha(index2);
+    alphaOld1GPU = alphaGPU(index1);
+    alphaOld2GPU = alphaGPU(index2);
 
     % 获得最新的alpha
-    alpha(index2) = alphaNewMatrix(index1, index2);
-    alpha(index1) = alphaOld1 + sMatrix(index1, index2)*(alphaOld2-alpha(index2));
-
-    % 每隔开方次就矫正一次alpha
+    alphaGPU(index2GPU) = alphaNewMatrixGPU(index1GPU, index2GPU);
+    alphaGPU(index1GPU) = alphaOld1GPU + sMatrixGPU(index1GPU, index2GPU)*(alphaOld2GPU-alphaGPU(index2GPU));
 
     % 获取误差
-    timeTmp = timeTmp + 1;
-    tolTmp = tolMatrix(index1, index2);
+    timeTmpGPU = timeTmpGPU + 1;
+    tolTmpGPU = tolMatrixGPU(index1GPU, index2GPU);
 
     % 获取新的b
-    b = -sum(K*(alpha.*Y)-Y) / m;
+    bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
 
     % 如果alpha浮点误差超过误差极限了，尝试重新计算alpha
-    alphaError = alpha'*Y;
-    tolError = abs(alphaError);
-    if abs(alphaError) > floatErrorMax
-        alphaErrorVec(:) = 0;
+    alphaErrorGPU = alphaGPU'*YGPU;
+    tolErrorGPU = abs(alphaErrorGPU);
+    if abs(alphaErrorGPU) > floatErrorMaxGPU
+        alphaErrorVecGPU(:) = 0;
 
         % 将alpha拆分成只正、只负、可正可负
-        alpha1 = (alpha<tolError)-(alpha>(C-tolError));
+        alpha1GPU = (alphaGPU<tolErrorGPU)-(alphaGPU>(CGPU-tolErrorGPU));
         % 从只正、只负中获取负收益数
-        alphaErrorNum = sum(alpha1.*Y*alphaError>0);
+        alphaErrorNumGPU = sum(alpha1GPU.*YGPU*alphaErrorGPU>0);
         % 如果负收益数小于一半，开始重新计算alpha
-        sumAlpha = m - 2*alphaErrorNum;
-        if sumAlpha > 0
+        sumAlphaGPU = mGPU - 2*alphaErrorNumGPU;
+        if sumAlphaGPU > 0
             % 可正可负中的值
-            alpha2 = -(alpha1==0).*Y*(alphaError/sumAlpha);
-            alpha3 = alpha1*(tolError/sumAlpha) + alpha2;
-            alpha = alpha + alpha3;
-            b = -sum(K*(alpha.*Y)-Y) / m;
-            fprintf('success:\n%.20f\n%.20f\n', alphaError, alpha'*Y);
+            alpha2GPU = -(alpha1GPU==0).*YGPU*(alphaErrorGPU/sumAlphaGPU);
+            alpha3GPU = alpha1GPU*(tolErrorGPU/sumAlphaGPU) + alpha2GPU;
+            alphaGPU = alphaGPU + alpha3GPU;
+            bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
+            fprintf('success:\n%.20f\n%.20f\n', alphaErrorGPU, alphaGPU'*YGPU);
         else
-            fprintf('modify float fail:%d\n', sumAlpha);
+            fprintf('modify float fail:%d\n', sumAlphaGPU);
         end
     end
     
 
     % 找到theta
-    w = ((alpha'.*Y') * X)';
-    JError = svmCost(X, Y, w, b, 1/C);
-    fprintf('Iter:%d, error:%f\n', timeTmp, JError);
+    wGPU = ((alphaGPU'.*YGPU') * XGPU)';
+    JErrorGPU = svmCost(XGPU, YGPU, wGPU, bGPU, 1/CGPU);
+    fprintf('Iter:%d, error:%f\n', timeTmpGPU, JErrorGPU);
     
     % 连续误差小于某个范围，确定已经收敛
-    if tolTmp < tol
-        tolTimeTmp = tolTimeTmp + 1;
+    if tolTmpGPU < tolGPU
+        tolTimeTmpGPU = tolTimeTmpGPU + 1;
     else
-        tolTimeTmp = 0;
+        tolTimeTmpGPU = 0;
     end
 end
 
 % 找到theta和b
-w = ((alpha'.*Y') * X)';
+wGPU = ((alpha'.*Y') * X)';
 
-model.w = w;
-model.b = b;
-model.maxTime = timeTmp;
-model.alpha = alpha;
-model.point = point;
-model.error = alphaError;
-model.tol = tol;
-model.floatError = floatErrorMax;
+model.w = wGPU;
+model.b = bGPU;
+model.maxTime = timeTmpGPU;
+model.alpha = alphaGPU;
+model.point = pointGPU;
+model.error = alphaErrorGPU;
+model.tol = tolGPU;
+model.floatError = floatErrorMaxGPU;
 
 end
