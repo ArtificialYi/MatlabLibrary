@@ -7,7 +7,7 @@ function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter)
 % maxIter 最大迭代次数
 
 % 初始化参数
-XExist = existOnGPU(X);
+XExist = existsOnGPU(X);
 fprintf('查看X是否存在于GPU中:%d\n', XExist);
 
 % 初始化参数
