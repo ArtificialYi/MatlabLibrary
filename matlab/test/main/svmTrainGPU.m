@@ -23,9 +23,9 @@ YGPU(YGPU==0) = -1;
 
 
 % 初始化浮点误差和精度范围
-floatErrorUnit = C*1e-14;
-tol = max(floatErrorUnit, tol);
-floatErrorMax = min(floatErrorUnit, tol);
+floatErrorUnitGPU = CGPU*1e-14;
+tolGPU = max(floatErrorUnitGPU, tolGPU);
+floatErrorMaxGPU = min(floatErrorUnitGPU, tolGPU);
 
 % 初始化核函数 m*m
 KGPU = XGPU * XGPU';
