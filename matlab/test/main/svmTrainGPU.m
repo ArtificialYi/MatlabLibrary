@@ -11,9 +11,11 @@ gpuDevice(gpuNum);
 XGPU = gpuArray(X);
 % 初始化参数
 m = size(XGPU, 1);
-mExist = existsOnGPU(m);
-fprintf('m是否已经移动至GPU中:%d\n', mExist);
-Y(Y==0) = -1;
+YGPU = gpuArray(Y);
+YGPU(YGPU==0) = -1;
+
+yExist = existsOnGPU(YGPU);
+fprintf('y是否已经移动至GPU中:%d\n', yExist);
 
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
