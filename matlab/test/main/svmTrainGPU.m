@@ -32,26 +32,19 @@ KGPU = XGPU * XGPU';
 % 初始化数据差 m*m
 eta = diag(KGPU) + diag(KGPU)' - KGPU*2;
 eta(eta==0) = -1;
-exist = existsOnGPU(eta);
-fprintf('eta是否已经移动至GPU中:%d\n', exist);
 
 % 获取初始b的值 1*1
 b = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
-exist = existsOnGPU(b);
-fprintf('b是否已经移动至GPU中:%d\n', exist);
 
 % 设置最大循环次数
-timeMax = maxIterGPU;
+timeMaxGPU = maxIterGPU;
 timeTmpGPU = gpuArray(0);
 
-exist = existsOnGPU(timeMax);
-fprintf('timeMax是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(timeTmpGPU);
-fprintf('timeTmpGPU是否已经移动至GPU中:%d\n', exist);
-
 % 连续最小循环次数
-tolTimeMax = floor(sqrt(m));
-tolTimeTmp = 0;
+tolTimeMaxGPU = floor(sqrt(mGPU));
+tolTimeTmpGPU = gpuArray(0);
+exist = existsOnGPU(tolTimeMaxGPU);
+fprintf('tolTimeMaxGPU是否已经移动至GPU中:%d\n', exist);
 
 % 点误差
 E = zeros(m, 1);
@@ -83,7 +76,7 @@ destiny = zeros(m, m);
 sumY = sum(Y);
 
 % 开始循环计算
-while timeTmpGPU < timeMax && tolTimeTmp < tolTimeMax
+while timeTmpGPU < timeMaxGPU && tolTimeTmp < tolTimeMax
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
