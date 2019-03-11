@@ -34,7 +34,7 @@ eta = diag(KGPU) + diag(KGPU)' - KGPU*2;
 eta(eta==0) = -1;
 
 % 获取初始b的值 1*1
-b = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
+bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
 
 % 设置最大循环次数
 timeMaxGPU = maxIterGPU;
@@ -44,35 +44,16 @@ timeTmpGPU = gpuArray(0);
 tolTimeMaxGPU = floor(sqrt(mGPU));
 tolTimeTmpGPU = gpuArray(0);
 
-exist = existsOnGPU(tolTimeMaxGPU);
-fprintf('tolTimeMaxGPU是否已经移动至GPU中:%d\n', exist);
-
 % 点误差
 EGPU = gpuArray.zeros(mGPU, 1);
 EMinusGPU = gpuArray.zeros(mGPU, mGPU);
 tolMatrixGPU = gpuArray.zeros(mGPU, mGPU);
-
-exist = existsOnGPU(EGPU);
-fprintf('E是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(EMinusGPU);
-fprintf('EMinus是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(tolMatrixGPU);
-fprintf('tolMatrix是否已经移动至GPU中:%d\n', exist);
 
 % 点的误差积分
 posPointGPU = gpuArray.zeros(mGPU, 1);
 negPointGPU = gpuArray.zeros(mGPU, 1);
 pointGPU = gpuArray.zeros(mGPU, 1);
 pointMatrixGPU = gpuArray.zeros(mGPU, mGPU);
-
-exist = existsOnGPU(posPointGPU);
-fprintf('posPointGPU是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(negPointGPU);
-fprintf('negPointGPU是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(pointGPU);
-fprintf('pointGPU是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(pointMatrixGPU);
-fprintf('pointMatrixGPU是否已经移动至GPU中:%d\n', exist);
 
 % 左右横跳
 sMatrixGPU = gpuArray.zeros(mGPU, mGPU);
@@ -91,26 +72,26 @@ alphaErrorGPU = alpha'*Y;
 % 随机数
 destinyGPU = zeros(mGPU, mGPU);
 sumY = sum(YGPU);
-exist = existsOnGPU(sumY);
-fprintf('sumY是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(C+sumY);
+fprintf('cpu+gpu是否已经移动至GPU中:%d\n', exist);
 
 % 开始循环计算
 while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     % 获取函数误差 m*1
-    E(:) = K*(alpha.*Y)-Y + b;
+    EGPU(:) = KGPU*(alphaGPU.*YGPU)-YGPU + bGPU;
     % 获取两两误差和误差梯度 m*m
-    EMinus(:) = E - E';
+    EMinusGPU(:) = EGPU - EGPU';
     
     % 寻找违反KKT条件的所有点
     % 寻找对的点调整alpha m*1
-    posPoint(:) = E.*Y.*alpha;
-    posPoint(posPoint<0)=0;
+    posPointGPU(:) = EGPU.*YGPU.*alphaGPU;
+    posPointGPU(posPointGPU<0)=0;
     % 寻找错误的点调整alpha
-    negPoint(:) = E.*Y.*(C-alpha);
-    negPoint(negPoint>0)=0;
+    negPointGPU(:) = EGPU.*YGPU.*(CGPU-alphaGPU);
+    negPointGPU(negPointGPU>0)=0;
     % 将有问题的点整理出来
-    point(:) = abs(negPoint+posPoint);
-    pointNum = sum(point>0);
+    point(:) = abs(negPointGPU+posPointGPU);
+    pointNum = sum(pointGPU>0);
 
     % 随机选点事件
     r = rand();
