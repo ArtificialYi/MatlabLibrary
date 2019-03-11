@@ -44,43 +44,58 @@ timeTmpGPU = gpuArray(0);
 tolTimeMaxGPU = floor(sqrt(mGPU));
 tolTimeTmpGPU = gpuArray(0);
 
+exist = existsOnGPU(tolTimeMaxGPU);
+fprintf('tolTimeMaxGPU是否已经移动至GPU中:%d\n', exist);
+
 % 点误差
-E = zeros(mGPU, 1);
-EMinus = zeros(mGPU, mGPU);
-tolMatrix = zeros(mGPU, mGPU);
-exist = existsOnGPU(E);
+EGPU = gpuArray.zeros(mGPU, 1);
+EMinusGPU = gpuArray.zeros(mGPU, mGPU);
+tolMatrixGPU = gpuArray.zeros(mGPU, mGPU);
+
+exist = existsOnGPU(EGPU);
 fprintf('E是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(EMinus);
+exist = existsOnGPU(EMinusGPU);
 fprintf('EMinus是否已经移动至GPU中:%d\n', exist);
-exist = existsOnGPU(tolMatrix);
+exist = existsOnGPU(tolMatrixGPU);
 fprintf('tolMatrix是否已经移动至GPU中:%d\n', exist);
 
 % 点的误差积分
-posPoint = zeros(m, 1);
-negPoint = zeros(m, 1);
-point = zeros(m, 1);
-pointMatrix = zeros(m, m);
+posPointGPU = gpuArray.zeros(mGPU, 1);
+negPointGPU = gpuArray.zeros(mGPU, 1);
+pointGPU = gpuArray.zeros(mGPU, 1);
+pointMatrixGPU = gpuArray.zeros(mGPU, mGPU);
+
+exist = existsOnGPU(posPointGPU);
+fprintf('posPointGPU是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(negPointGPU);
+fprintf('negPointGPU是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(pointGPU);
+fprintf('pointGPU是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(pointMatrixGPU);
+fprintf('pointMatrixGPU是否已经移动至GPU中:%d\n', exist);
 
 % 左右横跳
-sMatrix = zeros(m, m);
-leftMatrixTmp1 = zeros(m, m);
-leftMatrixTmp2 = zeros(m, m);
-leftMatrix = zeros(m, m);
-rightMatrixTmp1 = zeros(m, m);
-rightMatrixTmp2 = zeros(m, m);
-rightMatrix = zeros(m, m);
+sMatrixGPU = gpuArray.zeros(mGPU, mGPU);
+leftMatrixTmp1GPU = gpuArray.zeros(mGPU, mGPU);
+leftMatrixTmp2GPU = gpuArray.zeros(mGPU, mGPU);
+leftMatrixGPU = gpuArray.zeros(mGPU, mGPU);
+rightMatrixTmp1GPU = gpuArray.zeros(mGPU, mGPU);
+rightMatrixTmp2GPU = gpuArray.zeros(mGPU, mGPU);
+rightMatrixGPU = gpuArray.zeros(mGPU, mGPU);
 
 % alpha相关
-alphaNewMatrix = zeros(m, m);
-alphaErrorVec = zeros(m, 1);
-alphaError = alpha'*Y;
+alphaNewMatrixGPU = zeros(mGPU, mGPU);
+alphaErrorVecGPU = zeros(mGPU, 1);
+alphaErrorGPU = alpha'*Y;
 
 % 随机数
-destiny = zeros(m, m);
-sumY = sum(Y);
+destinyGPU = zeros(mGPU, mGPU);
+sumY = sum(YGPU);
+exist = existsOnGPU(sumY);
+fprintf('sumY是否已经移动至GPU中:%d\n', exist);
 
 % 开始循环计算
-while timeTmpGPU < timeMaxGPU && tolTimeTmp < tolTimeMax
+while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
