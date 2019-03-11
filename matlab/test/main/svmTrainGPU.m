@@ -65,12 +65,12 @@ rightMatrixTmp2GPU = gpuArray.zeros(mGPU, mGPU);
 rightMatrixGPU = gpuArray.zeros(mGPU, mGPU);
 
 % alpha相关
-alphaNewMatrixGPU = zeros(mGPU, mGPU);
-alphaErrorVecGPU = zeros(mGPU, 1);
-alphaErrorGPU = alpha'*Y;
+alphaNewMatrixGPU = gpuArray.zeros(mGPU, mGPU);
+alphaErrorVecGPU = gpuArray.zeros(mGPU, 1);
+alphaErrorGPU = alphaGPU'*YGPU;
 
 % 随机数
-destinyGPU = zeros(mGPU, mGPU);
+destinyGPU = gpuArray.zeros(mGPU, mGPU);
 sumY = sum(YGPU);
 
 % 开始循环计算
