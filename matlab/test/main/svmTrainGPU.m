@@ -29,11 +29,11 @@ floatErrorMax = min(floatErrorUnit, tol);
 
 % 初始化核函数 m*m
 KGPU = XGPU * XGPU';
-exist = existsOnGPU(KGPU);
-fprintf('KGPU是否已经移动至GPU中:%d\n', exist);
 % 初始化数据差 m*m
-eta = diag(K) + diag(K)' - K*2;
+eta = diag(KGPU) + diag(KGPU)' - KGPU*2;
 eta(eta==0) = -1;
+exist = existsOnGPU(eta);
+fprintf('eta是否已经移动至GPU中:%d\n', exist);
 
 % 获取初始b的值 1*1
 b = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
