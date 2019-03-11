@@ -28,13 +28,17 @@ tol = max(floatErrorUnit, tol);
 floatErrorMax = min(floatErrorUnit, tol);
 
 % 初始化核函数 m*m
-K = X * X';
+KGPU = XGPU * XGPU';
+exist = existsOnGPU(KGPU);
+fprintf('KGPU是否已经移动至GPU中:%d\n', exist);
 % 初始化数据差 m*m
 eta = diag(K) + diag(K)' - K*2;
 eta(eta==0) = -1;
 
 % 获取初始b的值 1*1
-b = -sum(K*(alpha.*Y)-Y) / m;
+b = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
+exist = existsOnGPU(b);
+fprintf('b是否已经移动至GPU中:%d\n', exist);
 
 % 设置最大循环次数
 timeMax = maxIterGPU;
