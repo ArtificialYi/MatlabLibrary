@@ -40,11 +40,11 @@ XValNorm = ...
 %% 特征归一化-训练模型-40组／2min 80组／5min 160组／15min 320组/30min
 CTrain = 1;
 tolTrain = 1e-5;
-maxIterTrain = 200;
+maxIterTrain = 1;
 alphaTrain = zeros(m, 1);
 
 modelOriginTmp = ...
-    svmTrain(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1);
+    svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1);
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
     [modelOriginMatrix(i)] = svmTrain(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);
