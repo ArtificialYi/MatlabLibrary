@@ -8,14 +8,18 @@ function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
 
 % 获取GPU资源
 gpuDevice(gpuNum);
+% 将数据放入GPU
 XGPU = gpuArray(X);
+YGPU = gpuArray(Y);
+alphaGPU = gpuArray(alpha);
+
 % 初始化参数
 m = size(XGPU, 1);
-YGPU = gpuArray(Y);
 YGPU(YGPU==0) = -1;
+mGPU = gpuArray(m);
 
-yExist = existsOnGPU(YGPU);
-fprintf('y是否已经移动至GPU中:%d\n', yExist);
+exist = existsOnGPU(mGPU);
+fprintf('m是否已经移动至GPU中:%d\n', exist);
 
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
