@@ -43,13 +43,17 @@ timeTmpGPU = gpuArray(0);
 % 连续最小循环次数
 tolTimeMaxGPU = floor(sqrt(mGPU));
 tolTimeTmpGPU = gpuArray(0);
-exist = existsOnGPU(tolTimeMaxGPU);
-fprintf('tolTimeMaxGPU是否已经移动至GPU中:%d\n', exist);
 
 % 点误差
-E = zeros(m, 1);
-EMinus = zeros(m, m);
-tolMatrix = zeros(m, m);
+E = zeros(mGPU, 1);
+EMinus = zeros(mGPU, mGPU);
+tolMatrix = zeros(mGPU, mGPU);
+exist = existsOnGPU(E);
+fprintf('E是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(EMinus);
+fprintf('EMinus是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(tolMatrix);
+fprintf('tolMatrix是否已经移动至GPU中:%d\n', exist);
 
 % 点的误差积分
 posPoint = zeros(m, 1);
