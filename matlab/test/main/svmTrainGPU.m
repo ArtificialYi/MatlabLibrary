@@ -1,56 +1,54 @@
 function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
-%UNTITLED19 Ê¹ÓÃGPUÑµÁ·SVMÄ£ĞÍ
-% X Ô­Ê¼Êı¾İ
-% Y ½á¹û¼¯
-% C ×î´óÈİĞíÎó²îÖµ
-% tol ¾«×¼¶È
-% maxIter ×î´óµü´ú´ÎÊı
+%svmTrain SVMåŸºç¡€æ¨¡å‹è®­ç»ƒå‡½æ•°-SMOç®—æ³•ï¼ŒCè¶Šå¤§ï¼Œæ”¶æ•›æ¦‚ç‡è¶Šä½
+% X åŸå§‹æ•°æ®
+% Y ç»“æœé›†
+% C æœ€å¤§å®¹è®¸è¯¯å·®å€¼
+% tol ç²¾å‡†åº¦
+% maxIter æœ€å¤§è¿­ä»£æ¬¡æ•°
 
-% Æô¶¯GPU
+% è·å–GPUèµ„æº
 gpuDevice(gpuNum);
-% ³õÊ¼»¯²ÎÊı
 XGPU = gpuArray(X);
 XExist = existsOnGPU(XGPU);
-fprintf('²é¿´XÊÇ·ñ´æÔÚÓÚGPUÖĞ:%d\n', XExist);
-
-% ³õÊ¼»¯²ÎÊı
+fprintf('Xæ˜¯å¦å·²ç»ç§»åŠ¨è‡³GPUä¸­:%d\n', XExist);
+% åˆå§‹åŒ–å‚æ•°
 m = size(X, 1);
 Y(Y==0) = -1;
 
-% ³õÊ¼»¯¸¡µãÎó²îºÍ¾«¶È·¶Î§
+% åˆå§‹åŒ–æµ®ç‚¹è¯¯å·®å’Œç²¾åº¦èŒƒå›´
 floatErrorUnit = C*1e-14;
 tol = max(floatErrorUnit, tol);
 floatErrorMax = min(floatErrorUnit, tol);
 
-% ³õÊ¼»¯ºËº¯Êı m*m
+% åˆå§‹åŒ–æ ¸å‡½æ•° m*m
 K = X * X';
-% ³õÊ¼»¯Êı¾İ²î m*m
+% åˆå§‹åŒ–æ•°æ®å·® m*m
 eta = diag(K) + diag(K)' - K*2;
 eta(eta==0) = -1;
 
-% »ñÈ¡³õÊ¼bµÄÖµ 1*1
+% è·å–åˆå§‹bçš„å€¼ 1*1
 b = -sum(K*(alpha.*Y)-Y) / m;
 
-% ÉèÖÃ×î´óÑ­»·´ÎÊı
+% è®¾ç½®æœ€å¤§å¾ªç¯æ¬¡æ•°
 timeMax = maxIter;
 timeTmp = 0;
 
-% Á¬Ğø×îĞ¡Ñ­»·´ÎÊı
+% è¿ç»­æœ€å°å¾ªç¯æ¬¡æ•°
 tolTimeMax = floor(sqrt(m));
 tolTimeTmp = 0;
 
-% µãÎó²î
+% ç‚¹è¯¯å·®
 E = zeros(m, 1);
 EMinus = zeros(m, m);
 tolMatrix = zeros(m, m);
 
-% µãµÄÎó²î»ı·Ö
+% ç‚¹çš„è¯¯å·®ç§¯åˆ†
 posPoint = zeros(m, 1);
 negPoint = zeros(m, 1);
 point = zeros(m, 1);
 pointMatrix = zeros(m, m);
 
-% ×óÓÒºáÌø
+% å·¦å³æ¨ªè·³
 sMatrix = zeros(m, m);
 leftMatrixTmp1 = zeros(m, m);
 leftMatrixTmp2 = zeros(m, m);
@@ -59,54 +57,54 @@ rightMatrixTmp1 = zeros(m, m);
 rightMatrixTmp2 = zeros(m, m);
 rightMatrix = zeros(m, m);
 
-% alphaÏà¹Ø
+% alphaç›¸å…³
 alphaNewMatrix = zeros(m, m);
 alphaErrorVec = zeros(m, 1);
 alphaError = alpha'*Y;
 
-% Ëæ»úÊı
+% éšæœºæ•°
 destiny = zeros(m, m);
 sumY = sum(Y);
 
-% ¿ªÊ¼Ñ­»·¼ÆËã
+% å¼€å§‹å¾ªç¯è®¡ç®—
 while timeTmp < timeMax && tolTimeTmp < tolTimeMax
-    % »ñÈ¡º¯ÊıÎó²î m*1
+    % è·å–å‡½æ•°è¯¯å·® m*1
     E(:) = K*(alpha.*Y)-Y + b;
-    % »ñÈ¡Á½Á½Îó²îºÍÎó²îÌİ¶È m*m
+    % è·å–ä¸¤ä¸¤è¯¯å·®å’Œè¯¯å·®æ¢¯åº¦ m*m
     EMinus(:) = E - E';
     
-    % Ñ°ÕÒÎ¥·´KKTÌõ¼şµÄËùÓĞµã
-    % Ñ°ÕÒ¶ÔµÄµãµ÷Õûalpha m*1
+    % å¯»æ‰¾è¿åKKTæ¡ä»¶çš„æ‰€æœ‰ç‚¹
+    % å¯»æ‰¾å¯¹çš„ç‚¹è°ƒæ•´alpha m*1
     posPoint(:) = E.*Y.*alpha;
     posPoint(posPoint<0)=0;
-    % Ñ°ÕÒ´íÎóµÄµãµ÷Õûalpha
+    % å¯»æ‰¾é”™è¯¯çš„ç‚¹è°ƒæ•´alpha
     negPoint(:) = E.*Y.*(C-alpha);
     negPoint(negPoint>0)=0;
-    % ½«ÓĞÎÊÌâµÄµãÕûÀí³öÀ´
+    % å°†æœ‰é—®é¢˜çš„ç‚¹æ•´ç†å‡ºæ¥
     point(:) = abs(negPoint+posPoint);
     pointNum = sum(point>0);
 
-    % Ëæ»úÑ¡µãÊÂ¼ş
+    % éšæœºé€‰ç‚¹äº‹ä»¶
     r = rand();
     destiny(:) = rand(m, m);
     if r > 0.4
-        % 60%µÄ¸ÅÂÊÓÃ¼Ó·¨-ÏûÈ¥Ã»ÓĞÎÊÌâµÄÁ½¸öµãÖ®¼äµÄÈ¨ÖØ
+        % 60%çš„æ¦‚ç‡ç”¨åŠ æ³•-æ¶ˆå»æ²¡æœ‰é—®é¢˜çš„ä¸¤ä¸ªç‚¹ä¹‹é—´çš„æƒé‡
         pointMatrix(:) = point + point';
     elseif r > 0.2 && pointNum > 2
-        % 20%µÄ¸ÅÂÊÓÃ³Ë·¨-ÏûÈ¥Ã»ÓĞÎÊÌâµÄÒ»¸öµãÏà¹ØµÄËùÓĞÈ¨ÖØ  
+        % 20%çš„æ¦‚ç‡ç”¨ä¹˜æ³•-æ¶ˆå»æ²¡æœ‰é—®é¢˜çš„ä¸€ä¸ªç‚¹ç›¸å…³çš„æ‰€æœ‰æƒé‡  
         pointMatrix(:) = point * point';
     elseif r > 0.1
-        % 10%µÄ¸ÅÂÊ¼Ó·¨+Ëæ»úÒò×Ó
+        % 10%çš„æ¦‚ç‡åŠ æ³•+éšæœºå› å­
         pointMatrix(:) = (point + point').*destiny;
     elseif r > 0.01
-        % 9%µÄ¸ÅÂÊ³Ë·¨+Ëæ»úÒò×Ó
+        % 9%çš„æ¦‚ç‡ä¹˜æ³•+éšæœºå› å­
         pointMatrix(:) = (point * point').*destiny;
     else
-        % 1%µÄ¸ÅÂÊÍêÈ«Ëæ»ú
+        % 1%çš„æ¦‚ç‡å®Œå…¨éšæœº
         pointMatrix(:) = destiny;
     end
 
-    % ÕÒµ½leftMatrixºÍrightMatrix
+    % æ‰¾åˆ°leftMatrixå’ŒrightMatrix
     sMatrix(:) = Y * Y';
     % leftMatrix
     leftMatrixTmp1(:) = alpha + alpha' - C;
@@ -124,22 +122,22 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     rightMatrix(:) = rightMatrixTmp1+rightMatrixTmp2;
     rightMatrix(rightMatrix>C) = C;
     
-    % Î´Ê¹ÓÃÉÏÏÂ½çÑéÖ¤Ç°µÄalphaNew
+    % æœªä½¿ç”¨ä¸Šä¸‹ç•ŒéªŒè¯å‰çš„alphaNew
     alphaNewMatrix(:) = EMinus .* Y' ./ eta + alpha';
     
-    % Ê¹ÓÃÉÏÏÂ½çÑéÖ¤
+    % ä½¿ç”¨ä¸Šä¸‹ç•ŒéªŒè¯
     alphaNewMatrix(:) = min(rightMatrix, alphaNewMatrix);
     alphaNewMatrix(:) = max(leftMatrix, alphaNewMatrix);
     
-    % Ã¿¶àÉÙ´Îµü´ú¾ÀÕıÒ»ÏÂalpha¿ÉÄÜ´æÔÚµÄÎó²î
+    % æ¯å¤šå°‘æ¬¡è¿­ä»£çº æ­£ä¸€ä¸‹alphaå¯èƒ½å­˜åœ¨çš„è¯¯å·®
 
-    % ¼ÆËãËùÓĞÎó²î
+    % è®¡ç®—æ‰€æœ‰è¯¯å·®
     tolMatrix(:) = abs(alphaNewMatrix - alpha');
-    % ½«±ß½çÎó²îÉèÖÃÎª0
+    % å°†è¾¹ç•Œè¯¯å·®è®¾ç½®ä¸º0
     tolMatrix(:) = tril(tolMatrix, -1) + tril(tolMatrix', -1)';
     tolMatrix(:) = tolMatrix .* pointMatrix;
     
-    % È¡³ö×î´óµÄÒ»¸öÎó²î£¬¿ªÊ¼¼ÆËã
+    % å–å‡ºæœ€å¤§çš„ä¸€ä¸ªè¯¯å·®ï¼Œå¼€å§‹è®¡ç®—
     [indexMax] = find(tolMatrix==max(max(tolMatrix)));
     if length(indexMax) > 1
         indexMax = indexMax(1);
@@ -147,7 +145,7 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     index2 = ceil(indexMax / m);
     index1 = indexMax - (index2-1)*m;
     
-    % ×î´óÎó²îÒÑÎª0
+    % æœ€å¤§è¯¯å·®å·²ä¸º0
     if index1 == index2
         break;
     end
@@ -155,33 +153,33 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     alphaOld1 = alpha(index1);
     alphaOld2 = alpha(index2);
 
-    % »ñµÃ×îĞÂµÄalpha
+    % è·å¾—æœ€æ–°çš„alpha
     alpha(index2) = alphaNewMatrix(index1, index2);
     alpha(index1) = alphaOld1 + sMatrix(index1, index2)*(alphaOld2-alpha(index2));
 
-    % Ã¿¸ô¿ª·½´Î¾Í½ÃÕıÒ»´Îalpha
+    % æ¯éš”å¼€æ–¹æ¬¡å°±çŸ«æ­£ä¸€æ¬¡alpha
 
-    % »ñÈ¡Îó²î
+    % è·å–è¯¯å·®
     timeTmp = timeTmp + 1;
     tolTmp = tolMatrix(index1, index2);
 
-    % »ñÈ¡ĞÂµÄb
+    % è·å–æ–°çš„b
     b = -sum(K*(alpha.*Y)-Y) / m;
 
-    % Èç¹ûalpha¸¡µãÎó²î³¬¹ıÎó²î¼«ÏŞÁË£¬³¢ÊÔÖØĞÂ¼ÆËãalpha
+    % å¦‚æœalphaæµ®ç‚¹è¯¯å·®è¶…è¿‡è¯¯å·®æé™äº†ï¼Œå°è¯•é‡æ–°è®¡ç®—alpha
     alphaError = alpha'*Y;
     tolError = abs(alphaError);
     if abs(alphaError) > floatErrorMax
         alphaErrorVec(:) = 0;
 
-        % ½«alpha²ğ·Ö³ÉÖ»Õı¡¢Ö»¸º¡¢¿ÉÕı¿É¸º
+        % å°†alphaæ‹†åˆ†æˆåªæ­£ã€åªè´Ÿã€å¯æ­£å¯è´Ÿ
         alpha1 = (alpha<tolError)-(alpha>(C-tolError));
-        % ´ÓÖ»Õı¡¢Ö»¸ºÖĞ»ñÈ¡¸ºÊÕÒæÊı
+        % ä»åªæ­£ã€åªè´Ÿä¸­è·å–è´Ÿæ”¶ç›Šæ•°
         alphaErrorNum = sum(alpha1.*Y*alphaError>0);
-        % Èç¹û¸ºÊÕÒæÊıĞ¡ÓÚÒ»°ë£¬¿ªÊ¼ÖØĞÂ¼ÆËãalpha
+        % å¦‚æœè´Ÿæ”¶ç›Šæ•°å°äºä¸€åŠï¼Œå¼€å§‹é‡æ–°è®¡ç®—alpha
         sumAlpha = m - 2*alphaErrorNum;
         if sumAlpha > 0
-            % ¿ÉÕı¿É¸ºÖĞµÄÖµ
+            % å¯æ­£å¯è´Ÿä¸­çš„å€¼
             alpha2 = -(alpha1==0).*Y*(alphaError/sumAlpha);
             alpha3 = alpha1*(tolError/sumAlpha) + alpha2;
             alpha = alpha + alpha3;
@@ -193,12 +191,12 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     end
     
 
-    % ÕÒµ½theta
+    % æ‰¾åˆ°theta
     w = ((alpha'.*Y') * X)';
     JError = svmCost(X, Y, w, b, 1/C);
     fprintf('Iter:%d, error:%f\n', timeTmp, JError);
     
-    % Á¬ĞøÎó²îĞ¡ÓÚÄ³¸ö·¶Î§£¬È·¶¨ÒÑ¾­ÊÕÁ²
+    % è¿ç»­è¯¯å·®å°äºæŸä¸ªèŒƒå›´ï¼Œç¡®å®šå·²ç»æ”¶æ•›
     if tolTmp < tol
         tolTimeTmp = tolTimeTmp + 1;
     else
@@ -206,7 +204,7 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     end
 end
 
-% ÕÒµ½thetaºÍb
+% æ‰¾åˆ°thetaå’Œb
 w = ((alpha'.*Y') * X)';
 
 model.w = w;
@@ -217,5 +215,5 @@ model.point = point;
 model.error = alphaError;
 model.tol = tol;
 model.floatError = floatErrorMax;
-end
 
+end
