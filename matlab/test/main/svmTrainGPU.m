@@ -152,14 +152,6 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     
     exist = existsOnGPU(alphaNewMatrixGPU);
     fprintf('min&max是否已经移动至GPU中:%d\n', exist);
-    exist = existsOnGPU(tolMatrixGPU);
-    fprintf('abs是否已经移动至GPU中:%d\n', exist);
-    exist = existsOnGPU(indexMax);
-    fprintf('find是否已经移动至GPU中:%d\n', exist);
-    exist = existsOnGPU(index2);
-    fprintf('ceil是否已经移动至GPU中:%d\n', exist);
-    exist = existsOnGPU(index1);
-    fprintf('compute是否已经移动至GPU中:%d\n', exist);
     
     % 最大误差已为0
     if index1 == index2
