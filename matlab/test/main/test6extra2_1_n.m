@@ -42,9 +42,10 @@ CTrain = 1;
 tolTrain = 1e-5;
 maxIterTrain = 1;
 alphaTrain = zeros(m, 1);
+gpuNum = 1;
 
 modelOriginTmp = ...
-    svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1);
+    svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1, gpuNum);
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
     [modelOriginMatrix(i)] = svmTrain(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);

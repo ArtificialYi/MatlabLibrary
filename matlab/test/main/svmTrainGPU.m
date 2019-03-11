@@ -1,4 +1,4 @@
-function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter)
+function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
 %UNTITLED19 使用GPU训练SVM模型
 % X 原始数据
 % Y 结果集
@@ -6,6 +6,8 @@ function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter)
 % tol 精准度
 % maxIter 最大迭代次数
 
+% 启动GPU
+gpuDevice(gpuNum);
 % 初始化参数
 XExist = existsOnGPU(X);
 fprintf('查看X是否存在于GPU中:%d\n', XExist);
