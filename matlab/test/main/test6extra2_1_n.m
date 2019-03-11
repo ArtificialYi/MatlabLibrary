@@ -3,10 +3,10 @@ clear; close all; clc;
 
 %% 读取原始数据-抽象出测试集、训练集
 % 读取原始数据
-data = load('data/ex3data1.mat');
-
+data = load('../resource/ex3data1.mat');
 XOrigin = data.X;
 YOrigin = data.y;
+m = size(XOrigin, 1);
 
 % 二值分类器
 classNum = 10;
