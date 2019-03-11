@@ -48,7 +48,7 @@ modelOriginTmp = ...
     svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1, gpuNum);
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
-    [modelOriginMatrix(i)] = svmTrainGPU(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);
+    [modelOriginMatrix(i)] = svmTrainGPU(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain, gpuNum);
     fprintf('第%d组%d次运算结束.\n', i, maxIterTrain);
 end
 
