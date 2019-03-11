@@ -154,12 +154,12 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     fprintf('min&max是否已经移动至GPU中:%d\n', exist);
     
     % 最大误差已为0
-    if index1 == index2
+    if index1GPU == index2GPU
         break;
     end
     
-    alphaOld1GPU = alphaGPU(index1);
-    alphaOld2GPU = alphaGPU(index2);
+    alphaOld1GPU = alphaGPU(index1GPU);
+    alphaOld2GPU = alphaGPU(index2GPU);
 
     % 获得最新的alpha
     alphaGPU(index2GPU) = alphaNewMatrixGPU(index1GPU, index2GPU);
