@@ -30,8 +30,8 @@ floatErrorMax = min(floatErrorUnit, tol);
 % 初始化核函数 m*m
 KGPU = XGPU * XGPU';
 % 初始化数据差 m*m
-eta = diag(KGPU) + diag(KGPU)' - KGPU*2;
-eta(eta==0) = -1;
+etaGPU = diag(KGPU) + diag(KGPU)' - KGPU*2;
+etaGPU(etaGPU==0) = -1;
 
 % 获取初始b的值 1*1
 bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
@@ -72,8 +72,6 @@ alphaErrorGPU = alpha'*Y;
 % 随机数
 destinyGPU = zeros(mGPU, mGPU);
 sumY = sum(YGPU);
-exist = existsOnGPU(C+sumY);
-fprintf('cpu+gpu是否已经移动至GPU中:%d\n', exist);
 
 % 开始循环计算
 while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
@@ -91,68 +89,77 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     negPointGPU(negPointGPU>0)=0;
     % 将有问题的点整理出来
     point(:) = abs(negPointGPU+posPointGPU);
-    pointNum = sum(pointGPU>0);
+    pointNumGPU = sum(pointGPU>0);
 
     % 随机选点事件
-    r = rand();
-    destiny(:) = rand(m, m);
-    if r > 0.4
+    rGPU = gpuArray.rand();
+    destinyGPU(:) = gpuArray.rand(mGPU, mGPU);
+    if rGPU > 0.4
         % 60%的概率用加法-消去没有问题的两个点之间的权重
-        pointMatrix(:) = point + point';
-    elseif r > 0.2 && pointNum > 2
+        pointMatrixGPU(:) = pointGPU + pointGPU';
+    elseif rGPU > 0.2 && pointNumGPU > 2
         % 20%的概率用乘法-消去没有问题的一个点相关的所有权重  
-        pointMatrix(:) = point * point';
-    elseif r > 0.1
+        pointMatrixGPU(:) = pointGPU * pointGPU';
+    elseif rGPU > 0.1
         % 10%的概率加法+随机因子
-        pointMatrix(:) = (point + point').*destiny;
-    elseif r > 0.01
+        pointMatrixGPU(:) = (pointGPU + pointGPU').*destinyGPU;
+    elseif rGPU > 0.01
         % 9%的概率乘法+随机因子
-        pointMatrix(:) = (point * point').*destiny;
+        pointMatrixGPU(:) = (pointGPU * pointGPU').*destinyGPU;
     else
         % 1%的概率完全随机
-        pointMatrix(:) = destiny;
+        pointMatrixGPU(:) = destinyGPU;
     end
 
     % 找到leftMatrix和rightMatrix
-    sMatrix(:) = Y * Y';
-    % leftMatrix
-    leftMatrixTmp1(:) = alpha + alpha' - C;
-    leftMatrixTmp2(:) = alpha' - alpha;
-    leftMatrixTmp1(sMatrix ~= 1) = 0;
-    leftMatrixTmp2(sMatrix == 1) = 0;
-    leftMatrix(:) = leftMatrixTmp1+leftMatrixTmp2;
-    leftMatrix(leftMatrix<0) = 0;
+    sMatrixGPU(:) = YGPU * YGPU';
+    % leftMatrixGPU
+    leftMatrixTmp1GPU(:) = alphaGPU + alphaGPU' - CGPU;
+    leftMatrixTmp2GPU(:) = alphaGPU' - alphaGPU;
+    leftMatrixTmp1GPU(sMatrixGPU ~= 1) = 0;
+    leftMatrixTmp2GPU(sMatrixGPU == 1) = 0;
+    leftMatrixGPU(:) = leftMatrixTmp1GPU+leftMatrixTmp2GPU;
+    leftMatrixGPU(leftMatrixGPU<0) = 0;
     
     % rightMatrix
-    rightMatrixTmp1(:) = alpha + alpha';
-    rightMatrixTmp2(:) = alpha' - alpha + C;
-    rightMatrixTmp1(sMatrix ~= 1) = 0;
-    rightMatrixTmp2(sMatrix == 1) = 0;
-    rightMatrix(:) = rightMatrixTmp1+rightMatrixTmp2;
-    rightMatrix(rightMatrix>C) = C;
+    rightMatrixTmp1GPU(:) = alphaGPU + alphaGPU';
+    rightMatrixTmp2GPU(:) = alphaGPU' - alphaGPU + CGPU;
+    rightMatrixTmp1GPU(sMatrixGPU ~= 1) = 0;
+    rightMatrixTmp2GPU(sMatrixGPU == 1) = 0;
+    rightMatrixGPU(:) = rightMatrixTmp1GPU+rightMatrixTmp2GPU;
+    rightMatrixGPU(rightMatrixGPU>C) = C;
     
     % 未使用上下界验证前的alphaNew
-    alphaNewMatrix(:) = EMinus .* Y' ./ eta + alpha';
+    alphaNewMatrixGPU(:) = EMinusGPU .* YGPU' ./ etaGPU + alphaGPU';
     
     % 使用上下界验证
-    alphaNewMatrix(:) = min(rightMatrix, alphaNewMatrix);
-    alphaNewMatrix(:) = max(leftMatrix, alphaNewMatrix);
-    
-    % 每多少次迭代纠正一下alpha可能存在的误差
+    alphaNewMatrixGPU(:) = min(rightMatrixGPU, alphaNewMatrixGPU);
+    alphaNewMatrixGPU(:) = max(leftMatrixGPU, alphaNewMatrixGPU);
 
     % 计算所有误差
-    tolMatrix(:) = abs(alphaNewMatrix - alpha');
+    tolMatrixGPU(:) = abs(alphaNewMatrixGPU - alphaGPU');
     % 将边界误差设置为0
-    tolMatrix(:) = tril(tolMatrix, -1) + tril(tolMatrix', -1)';
-    tolMatrix(:) = tolMatrix .* pointMatrix;
+    tolMatrixGPU(:) = tril(tolMatrixGPU, -1) + tril(tolMatrixGPU', -1)';
+    tolMatrixGPU(:) = tolMatrixGPU .* pointMatrixGPU;
     
     % 取出最大的一个误差，开始计算
-    [indexMax] = find(tolMatrix==max(max(tolMatrix)));
+    [indexMax] = find(tolMatrixGPU==max(max(tolMatrixGPU)));
     if length(indexMax) > 1
         indexMax = indexMax(1);
     end
-    index2 = ceil(indexMax / m);
-    index1 = indexMax - (index2-1)*m;
+    index2 = ceil(indexMax / mGPU);
+    index1 = indexMax - (index2-1)*mGPU;
+    
+    exist = existsOnGPU(alphaNewMatrixGPU);
+    fprintf('min&max是否已经移动至GPU中:%d\n', exist);
+    exist = existsOnGPU(tolMatrixGPU);
+    fprintf('abs是否已经移动至GPU中:%d\n', exist);
+    exist = existsOnGPU(indexMax);
+    fprintf('find是否已经移动至GPU中:%d\n', exist);
+    exist = existsOnGPU(index2);
+    fprintf('ceil是否已经移动至GPU中:%d\n', exist);
+    exist = existsOnGPU(index1);
+    fprintf('compute是否已经移动至GPU中:%d\n', exist);
     
     % 最大误差已为0
     if index1 == index2
