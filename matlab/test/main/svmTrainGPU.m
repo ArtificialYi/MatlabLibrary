@@ -8,18 +8,19 @@ function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
 
 % 获取GPU资源
 gpuDevice(gpuNum);
+
 % 将数据放入GPU
 XGPU = gpuArray(X);
 YGPU = gpuArray(Y);
+CGPU = gpuArray(C);
 alphaGPU = gpuArray(alpha);
+tolGPU = gpuArray(tol);
+maxIterGPU = gpuArray(maxIter);
 
 % 初始化参数
-m = size(XGPU, 1);
+mGPU = gpuArray(size(XGPU, 1));
 YGPU(YGPU==0) = -1;
-mGPU = gpuArray(m);
 
-exist = existsOnGPU(mGPU);
-fprintf('m是否已经移动至GPU中:%d\n', exist);
 
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
@@ -36,8 +37,13 @@ eta(eta==0) = -1;
 b = -sum(K*(alpha.*Y)-Y) / m;
 
 % 设置最大循环次数
-timeMax = maxIter;
-timeTmp = 0;
+timeMax = maxIterGPU;
+timeTmpGPU = gpuArray(0);
+
+exist = existsOnGPU(timeMax);
+fprintf('timeMax是否已经移动至GPU中:%d\n', exist);
+exist = existsOnGPU(timeTmpGPU);
+fprintf('timeTmpGPU是否已经移动至GPU中:%d\n', exist);
 
 % 连续最小循环次数
 tolTimeMax = floor(sqrt(m));
@@ -73,7 +79,7 @@ destiny = zeros(m, m);
 sumY = sum(Y);
 
 % 开始循环计算
-while timeTmp < timeMax && tolTimeTmp < tolTimeMax
+while timeTmpGPU < timeMax && tolTimeTmp < tolTimeMax
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
