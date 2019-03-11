@@ -1,39 +1,36 @@
 function out = mapFeature2polynomial(X, p)
-% mapFeature å¤šé¡¹å¼æ‰©å……ç‰¹å¾
-% X åŸå§‹æ•°æ®
-% p å¤šé¡¹å¼æ¬¡æ•°
-%   è·å–å¤§å°
-
-% è¯»å–baseç›®å½•ä¸‹çš„æ–¹æ³•
-addpath('./base');
+% mapFeature ¶àÏîÊ½À©³äÌØÕ÷
+% X Ô­Ê¼Êı¾İ
+% p ¶àÏîÊ½´ÎÊı
+%   »ñÈ¡´óĞ¡
 
 [m, n] = size(X);
-%   åˆå§‹åŒ–ç»“æœçŸ©é˜µ
+%   ³õÊ¼»¯½á¹û¾ØÕó
 tmpN = zeros(1, p - 1);
 for i=2:p
     tmpN(i - 1) = numOfPolynomialFeature(n, i);
 end
 out = [X, zeros(m, sum(tmpN))];
 
-%   ä¸ºç»“æœèµ‹å€¼
+%   Îª½á¹û¸³Öµ
 tmpOutCol = n;
 for i=2:p
-    % è·å–æ‰©å……ç‰¹å¾æ‰€æœ‰æ’åˆ—ç»„åˆ
+    % »ñÈ¡À©³äÌØÕ÷ËùÓĞÅÅÁĞ×éºÏ
     powerMatrix = matrixOfSumWithNum(n, i);
     featureNum = size(powerMatrix, 1);
     
-    % ä½¿åŸå§‹æ•°æ®å’Œæ’åˆ—ç»„åˆçš„è¡Œæ•°ä¿æŒä¸€è‡´
+    % Ê¹Ô­Ê¼Êı¾İºÍÅÅÁĞ×éºÏµÄĞĞÊı±£³ÖÒ»ÖÂ
     repeatNoneConstX = repeatMatrix(X, featureNum);
     multiPowerMatrix = multiMatrix(powerMatrix, m);
     
-    % å¼€å§‹è®¡ç®—
+    % ¿ªÊ¼¼ÆËã
     tmpFeatureX = repeatNoneConstX .^ multiPowerMatrix;
     tmpFeatureVec = prod(tmpFeatureX, 2);
     
-    % é‡æ–°ç»„åˆæˆéœ€è¦çš„ç‰¹å¾çŸ©é˜µ
+    % ÖØĞÂ×éºÏ³ÉĞèÒªµÄÌØÕ÷¾ØÕó
     tmpX = reshape(tmpFeatureVec, featureNum, m);
     
-    % å°†ç‰¹å¾èåˆåˆ°ç»“æœä¸­
+    % ½«ÌØÕ÷ÈÚºÏµ½½á¹ûÖĞ
     out(:, (tmpOutCol + 1):(tmpOutCol + featureNum)) = tmpX';
     tmpOutCol = tmpOutCol + featureNum;
 end
