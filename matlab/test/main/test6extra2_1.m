@@ -36,3 +36,29 @@ XOriginNorm = ...
     mapFeatureWithParam(XOrigin, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+
+%% 特征归一化-训练模型-40组／2min 80组／5min 160组／15min 320组/30min
+CTrain = 1;
+tolTrain = 1e-5;
+maxIterTrain = 1;
+alphaTrain = zeros(m, 1);
+
+modelOriginTmp = ...
+    svmTrain(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1);
+modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
+for i=1:maxClass
+    [modelOriginMatrix(i)] = svmTrain(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain);
+    fprintf('第%d组的%d次训练完毕.\n', i, maxIterTrain);
+end
+
+%% 训练结果展示
+for i=1:maxClass
+    fprintf('第%d组的结果为：\n', i);
+    fprintf('alpha的最大值为:%f\n', max(modelOriginMatrix(i).alpha));
+    fprintf('w的结果为:\n');
+    fprintf('b的结果为:%f\n', modelOriginMatrix(i).b);
+    fprintf('point的和为:%f\n总的错误的点数为:%d\n', sum(modelOriginMatrix(i).point), sum(modelOriginMatrix(i).point>tolTrain));
+    fprintf('向量误差为：%.15f\n', modelOriginMatrix(i).error);
+    fprintf('真实精度为:%.15f\n', modelOriginMatrix(i).tol);
+    fprintf('浮点误差为:%.15f\n', modelOriginMatrix(i).floatError);
+end
