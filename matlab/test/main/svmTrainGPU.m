@@ -213,13 +213,13 @@ end
 % 找到theta和b
 wGPU = ((alpha'.*Y') * X)';
 
-model.w = wGPU;
-model.b = bGPU;
-model.maxTime = timeTmpGPU;
-model.alpha = alphaGPU;
-model.point = pointGPU;
-model.error = alphaErrorGPU;
-model.tol = tolGPU;
-model.floatError = floatErrorMaxGPU;
+model.w = gather(wGPU);
+model.b = gather(bGPU);
+model.maxTime = gather(timeTmpGPU);
+model.alpha = gather(alphaGPU);
+model.point = gather(pointGPU);
+model.error = gather(alphaErrorGPU);
+model.tol = gather(tolGPU);
+model.floatError = gather(floatErrorMaxGPU);
 
 end
