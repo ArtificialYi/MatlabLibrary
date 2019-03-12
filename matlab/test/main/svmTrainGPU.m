@@ -71,7 +71,6 @@ alphaErrorGPU = alphaGPU'*YGPU;
 
 % 随机数
 destinyGPU = gpuArray.zeros(mGPU, mGPU);
-sumY = sum(YGPU);
 
 % 开始循环计算
 while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
@@ -88,7 +87,7 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     negPointGPU(:) = EGPU.*YGPU.*(CGPU-alphaGPU);
     negPointGPU(negPointGPU>0)=0;
     % 将有问题的点整理出来
-    point(:) = abs(negPointGPU+posPointGPU);
+    pointGPU(:) = abs(negPointGPU+posPointGPU);
     pointNumGPU = sum(pointGPU>0);
 
     % 随机选点事件
@@ -150,9 +149,6 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     index2GPU = ceil(indexMaxGPU / mGPU);
     index1GPU = indexMaxGPU - (index2GPU-1)*mGPU;
     
-    exist = existsOnGPU(alphaNewMatrixGPU);
-    fprintf('min&max是否已经移动至GPU中:%d\n', exist);
-    
     % 最大误差已为0
     if index1GPU == index2GPU
         break;
@@ -196,7 +192,6 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
         end
     end
     
-
     % 找到theta
     wGPU = ((alphaGPU'.*YGPU') * XGPU)';
     JErrorGPU = svmCost(XGPU, YGPU, wGPU, bGPU, 1/CGPU);
