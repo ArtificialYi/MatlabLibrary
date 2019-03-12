@@ -196,7 +196,7 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
 end
 
 % 找到theta和b
-wGPU = ((alpha'.*Y') * X)';
+wGPU = ((alphaGPU'.*YGPU') * XGPU)';
 
 model.w = wGPU;
 model.b = bGPU;
