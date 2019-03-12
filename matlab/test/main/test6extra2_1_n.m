@@ -90,11 +90,17 @@ maxIterLearnGPU = gpuArray(100);
 splitLearnGPU = gpuArray(51);
 
 % 学习曲线参数
+errorTrainLearn = zeros(splitLearnGPU, maxClass);
+errorValLearn = zeros(splitLearnGPU, maxClass);
+realSplitVecLearn = zeros(splitLearnGPU, maxClass);
 for i=1:maxClass
-    [errorTrainLearn(:, i), errorValLearn(:, i), realSplitVecLearn(:, i)] = ...
-        gather(svmLearningCurveGPU(XTrainNormGPU, YTrainMatrixGPU(:, i), ...
+    [errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
+        svmLearningCurveGPU(XTrainNormGPU, YTrainMatrixGPU(:, i), ...
             XValNormGPU, YValMatrixGPU(:, i), CLearnGPU, ...
-            tolLearnGPU, maxIterLearnGPU, splitLearnGPU));
+            tolLearnGPU, maxIterLearnGPU, splitLearnGPU);
+    errorTrainLearn(:, i) = gather(errorTrainLearnGPU);
+    errorValLearn(:, i) = gather(errorValLearnGPU);
+    realSplitVecLearn(:, i) = gather(realSplitVecLearnGPU);
 end
 
 %% 保存工作区变量
