@@ -34,7 +34,7 @@ for i=1:realSplitGPU
     YTmpGPU = YGPU(1:currentIndexGPU);
     alphaTmpGPU = gpuArray.zeros(currentIndexGPU, 1);
 
-    modelTmpGPU = svmTrainGPU(XTmpGPU, YTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU, gpuNumArr(2));
+    modelTmpGPU = svmTrainGPU(XTmpGPU, YTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU);
     
     realSplitVecGPU(i) = currentIndexGPU;
     
