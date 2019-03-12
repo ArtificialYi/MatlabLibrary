@@ -17,6 +17,7 @@ indexVecRand = randperm(m);
     splitOriginData(XOrigin, YOrigin, indexVecRand, trainPoint, valPoint);
 
 % 交叉验证集的大小
+mTrain = size(XTrain, 1);
 mVal = size(XVal, 1);
 
 % 二分切割
