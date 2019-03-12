@@ -47,5 +47,6 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 %% 开始画图
-firstUnit = XOrigin(1, :);
-
+figure(1);
+colormap(gray);
+plotImage(XOrigin, 20, 20, 1, 1, [-0.01, 0.01]);
