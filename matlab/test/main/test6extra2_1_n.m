@@ -40,7 +40,7 @@ XValNorm = ...
 %% 第一次训练数据
 CTrain = 1;
 tolTrain = 1e-5;
-maxIterTrain = 1;
+maxIterTrain = 10;
 alphaTrain = zeros(m, 1);
 gpuNum = 1;
 
