@@ -64,3 +64,13 @@ for i=1:maxClass
 end
 
 %% 学习曲线
+CLearn = 1;
+tolLearn = 1e-5;
+maxIterLearn = 100;
+splitLearn = 5;
+
+% 学习曲线参数
+[errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
+    svmLearningCurveGPU(XTrainNorm, YTrain, ...
+        XValNorm, YVal, CLearn, ...
+        tolLearn, maxIterLearn, splitLearn, [1 2]);
