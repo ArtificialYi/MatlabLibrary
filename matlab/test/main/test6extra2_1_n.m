@@ -67,7 +67,7 @@ end
 CLearn = 1;
 tolLearn = 1e-5;
 maxIterLearn = 100;
-splitLearn = 5;
+splitLearn = 51;
 
 % 学习曲线参数
 [errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
