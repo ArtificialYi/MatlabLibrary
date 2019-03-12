@@ -1,5 +1,5 @@
-function [errorTrain, errorVal, realSplitVec] = ...
-    svmLearningCurveGPU(X, y, XVal, yVal, C, tol, maxIter, split, gpuNumArr)
+function [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
+    svmLearningCurveGPU(XGPU, YGPU, XValGPU, YValGPU, CGPU, tolGPU, maxIterGPU, splitGPU)
 %svmLearningCurve SVM的学习曲线
 % X 训练集
 % y 训练集结果
@@ -9,21 +9,13 @@ function [errorTrain, errorVal, realSplitVec] = ...
 % tol 精度
 % maxIter 最大迭代次数
 
-% 获取新的GPU资源
-gpuDevice(gpuNumArr(1));
-
 % 将入参转化为GPU参数
-XGPU = gpuArray(X);
-yGPU = gpuArray(y);
-XValGPU = gpuArray(XVal);
-yValGPU = gpuArray(yVal);
-CGPU = gpuArray(C);
-tolGPU = gpuArray(tol);
-maxIterGPU = gpuArray(maxIter);
-splitGPU = gpuArray(split);
 
 % 训练集大小
 mGPU = size(XGPU, 1);
+
+exist = existsOnGPU(mGPU);
+fprintf('size也是GPU内存%d\n', exist);
 
 if mGPU < splitGPU
     realSplitGPU = mGPU;
@@ -32,21 +24,21 @@ else
 end
 
 % 初始化结果数组
-errorTrain = zeros(realSplitGPU, 1);
-errorVal = zeros(realSplitGPU, 1);
-realSplitVec = zeros(realSplitGPU, 1);
+errorTrainGPU = gpuArray.zeros(realSplitGPU, 1);
+errorValGPU = gpuArray.zeros(realSplitGPU, 1);
+realSplitVecGPU = gpuArray.zeros(realSplitGPU, 1);
 
 for i=1:realSplitGPU
     currentIndexGPU = floor(mGPU * i / realSplitGPU);
     XTmpGPU = XGPU(1:currentIndexGPU, :);
-    yTmpGPU = yGPU(1:currentIndexGPU);
+    YTmpGPU = YGPU(1:currentIndexGPU);
     alphaTmpGPU = gpuArray.zeros(currentIndexGPU, 1);
 
-    modelTmp = svmTrainGPU(XTmpGPU, yTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU, gpuNumArr(2));
+    modelTmp = svmTrainGPU(XTmpGPU, YTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU, gpuNumArr(2));
     
-    realSplitVec(i) = gather(currentIndexGPU);
+    realSplitVecGPU(i) = currentIndexGPU;
     
-    errorTrain(i) = gather(svmCost(XTmpGPU, yTmpGPU, modelTmp.w, modelTmp.b, 0));
-    errorVal(i) = gather(svmCost(XValGPU, yValGPU, modelTmp.w, modelTmp.b, 0));
+    errorTrainGPU(i) = svmCost(XTmpGPU, YTmpGPU, modelTmp.w, modelTmp.b, 0);
+    errorValGPU(i) = svmCost(XValGPU, YValGPU, modelTmp.w, modelTmp.b, 0);
 end
 

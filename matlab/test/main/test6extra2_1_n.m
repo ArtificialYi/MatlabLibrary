@@ -57,8 +57,10 @@ alphaTrainGPU = gpuArray.zeros(m, 1);
 tolTrainGPU = gpuArray(1e-5);
 maxIterTrainGPU = gpuArray(100);
 
+% CPU可用变量
 modelOriginTmp = ...
     gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,1), CTrainGPU, alphaTrainGPU, tolTrainGPU, 1));
+modelOriginTmp.alpha(:) = gather(alphaTrainGPU);
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
     [modelOriginMatrix(i)] = gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,i), CTrainGPU, gpuArray(modelOriginMatrix(i).alpha), tolTrainGPU, maxIterTrainGPU));
@@ -70,24 +72,29 @@ for i=1:maxClass
     fprintf('alpha:%f\n', max(modelOriginMatrix(i).alpha));
     fprintf('w:\n');
     fprintf('b:%f\n', modelOriginMatrix(i).b);
-    fprintf('point:%f\n错误点数:%d\n', sum(modelOriginMatrix(i).point), sum(modelOriginMatrix(i).point>tolTrain));
+    fprintf('point:%f\n错误点数:%d\n', sum(modelOriginMatrix(i).point), sum(modelOriginMatrix(i).point>tolTrainGPU));
     fprintf('误差值%.20f\n', modelOriginMatrix(i).error);
     fprintf('精度:%.20f\n', modelOriginMatrix(i).tol);
     fprintf('精度误差:%.20f\n', modelOriginMatrix(i).floatError);
 end
 
 %% 学习曲线
-CLearn = 1;
-tolLearn = 1e-5;
-maxIterLearn = 100;
-splitLearn = 51;
+% 生成GPU变量
+XTrainNormGPU = gpuArray(XTrainNorm);
+YTrainMatrixGPU = gpuArray(YTrainMatrix);
+XValNormGPU = gpuArray(XValNorm);
+YValMatrixGPU = gpuArray(YValMatrix);
+CLearnGPU = gpuArray(1);
+tolLearnGPU = gpuArray(1e-5);
+maxIterLearnGPU = gpuArray(100);
+splitLearnGPU = gpuArray(51);
 
 % 学习曲线参数
 for i=1:maxClass
     [errorTrainLearn(:, i), errorValLearn(:, i), realSplitVecLearn(:, i)] = ...
-        svmLearningCurveGPU(XTrainNorm, YTrainMatrix(:, i), ...
-            XValNorm, YValMatrix(:, i), CLearn, ...
-            tolLearn, maxIterLearn, splitLearn, [1 2]);
+        gather(svmLearningCurveGPU(XTrainNormGPU, YTrainMatrixGPU(:, i), ...
+            XValNormGPU, YValMatrixGPU(:, i), CLearnGPU, ...
+            tolLearnGPU, maxIterLearnGPU, splitLearnGPU, [1 2]));
 end
 
 %% 保存工作区变量
