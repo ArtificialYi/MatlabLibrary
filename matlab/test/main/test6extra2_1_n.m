@@ -8,17 +8,6 @@ XOrigin = data.X;
 YOrigin = data.y;
 m = size(XOrigin, 1);
 
-% 二分
-classNum = 10;
-maxClass = ceil(log2(classNum));
-YOriginMatrix = zeros(m, maxClass);
-
-YOriginTmp = YOrigin;
-for i=1:maxClass
-    YOriginMatrix(:,i) = mod(YOriginTmp, 2);
-    YOriginTmp = (YOriginTmp - YOriginMatrix(:,i))/2; 
-end
-
 trainPoint = 0.7;
 valPoint = 0.3;
 
@@ -29,6 +18,25 @@ indexVecRand = randperm(m);
 
 % 交叉验证集的大小
 mVal = size(XVal, 1);
+
+% 二分切割
+classNum = 10;
+maxClass = ceil(log2(classNum));
+YOriginMatrix = zeros(m, maxClass);
+YTrainMatrix = zeros(mTrain, maxClass);
+YValMatrix = zeros(mVal, maxClass);
+
+YOriginTmp = YOrigin;
+YTrainTmp = YTrain;
+YValTmp = YVal;
+for i=1:maxClass
+    YOriginMatrix(:,i) = mod(YOriginTmp, 2);
+    YOriginTmp = (YOriginTmp - YOriginMatrix(:,i))/2;
+    YTrainMatrix(:,i) = mod(YTrainTmp, 2);
+    YTrainTmp = (YTrainTmp - YTrainMatrix(:,i))/2;
+    YValMatrix(:,i) = mod(YValTmp, 2);
+    YValTmp = (YValTmp - YValMatrix(:,i))/2;
+end
 
 % 归一化数据
 [XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
@@ -70,7 +78,12 @@ maxIterLearn = 100;
 splitLearn = 51;
 
 % 学习曲线参数
-[errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
-    svmLearningCurveGPU(XTrainNorm, YTrain, ...
-        XValNorm, YVal, CLearn, ...
-        tolLearn, maxIterLearn, splitLearn, [1 2]);
+for i=1:maxClass
+    [errorTrainLearn(:, i), errorValLearn(:, i), realSplitVecLearn(:, i)] = ...
+        svmLearningCurveGPU(XTrainNorm, YTrainMatrix(:, i), ...
+            XValNorm, YValMatrix(:, i), CLearn, ...
+            tolLearn, maxIterLearn, splitLearn, [1 2]);
+end
+
+%% 保存工作区变量
+save data_test6extra2_1_n.mat;
