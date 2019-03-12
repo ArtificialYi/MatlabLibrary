@@ -1,4 +1,4 @@
-function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
+function [model] = svmTrainGPU(XGPU, YGPU, CGPU, alphaGPU, tolGPU, maxIterGPU)
 %svmTrain SVM基础模型训练函数-SMO算法，C越大，收敛概率越低
 % X 原始数据
 % Y 结果集
@@ -6,21 +6,11 @@ function [model] = svmTrainGPU(X, Y, C, alpha, tol, maxIter, gpuNum)
 % tol 精准度
 % maxIter 最大迭代次数
 
-% 获取GPU资源
-gpuDevice(gpuNum);
-
-% 将数据放入GPU
-XGPU = gpuArray(X);
-YGPU = gpuArray(Y);
-CGPU = gpuArray(C);
-alphaGPU = gpuArray(alpha);
-tolGPU = gpuArray(tol);
-maxIterGPU = gpuArray(maxIter);
+% 传入数据本身就应该是GPU中的数据
 
 % 初始化参数
 mGPU = gpuArray(size(XGPU, 1));
 YGPU(YGPU==0) = -1;
-
 
 % 初始化浮点误差和精度范围
 floatErrorUnitGPU = CGPU*1e-14;
@@ -208,13 +198,13 @@ end
 % 找到theta和b
 wGPU = ((alpha'.*Y') * X)';
 
-model.w = gather(wGPU);
-model.b = gather(bGPU);
-model.maxTime = gather(timeTmpGPU);
-model.alpha = gather(alphaGPU);
-model.point = gather(pointGPU);
-model.error = gather(alphaErrorGPU);
-model.tol = gather(tolGPU);
-model.floatError = gather(floatErrorMaxGPU);
+model.w = wGPU;
+model.b = bGPU;
+model.maxTime = timeTmpGPU;
+model.alpha = alphaGPU;
+model.point = pointGPU;
+model.error = alphaErrorGPU;
+model.tol = tolGPU;
+model.floatError = floatErrorMaxGPU;
 
 end

@@ -1,5 +1,7 @@
 %% 初始化环境
 clear; close all; clc;
+% 开启gpu
+gpuDevice(1);
 
 %% 读取数据
 % 读取数据
@@ -47,18 +49,20 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 %% 第一次训练数据
-CTrain = 1;
-tolTrain = 1e-5;
-maxIterTrain = 100;
-alphaTrain = zeros(m, 1);
-gpuNum = 1;
+% CPU->GPU
+XOriginNormGPU = gpuArray(XOriginNorm);
+YOriginMatrixGPU = gpuArray(YOriginMatrix);
+CTrainGPU = gpuArray(1);
+alphaTrainGPU = gpuArray.zeros(m, 1);
+tolTrainGPU = gpuArray(1e-5);
+maxIterTrainGPU = gpuArray(100);
 
 modelOriginTmp = ...
-    svmTrainGPU(XOriginNorm, YOriginMatrix(:,1), CTrain, alphaTrain, tolTrain, 1, gpuNum);
+    gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,1), CTrainGPU, alphaTrainGPU, tolTrainGPU, 1));
 modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
 for i=1:maxClass
-    [modelOriginMatrix(i)] = svmTrainGPU(XOriginNorm, YOriginMatrix(:,i), CTrain, modelOriginMatrix(i).alpha, tolTrain, maxIterTrain, gpuNum);
-    fprintf('第%d组%d次运算结束.\n', i, maxIterTrain);
+    [modelOriginMatrix(i)] = gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,i), CTrainGPU, gpuArray(modelOriginMatrix(i).alpha), tolTrainGPU, maxIterTrainGPU));
+    fprintf('第%d组%d次运算结束.\n', i, maxIterTrainGPU);
 end
 
 %% 训练结果展示
