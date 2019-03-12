@@ -116,7 +116,7 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     rightMatrixTmp1GPU(sMatrixGPU ~= 1) = 0;
     rightMatrixTmp2GPU(sMatrixGPU == 1) = 0;
     rightMatrixGPU(:) = rightMatrixTmp1GPU+rightMatrixTmp2GPU;
-    rightMatrixGPU(rightMatrixGPU>C) = C;
+    rightMatrixGPU(rightMatrixGPU>CGPU) = CGPU;
     
     % 未使用上下界验证前的alphaNew
     alphaNewMatrixGPU(:) = EMinusGPU .* YGPU' ./ etaGPU + alphaGPU';
