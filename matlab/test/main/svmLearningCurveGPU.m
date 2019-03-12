@@ -12,10 +12,7 @@ function [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
 % 将入参转化为GPU参数
 
 % 训练集大小
-mGPU = size(XGPU, 1);
-
-exist = existsOnGPU(mGPU);
-fprintf('size也是GPU内存%d\n', exist);
+mGPU = gpuArray(size(XGPU, 1));
 
 if mGPU < splitGPU
     realSplitGPU = mGPU;
