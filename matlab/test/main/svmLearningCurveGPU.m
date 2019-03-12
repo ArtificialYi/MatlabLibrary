@@ -34,11 +34,11 @@ for i=1:realSplitGPU
     YTmpGPU = YGPU(1:currentIndexGPU);
     alphaTmpGPU = gpuArray.zeros(currentIndexGPU, 1);
 
-    modelTmp = svmTrainGPU(XTmpGPU, YTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU, gpuNumArr(2));
+    modelTmpGPU = svmTrainGPU(XTmpGPU, YTmpGPU, CGPU, alphaTmpGPU, tolGPU, maxIterGPU, gpuNumArr(2));
     
     realSplitVecGPU(i) = currentIndexGPU;
     
-    errorTrainGPU(i) = svmCost(XTmpGPU, YTmpGPU, modelTmp.w, modelTmp.b, 0);
-    errorValGPU(i) = svmCost(XValGPU, YValGPU, modelTmp.w, modelTmp.b, 0);
+    errorTrainGPU(i) = svmCost(XTmpGPU, YTmpGPU, modelTmpGPU.w, modelTmpGPU.b, 0);
+    errorValGPU(i) = svmCost(XValGPU, YValGPU, modelTmpGPU.w, modelTmpGPU.b, 0);
 end
 
