@@ -1,14 +1,14 @@
-%% ��չ�����
+%% 初始化环境
 clear; close all; clc;
 
-%% ��ȡԭʼ����-��������Լ���ѵ����
-% ��ȡԭʼ����
+%% 读取数据
+% 读取数据
 data = load('../resource/ex3data1.mat');
 XOrigin = data.X;
 YOrigin = data.y;
 m = size(XOrigin, 1);
 
-% ��ֵ������
+% 二分
 classNum = 10;
 maxClass = ceil(log2(classNum));
 YOriginMatrix = zeros(m, maxClass);
@@ -22,22 +22,22 @@ end
 trainPoint = 0.7;
 valPoint = 0.3;
 
-% ��ԭʼ����ת��Ϊ�������������
+% 切成训练集、交叉验证集、测试集
 indexVecRand = randperm(m);
 [XTrain, YTrain, XVal, YVal, XTest, YTest] = ...
     splitOriginData(XOrigin, YOrigin, indexVecRand, trainPoint, valPoint);
 
-% ������֤��������
+% 交叉验证集的大小
 mVal = size(XVal, 1);
 
-% ������һ��
+% 归一化数据
 [XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
 XOriginNorm = ...
     mapFeatureWithParam(XOrigin, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
-%% ������һ��-ѵ��ģ��-40�飯2min 80�飯5min 160�飯15min 320��/30min
+%% 第一次训练数据
 CTrain = 1;
 tolTrain = 1e-5;
 maxIterTrain = 1;
@@ -52,7 +52,7 @@ for i=1:maxClass
     fprintf('第%d组%d次运算结束.\n', i, maxIterTrain);
 end
 
-%% 结果展示
+%% 训练结果展示
 for i=1:maxClass
     fprintf('alpha:%f\n', max(modelOriginMatrix(i).alpha));
     fprintf('w:\n');
@@ -63,12 +63,4 @@ for i=1:maxClass
     fprintf('精度误差:%.20f\n', modelOriginMatrix(i).floatError);
 end
 
-%% ��һ������ݴ���
-XTestTmp = [vecX1Repeat vecX2Multi];
-nTestTmp = size(XTestTmp, 2);
-
-XTestTmpNorm = ...
-    mapFeatureWithParam(XTestTmp, 1, noneIndex, noneIndex, mu, sigma);
-
-predYTestTmp = XTestTmpNorm*modelOrigin.w+modelOrigin.b;
-predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
+%% 学习曲线
