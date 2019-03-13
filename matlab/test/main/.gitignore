@@ -2,5 +2,7 @@
 .DS_Store
 
 # 忽略当前目录下的所有数据文件
-*.mat
-*.txt
+data/*.mat
+data/*.txt
+./*.mat
+./*.txt
