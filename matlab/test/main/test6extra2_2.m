@@ -11,3 +11,5 @@ m = size(XOrigin, 1);
 
 trainPoint = 0.7;
 valPoint = 0.3;
+
+%% 画出数据图
