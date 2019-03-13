@@ -58,12 +58,12 @@ tolTrainGPU = gpuArray(1e-5);
 maxIterTrainGPU = gpuArray(100);
 
 % CPU可用变量
-modelOriginTmp = ...
-    gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,1), CTrainGPU, alphaTrainGPU, tolTrainGPU, 1));
-modelOriginTmp.alpha(:) = gather(alphaTrainGPU);
-modelOriginMatrix = repmat(modelOriginTmp, maxClass, 1);
+modelOriginStructTmp = ...
+    svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,1), CTrainGPU, alphaTrainGPU, tolTrainGPU, 1);
+modelOriginStructTmp.alpha(:) = alphaTrainGPU;
+modelOriginMatrix = repmat(modelOriginStructTmp, maxClass, 1);
 for i=1:maxClass
-    [modelOriginMatrix(i)] = gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,i), CTrainGPU, gpuArray(modelOriginMatrix(i).alpha), tolTrainGPU, maxIterTrainGPU));
+    [modelOriginMatrix(i)] = gather(svmTrainGPU(XOriginNormGPU, YOriginMatrixGPU(:,i), CTrainGPU, modelOriginMatrix(i).alpha, tolTrainGPU, maxIterTrainGPU));
     fprintf('第%d组%d次运算结束.\n', i, maxIterTrainGPU);
 end
 
