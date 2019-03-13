@@ -5,7 +5,7 @@ clear; close all; clc;
 % 读取数据
 load data/data_test6extra2_1_n.mat;
 % 额外数据准备
-n = size(XOrigin, 2);
+n = size(XOriginNorm, 2);
 
 % 画图用的属性
 height = 20;
@@ -19,7 +19,7 @@ for i=1:maxClass
     thetaOriginMatrix(:, i) = [modelOriginMatrix(i).cpu.b;modelOriginMatrix(i).cpu.w];
 end
 
-predOriginMatrixTmp = [ones(m, 1) XOrigin] * thetaOriginMatrix;
+predOriginMatrixTmp = [ones(m, 1) XOriginNorm] * thetaOriginMatrix;
 predOriginMatrix = zeros(m, maxClass);
 predOriginMatrix(predOriginMatrixTmp >= 0) = 1;
 predOrigin = predOriginMatrix * (2.^(0:maxClass-1)');
@@ -44,16 +44,16 @@ plotImage(XVal, height, weight, pad, pad, imgVec);
 title('交叉验证集');
 
 % 原始数据正确的训练结果
-%figure(4);
-%colormap(gray);
-%plotImage(XOrigin(YOrigin==predOrigin), height, weight, pad, pad, imgVec);
-%title('原始数据-正确结果集');
+figure(4);
+colormap(gray);
+plotImage(XOrigin(YOrigin==predOrigin,:), height, weight, pad, pad, imgVec);
+title('原始数据-正确结果集');
 
 % 原始数据的错误训练结果
-%figure(5);
-%colormap(gray);
-%plotImage(XOrigin(YOrigin~=predOrigin), height, weight, pad, pad, imgVec);
-%title('原始数据-错误结果集');
+figure(5);
+colormap(gray);
+plotImage(XOrigin(YOrigin~=predOrigin,:), height, weight, pad, pad, imgVec);
+title('原始数据-错误结果集');
 
 % 画出所有学习曲线
 for i=1:maxClass
