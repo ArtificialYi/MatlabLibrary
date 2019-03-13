@@ -199,12 +199,21 @@ end
 wGPU = ((alphaGPU'.*YGPU') * XGPU)';
 
 model.w = wGPU;
+model.cpu.w = gather(wGPU);
 model.b = bGPU;
-model.maxTime = timeTmpGPU;
+model.cpu.b = gather(bGPU);
 model.alpha = alphaGPU;
+model.cpu.alpha = gather(alphaGPU);
+
+model.maxTime = timeTmpGPU;
+model.cpu.maxTime = gather(timeTmpGPU);
 model.point = pointGPU;
+model.cpu.point = gather(pointGPU);
 model.error = alphaErrorGPU;
+model.cpu.error = gather(alphaErrorGPU);
 model.tol = tolGPU;
+model.cpu.tol = gather(tolGPU);
 model.floatError = floatErrorMaxGPU;
+model.cpu.floatError = gather(floatErrorMaxGPU);
 
 end

@@ -3,50 +3,54 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-data = load('../resource/ex3data1.mat');
-XOrigin = data.X;
-YOrigin = data.y;
-m = size(XOrigin, 1);
+load data/data_test6extra2_1_n.mat;
+% 额外数据准备
+n = size(XOrigin, 2);
 
-trainPoint = 0.7;
-valPoint = 0.3;
+% 画图用的属性
+height = 20;
+weight = 20;
+pad = 1;
+imgVec = [-1 1];
 
-% 切成训练集、交叉验证集、测试集
-indexVecRand = randperm(m);
-[XTrain, YTrain, XVal, YVal, XTest, YTest] = ...
-    splitOriginData(XOrigin, YOrigin, indexVecRand, trainPoint, valPoint);
-
-% 交叉验证集的大小
-mTrain = size(XTrain, 1);
-mVal = size(XVal, 1);
-
-% 二分切割
-classNum = 10;
-maxClass = ceil(log2(classNum));
-YOriginMatrix = zeros(m, maxClass);
-YTrainMatrix = zeros(mTrain, maxClass);
-YValMatrix = zeros(mVal, maxClass);
-
-YOriginTmp = YOrigin;
-YTrainTmp = YTrain;
-YValTmp = YVal;
+% 利用第一次训练结果预测原始训练集的结果
+thetaOriginMatrix = zeros(n+1, maxClass);
 for i=1:maxClass
-    YOriginMatrix(:,i) = mod(YOriginTmp, 2);
-    YOriginTmp = (YOriginTmp - YOriginMatrix(:,i))/2;
-    YTrainMatrix(:,i) = mod(YTrainTmp, 2);
-    YTrainTmp = (YTrainTmp - YTrainMatrix(:,i))/2;
-    YValMatrix(:,i) = mod(YValTmp, 2);
-    YValTmp = (YValTmp - YValMatrix(:,i))/2;
+    thetaOriginMatrix(:, i) = [modelOriginMatrix(i).b;modelOriginMatrix(i).w];
 end
 
-% 归一化数据
-[XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
-XOriginNorm = ...
-    mapFeatureWithParam(XOrigin, 1, noneIndex, 1:length(noneIndex), mu, sigma);
-XValNorm = ...
-    mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+predOriginMatrixTmp = [ones(m, 1) XOrigin] * thetaOriginMatrix;
+predOriginMatrix = zeros(m, maxClass);
+predOriginMatrix(predOriginMatrixTmp >= 0) = 1;
+predOrigin = predOriginMatrix * (2.^(0:maxClass-1)');
 
 %% 开始画图
+% 原始数据图
 figure(1);
 colormap(gray);
-plotImage(XOrigin, 20, 20, 1, 1, [-0.01, 0.01]);
+plotImage(XOrigin, height, weight, pad, pad, imgVec);
+title('原始数据集');
+
+% 训练集图
+figure(2);
+colormap(gray);
+plotImage(XTrain, height, weight, pad, pad, imgVec);
+title('训练集');
+
+% 交叉验证集图
+figure(3);
+colormap(gray);
+plotImage(XVal, height, weight, pad, pad, imgVec);
+title('交叉验证集');
+
+% 原始数据正确的训练结果
+figure(4);
+colormap(gray);
+plotImage(XOrigin(YOrigin==predOrigin), height, weight, pad, pad, imgVec);
+title('原始数据-正确结果集');
+
+% 原始数据的错误训练结果
+figure(5);
+colormap(gray);
+plotImage(XOrigin(YOrigin~=predOrigin), height, weight, pad, pad, imgVec);
+title('原始数据-错误结果集');
