@@ -16,7 +16,7 @@ imgVec = [-1 1];
 % 利用第一次训练结果预测原始训练集的结果
 thetaOriginMatrix = zeros(n+1, maxClass);
 for i=1:maxClass
-    thetaOriginMatrix(:, i) = [modelOriginMatrix(i).b;modelOriginMatrix(i).w];
+    thetaOriginMatrix(:, i) = [modelOriginMatrix(i).cpu.b;modelOriginMatrix(i).cpu.w];
 end
 
 predOriginMatrixTmp = [ones(m, 1) XOrigin] * thetaOriginMatrix;
@@ -44,13 +44,19 @@ plotImage(XVal, height, weight, pad, pad, imgVec);
 title('交叉验证集');
 
 % 原始数据正确的训练结果
-figure(4);
-colormap(gray);
-plotImage(XOrigin(YOrigin==predOrigin), height, weight, pad, pad, imgVec);
-title('原始数据-正确结果集');
+%figure(4);
+%colormap(gray);
+%plotImage(XOrigin(YOrigin==predOrigin), height, weight, pad, pad, imgVec);
+%title('原始数据-正确结果集');
 
 % 原始数据的错误训练结果
-figure(5);
-colormap(gray);
-plotImage(XOrigin(YOrigin~=predOrigin), height, weight, pad, pad, imgVec);
-title('原始数据-错误结果集');
+%figure(5);
+%colormap(gray);
+%plotImage(XOrigin(YOrigin~=predOrigin), height, weight, pad, pad, imgVec);
+%title('原始数据-错误结果集');
+
+% 画出所有学习曲线
+for i=1:maxClass
+    figure(5+i);
+    plot(realSplitVecLearn(:,i), errorTrainLearn(:,i), realSplitVecLearn(:,i), errorValLearn(:,i));
+end
