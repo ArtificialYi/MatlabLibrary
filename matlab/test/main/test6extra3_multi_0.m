@@ -40,7 +40,7 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 1;
+CTrain = 170;
 tolTrain = 1e-10;
 maxIterTrain = 10000;
 alphaTrain = zeros(m, 1);
@@ -58,9 +58,9 @@ predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线训练
-CLearn = 1;
+CLearn = 170;
 tolLearn = 1e-15;
-maxIterLearn = 1000;
+maxIterLearn = 10000;
 splitLearn = 51;
 
 [errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
@@ -75,7 +75,7 @@ predCurrent = 1e-3;
 CLeftCurrent = 1e-6; % 精度的一半
 CRightCurrent = 1e3;
 tolCurrent = 1e-6;
-maxIterCurrent = 1;
+maxIterCurrent = 10000;
 
 while CRightCurrent - CLeftCurrent > predCurrent
     CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);

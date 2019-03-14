@@ -10,10 +10,13 @@ errorValVec = zeros(length(CVec), 1);
 m = size(XTrain, 1);
 alpha = zeros(m, 1);
 
+KTrain = svmKernelLinear(XTrain, XTrain);
+KVal = svmKernelLinear(XTrain, XVal);
+
 for i = 1:length(CVec)
-    modelTmp = svmTrain(XTrain, YTrain, CVec(i), alpha, tol, maxIter);
-    errorTrainVec(i) = svmCost(XTrain, YTrain, modelTmp.w, modelTmp.b, 0);
-    errorValVec(i) = svmCost(XVal, YVal, modelTmp.w, modelTmp.b, 0);
+    modelTmp = svmTrain(KTrain, YTrain, CVec(i), alpha, tol, maxIter);
+    errorTrainVec(i) = svmCost(KTrain, YTrain, KTrain, YTrain, modelTmp.alpha, modelTmp.b, 0);
+    errorValVec(i) = svmCost(KTrain, YTrain, KVal, YVal, modelTmp.alpha, modelTmp.b, 0);
 end
 
 end
