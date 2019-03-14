@@ -66,10 +66,13 @@ alphaError = alpha'*Y;
 destiny = zeros(m, m);
 
 % 如果不收敛
-repeatNotExist = 1;
+repeatExistTimeMax = floor(sqrt(m));
+repeatExistTime = 0;
 
 % 开始循环计算
-while timeTmp < timeMax && tolTimeTmp < tolTimeMax && repeatNotExist
+while timeTmp < timeMax && ...
+        tolTimeTmp < tolTimeMax && ...
+        repeatExistTime < repeatExistTimeMax
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
@@ -210,9 +213,12 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax && repeatNotExist
     errorScale = floor(JError * tolScale);
     % 将新的误差放入队列中,生成新的队列
     tolQueue(:) = [errorScale tolQueue(1:mQueue-1)];
-    if timeTmp > mQueue
-        % 查看新的队列中是否存在重复元素
-        repeatNotExist = isempty(strfind(tolQueue(3:mQueue), tolQueue(1:2)));
+    % 查看新的队列中是否存在重复元素
+    repeatNotExist = isempty(strfind(tolQueue(3:mQueue), tolQueue(1:2)));
+    if repeatNotExist
+        repeatExistTime = 0;
+    else
+        repeatExistTime = repeatExistTime + 1;
     end
 end
 
