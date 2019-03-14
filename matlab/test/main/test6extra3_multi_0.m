@@ -23,6 +23,9 @@ XOriginNorm = ...
 XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
+% 获取核结果
+KOrigin = svmKernelLinear(XOriginNorm, XOriginNorm);
+
 % 边界线数据准备
 minX1 = min(XOrigin(:,1));
 maxX1 = max(XOrigin(:,1));
@@ -36,26 +39,25 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 343;
+CTrain = 1;
 tolTrain = 1e-8;
 maxIterTrain = 10000;
 alphaTrain = zeros(m, 1);
 
 modelOrigin = ...
-    svmTrain(XOriginNorm, YOrigin, CTrain, alphaTrain, tolTrain, maxIterTrain);
+    svmTrain(KOrigin, YOrigin, CTrain, alphaTrain, tolTrain, maxIterTrain);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
-nTestTmp = size(XTestTmp, 2);
-
 XTestTmpNorm = ...
     mapFeatureWithParam(XTestTmp, 1, noneIndex, noneIndex, mu, sigma);
+KTestTmp = svmKernelLinear(XOriginNorm, XTestTmpNorm);
 
-predYTestTmp = XTestTmpNorm*modelOrigin.w+modelOrigin.b;
+predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线训练
-CLearn = 343;
+CLearn = 1;
 tolLearn = 1e-15;
 maxIterLearn = 1000;
 splitLearn = 51;
@@ -106,7 +108,7 @@ title('原始数据图');
 fprintf('原始数据图\n');
 hold off;
 
-% 学习曲线
+%% 学习曲线
 figure(2);
 plot(realSplitVecLearn, errorTrainLearn, realSplitVecLearn, errorValLearn);
 title('学习曲线');
