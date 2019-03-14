@@ -198,7 +198,7 @@ while timeTmp < timeMax && ...
     end
     
     % 找到代价
-    JError = svmCost(K, Y, alpha, b, 1/C);
+    JError = svmCost(K, Y, K, Y, alpha, b, 1/C);
     fprintf('Iter:%d, error:%f\n', timeTmp, JError);
     
     % 连续误差小于某个范围，确定已经收敛

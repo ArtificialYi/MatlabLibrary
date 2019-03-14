@@ -6,6 +6,7 @@ clear; close all; clc;
 data = load('resource/ex2data1.txt');
 XOrigin = data(:,1:2);
 YOrigin = data(:,3);
+YOrigin(YOrigin==0)=-1;
 m = size(XOrigin, 1);
 
 trainPoint = 0.7;
@@ -40,7 +41,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
 CTrain = 1;
-tolTrain = 1e-8;
+tolTrain = 1e-10;
 maxIterTrain = 10000;
 alphaTrain = zeros(m, 1);
 
@@ -50,7 +51,7 @@ modelOrigin = ...
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
 XTestTmpNorm = ...
-    mapFeatureWithParam(XTestTmp, 1, noneIndex, noneIndex, mu, sigma);
+    mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 KTestTmp = svmKernelLinear(XOriginNorm, XTestTmpNorm);
 
 predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
@@ -98,7 +99,7 @@ fprintf('当前最优C是:%.15f\n', CCurrent);
 % 原始数据图
 figure(1);
 posOrigin = find(YOrigin == 1); 
-negOrigin = find(YOrigin == 0);
+negOrigin = find(YOrigin == -1);
 
 plot(XOrigin(posOrigin, 1), XOrigin(posOrigin, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
 hold on;

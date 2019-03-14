@@ -28,12 +28,14 @@ for i=1:realSplit
     XTmp = X(1:currentIndex, :);
     yTmp = y(1:currentIndex);
     alphaTmp = zeros(currentIndex, 1);
-
-    modelTmp = svmTrain(XTmp, yTmp, C, alphaTmp, tol, maxIter);
+    KTrainTmp = svmKernelLinear(XTmp, XTmp);
+    KValTmp = svmKernelLinear(XTmp, XVal);
+    
+    modelTmp = svmTrain(KTrainTmp, yTmp, C, alphaTmp, tol, maxIter);
     
     realSplitVec(i) = currentIndex;
     
-    errorTrain(i) = svmCost(XTmp, yTmp, modelTmp.w, modelTmp.b, 0);
-    errorVal(i) = svmCost(XVal, yVal, modelTmp.w, modelTmp.b, 0);
+    errorTrain(i) = svmCost(KTrainTmp, yTmp, KTrainTmp, yTmp, modelTmp.alpha, modelTmp.b, 0);
+    errorVal(i) = svmCost(KTrainTmp, yTmp, KValTmp, yVal, modelTmp.alpha, modelTmp.b, 0);
 end
 
