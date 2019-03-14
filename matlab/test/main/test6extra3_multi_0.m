@@ -25,7 +25,10 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-kernelFunc = @(X1, X2) svmKernelLinear(X1, X2);
+l = 1;
+s = 1;
+p = 2;
+kernelFunc = @(X1, X2) svmKernelPolynomial(X1, X2, l, s, p);
 KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
 
 % 边界线数据准备
@@ -41,9 +44,9 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 1;
-tolTrain = 1e-10;
-maxIterTrain = 10000;
+CTrain = 501;
+tolTrain = 1e-15;
+maxIterTrain = 50000;
 alphaTrain = zeros(m, 1);
 
 modelOrigin = ...
@@ -59,9 +62,9 @@ predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线训练
-CLearn = 170;
+CLearn = 696;
 tolLearn = 1e-15;
-maxIterLearn = 100000;
+maxIterLearn = 50000;
 splitLearn = 51;
 
 [errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
@@ -71,12 +74,12 @@ splitLearn = 51;
     
 %% 尝试找到最优C
 % 计算最优C
-splitCCurrent = 5;
+splitCCurrent = 101;
 predCurrent = 1e-3;
 CLeftCurrent = 1e-6; % 精度的一半
 CRightCurrent = 1e3;
 tolCurrent = 1e-6;
-maxIterCurrent = 100000;
+maxIterCurrent = 50000;
 
 while CRightCurrent - CLeftCurrent > predCurrent
     CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
@@ -118,3 +121,29 @@ legend('训练集', '交叉验证集');
 xlabel('数量');
 ylabel('误差');
 fprintf('学习曲线\n');
+
+%% 训练集图
+figure(3);
+posTrain = find(YTrain == 1); 
+negTrain = find(YTrain == -1);
+
+plot(XTrain(posTrain, 1), XTrain(posTrain, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
+hold on;
+plot(XTrain(negTrain, 1), XTrain(negTrain, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
+title('原始数据图');
+fprintf('原始数据图\n');
+hold off;
+
+%% 交叉验证集图
+figure(4);
+posVal = find(YVal == 1); 
+negVal = find(YVal == -1);
+
+plot(XVal(posVal, 1), XVal(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
+hold on;
+plot(XVal(negVal, 1), XVal(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
+title('原始数据图');
+fprintf('原始数据图\n');
+hold off;
