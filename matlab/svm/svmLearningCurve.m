@@ -1,5 +1,5 @@
 function [errorTrain, errorVal, realSplitVec] = ...
-    svmLearningCurve(X, y, XVal, yVal, C, tol, maxIter, split)
+    svmLearningCurve(X, y, XVal, yVal, C, tol, maxIter, split, kernelFunc)
 %svmLearningCurve SVM的学习曲线
 % X 训练集
 % y 训练集结果
@@ -28,8 +28,8 @@ for i=1:realSplit
     XTmp = X(1:currentIndex, :);
     yTmp = y(1:currentIndex);
     alphaTmp = zeros(currentIndex, 1);
-    KTrainTmp = svmKernelLinear(XTmp, XTmp);
-    KValTmp = svmKernelLinear(XTmp, XVal);
+    KTrainTmp = kernelFunc(XTmp, XTmp);
+    KValTmp = kernelFunc(XTmp, XVal);
     
     modelTmp = svmTrain(KTrainTmp, yTmp, C, alphaTmp, tol, maxIter);
     

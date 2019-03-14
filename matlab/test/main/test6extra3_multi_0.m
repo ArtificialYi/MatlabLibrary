@@ -25,7 +25,8 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-KOrigin = svmKernelLinear(XOriginNorm, XOriginNorm);
+kernelFunc = @(X1, X2) svmKernelLinear(X1, X2);
+KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
 
 % 边界线数据准备
 minX1 = min(XOrigin(:,1));
@@ -40,7 +41,7 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 170;
+CTrain = 1;
 tolTrain = 1e-10;
 maxIterTrain = 10000;
 alphaTrain = zeros(m, 1);
@@ -52,7 +53,7 @@ modelOrigin = ...
 XTestTmp = [vecX1Repeat vecX2Multi];
 XTestTmpNorm = ...
     mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
-KTestTmp = svmKernelLinear(XOriginNorm, XTestTmpNorm);
+KTestTmp = kernelFunc(XOriginNorm, XTestTmpNorm);
 
 predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
@@ -60,13 +61,13 @@ predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 %% 学习曲线训练
 CLearn = 170;
 tolLearn = 1e-15;
-maxIterLearn = 10000;
+maxIterLearn = 100000;
 splitLearn = 51;
 
 [errorTrainLearn, errorValLearn, realSplitVecLearn] = ...
     svmLearningCurve(XTrainNorm, YTrain, ...
         XValNorm, YVal, CLearn, ...
-        tolLearn, maxIterLearn, splitLearn);
+        tolLearn, maxIterLearn, splitLearn, kernelFunc);
     
 %% 尝试找到最优C
 % 计算最优C
@@ -75,7 +76,7 @@ predCurrent = 1e-3;
 CLeftCurrent = 1e-6; % 精度的一半
 CRightCurrent = 1e3;
 tolCurrent = 1e-6;
-maxIterCurrent = 10000;
+maxIterCurrent = 100000;
 
 while CRightCurrent - CLeftCurrent > predCurrent
     CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
