@@ -10,6 +10,11 @@ function [model] = svmTrain(X, Y, C, alpha, tol, maxIter)
 m = size(X, 1);
 Y(Y==0) = -1;
 
+% 收敛队列和收敛比例
+mQueue = m;
+tolScale = ceil(1/tol);
+tolQueue = zeros(1, mQueue);
+
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
 tol = max(floatErrorUnit, tol);
@@ -59,10 +64,12 @@ alphaError = alpha'*Y;
 
 % 随机数
 destiny = zeros(m, m);
-sumY = sum(Y);
+
+% 如果不收敛
+repeatNotExist = 1;
 
 % 开始循环计算
-while timeTmp < timeMax && tolTimeTmp < tolTimeMax
+while timeTmp < timeMax && tolTimeTmp < tolTimeMax && repeatNotExist
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
@@ -196,6 +203,16 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
         tolTimeTmp = tolTimeTmp + 1;
     else
         tolTimeTmp = 0;
+    end
+    
+    % 另类收敛方案，如果无限重复不收敛的话,尝试判断重复，并且强制收敛
+    % 获取比例缩放后的误差
+    errorScale = floor(JError * tolScale);
+    % 将新的误差放入队列中,生成新的队列
+    tolQueue(:) = [errorScale tolQueue(1:mQueue-1)];
+    if timeTmp > mQueue
+        % 查看新的队列中是否存在重复元素
+        repeatNotExist = isempty(strfind(tolQueue(3:mQueue), tolQueue(1:2)));
     end
 end
 

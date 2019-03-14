@@ -36,9 +36,9 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 4.16;
-tolTrain = 1e-5;
-maxIterTrain = 10;
+CTrain = 1;
+tolTrain = 1e-8;
+maxIterTrain = 1000;
 alphaTrain = zeros(m, 1);
 
 modelOrigin = ...
