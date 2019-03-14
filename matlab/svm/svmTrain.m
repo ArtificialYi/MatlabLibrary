@@ -14,6 +14,8 @@ Y(Y==0) = -1;
 mQueue = m;
 tolScale = ceil(1/tol);
 tolQueue = zeros(1, mQueue);
+indexQueue = 1;
+minQueue = 0;
 
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
@@ -68,11 +70,13 @@ destiny = zeros(m, m);
 % 如果不收敛
 repeatExistTimeMax = floor(sqrt(m));
 repeatExistTime = 0;
+isMinError = 0;
 
 % 开始循环计算
+% 如果循环次数没有到最大次数 && 没有连续小于误差 && (不收敛检测失败 或 当前误差不是队列最小值)
 while timeTmp < timeMax && ...
         tolTimeTmp < tolTimeMax && ...
-        repeatExistTime < repeatExistTimeMax
+        (repeatExistTime < repeatExistTimeMax || ~isMinError)
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
@@ -211,15 +215,20 @@ while timeTmp < timeMax && ...
     % 另类收敛方案，如果无限重复不收敛的话,尝试判断重复，并且强制收敛
     % 获取比例缩放后的误差
     errorScale = floor(JError * tolScale);
-    % 将新的误差放入队列中,生成新的队列
-    tolQueue(:) = [errorScale tolQueue(1:mQueue-1)];
-    % 查看新的队列中是否存在重复元素
-    repeatNotExist = isempty(strfind(tolQueue(3:mQueue), tolQueue(1:2)));
-    if repeatNotExist
-        repeatExistTime = 0;
-    else
+    % 查看队列中是否已经存在该值
+    if find(tolQueue==errorScale)
         repeatExistTime = repeatExistTime + 1;
+    else
+        repeatExistTime = 0;
     end
+    % 如果当前是最小值,则可以考虑退出循环
+    isMinError = minQueue==errorScale;
+    % 将新值插入队列
+    tolQueue(indexQueue) = errorScale;
+    minQueue = min(tolQueue);
+    % 移动队尾指针
+    indexQueue = indexQueue+1;
+    indexQueue(indexQueue>mQueue) = indexQueue-mQueue;
 end
 
 % 找到theta和b
