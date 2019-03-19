@@ -39,3 +39,4 @@ for i=1:realSplitGPU
     errorValGPU(i) = svmCost(KTrainTmpGPU, YTmpGPU, KValTmpGPU, YValGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
 end
 
+end
