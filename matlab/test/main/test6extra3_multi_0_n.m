@@ -98,6 +98,8 @@ maxIterCurrentGPU = gpuArray(50000);
 
 KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
 KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+disp(size(KTrainGPU));
+disp(size(KValGPU));
 
 function [CCurrentGPU, errorMinCurrentGPU] = ...
         findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
