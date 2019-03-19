@@ -83,49 +83,49 @@ splitLearnGPU = gpuArray(51);
         tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
 
 %% 尝试找到最优C
-% 计算最优C
-splitCCurrent = 11;
-predCurrent = 1e-3;
-CLeftCurrent = 1e-6; % 精度的一半
-CRightCurrent = 1e4;
-tolCurrent = 1e-15;
-maxIterCurrent = 50000;
+% CPU->GPU
+splitCCurrentGPU = gpuArray(11);
+predCurrentGPU = gpuArray(1e-3);
+CLeftCurrentGPU = gpuArray(1e-6); % 精度的一半
+CRightCurrentGPU = gpuArray(1e4);
+tolCurrentGPU = gpuArray(1e-15);
+maxIterCurrentGPU = gpuArray(50000);
 
-KTrain = kernelFunc(XTrainNorm, XTrainNorm);
-KVal = kernelFunc(XTrainNorm, XValNorm);
+KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
 
 % 先用等比数列找到最优数值
-CVecCurrent = logspace(log10(CLeftCurrent), log10(CRightCurrent), splitCCurrent);
+CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
 [errorTrainCurrentTmp, errorValCurrentTmp] = ...
-    svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
-indexCurrent = indexMinForVec(errorValCurrentTmp);
-if length(indexCurrent) > 1
-    indexCurrent = indexCurrent(length(indexCurrent));
+    svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
+indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU);
+if length(indexCurrentGPU) > 1
+    indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
 end
-[indexCurrentLeftTmp, indexCurrentRightTmp] = ...
-    getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
-CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
-CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+[indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
+    getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
+CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
+CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
 
 % 再开始用等差数列做循环
-while CRightCurrent - CLeftCurrent > predCurrent
-    CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
-    [errorTrainCurrentTmp, errorValCurrentTmp] = ...
-        svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
-    indexCurrent = indexMinForVec(errorValCurrentTmp);
-    if length(indexCurrent) > 1
-        indexCurrent = indexCurrent(length(indexCurrent));
+while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
+    CVecCurrentGPU = linspace(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU);
+    [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
+        svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
+    indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU);
+    if length(indexCurrentGPU) > 1
+        indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
     end
-    [indexCurrentLeftTmp, indexCurrentRightTmp] = ...
-        getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
-    CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
-    CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+    [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
+        getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
+    CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
+    CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
 end
 
 % 将当前最优C打印出来
-CCurrent = CVecCurrent(indexCurrent);
-errorMinCurrent = errorValCurrentTmp(indexCurrent);
-fprintf('当前最优C是:%.15f\n', CCurrent);
+CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
+errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU);
+fprintf('当前最优C是:%.15f\n', CCurrentGPU);
 fprintf('当前最小误差是:%.15f\n', errorMinCurrent);
 
 %% 变量存储
@@ -135,8 +135,12 @@ modelOriginCpuRes = modelOriginGPU.cpu;
 errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
+% 当前最优C
+CCurrent = gather(CCurrentGPU);
+errorMinCurrent = gather(errorMinCurrentGPU);
 
 save data/data_test6extra3_multi_0_n.mat ...
     XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D ...
     realSplitVecLearn errorTrainLearn errorValLearn ...
-    XTrain YTrain XVal YVal;
+    XTrain YTrain XVal YVal ...
+    CCurrent errorMinCurrent;
