@@ -1,4 +1,4 @@
-function [tmp] = test6extra3_multi_0_n(p, l, s, C)
+function [tmp] = test6extra3_multi_0_n(p, l, s, C, isTrain)
 %% 测试函数
 % p 多项式的值
 % l 高阶参数
@@ -9,6 +9,7 @@ p = str2double(p);
 l = str2double(l);
 s = str2double(s);
 C = str2double(C);
+isTrain = str2double(isTrain);
 
 %% 读取数据
 % 读取数据
@@ -95,25 +96,12 @@ CRightCurrentGPU = gpuArray(1e4);
 tolCurrentGPU = gpuArray(1e-15);
 maxIterCurrentGPU = gpuArray(50000);
 
-KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
-KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+function [CCurrentGPU, errorMinCurrentGPU] = findCurrentMinCFunc()
+    KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+    KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
 
-% 先用等比数列找到最优数值
-CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
-[errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
-    svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
-indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
-if length(indexCurrentGPU) > 1
-    indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
-end
-[indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
-    getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
-CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
-CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
-
-% 再开始用等差数列做循环
-while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
-    CVecCurrentGPU = linspace(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU);
+    % 先用等比数列找到最优数值
+    CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
     [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
         svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
     indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
@@ -124,13 +112,38 @@ while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
         getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
     CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
     CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
+
+    % 再开始用等差数列做循环
+    while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
+        CVecCurrentGPU = linspace(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU);
+        [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
+            svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
+        indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
+        if length(indexCurrentGPU) > 1
+            indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
+        end
+        [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
+            getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
+        CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
+        CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
+    end
+    
+    CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
+    errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, :);
 end
 
-% 将当前最优C打印出来
-CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
-errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, :);
-fprintf('当前最优C是:%.15f\n', CCurrentGPU);
-fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
+%% 寻找全局最优C
+
+%% 如果是训练模式,找到最优的C
+CCurrent = 0;
+errorMinCurrent = 1;
+
+if isTrain
+    [CCurrentGPU, errorMinCurrentGPU] = findCurrentMinCFunc();
+    % 将当前最优C打印出来
+    fprintf('当前最优C是:%.15f\n', CCurrentGPU);
+    fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
+end
 
 %% 变量存储
 % 学习曲线
