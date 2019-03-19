@@ -211,7 +211,7 @@ while timeTmpGPU < timeMaxGPU && ...
     % 获取比例缩放后的误差
     errorScaleGPU = floor(JErrorGPU * tolScaleGPU);
     % 查看队列中是否已经存在该值
-    if find(tolQueueGPU==errorScaleGPU)
+    if isempty(find(tolQueueGPU==errorScaleGPU, 1))
         repeatExistTimeGPU = repeatExistTimeGPU + 1;
     else
         repeatExistTimeGPU = 0;
