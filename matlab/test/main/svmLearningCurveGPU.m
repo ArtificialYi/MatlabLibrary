@@ -1,5 +1,5 @@
 function [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
-    svmLearningCurveTrainGPU(XGPU, YGPU, XValGPU, YValGPU, CGPU, tolGPU, maxIterGPU, splitGPU, kernelFunc)
+    svmLearningCurveGPU(XGPU, YGPU, XValGPU, YValGPU, CGPU, tolGPU, maxIterGPU, splitGPU, kernelFunc)
 %svmLearningCurveGPU SVM的学习曲线
 % X 训练集
 % y 训练集结果
