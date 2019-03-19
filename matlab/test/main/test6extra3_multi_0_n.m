@@ -82,6 +82,52 @@ splitLearnGPU = gpuArray(51);
         XValNormGPU, YValGPU, CLearnGPU, ...
         tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
 
+%% 尝试找到最优C
+% 计算最优C
+splitCCurrent = 11;
+predCurrent = 1e-3;
+CLeftCurrent = 1e-6; % 精度的一半
+CRightCurrent = 1e4;
+tolCurrent = 1e-15;
+maxIterCurrent = 50000;
+
+KTrain = kernelFunc(XTrainNorm, XTrainNorm);
+KVal = kernelFunc(XTrainNorm, XValNorm);
+
+% 先用等比数列找到最优数值
+CVecCurrent = logspace(log10(CLeftCurrent), log10(CRightCurrent), splitCCurrent);
+[errorTrainCurrentTmp, errorValCurrentTmp] = ...
+    svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+indexCurrent = indexMinForVec(errorValCurrentTmp);
+if length(indexCurrent) > 1
+    indexCurrent = indexCurrent(length(indexCurrent));
+end
+[indexCurrentLeftTmp, indexCurrentRightTmp] = ...
+    getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
+CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
+CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+
+% 再开始用等差数列做循环
+while CRightCurrent - CLeftCurrent > predCurrent
+    CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
+    [errorTrainCurrentTmp, errorValCurrentTmp] = ...
+        svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+    indexCurrent = indexMinForVec(errorValCurrentTmp);
+    if length(indexCurrent) > 1
+        indexCurrent = indexCurrent(length(indexCurrent));
+    end
+    [indexCurrentLeftTmp, indexCurrentRightTmp] = ...
+        getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
+    CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
+    CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+end
+
+% 将当前最优C打印出来
+CCurrent = CVecCurrent(indexCurrent);
+errorMinCurrent = errorValCurrentTmp(indexCurrent);
+fprintf('当前最优C是:%.15f\n', CCurrent);
+fprintf('当前最小误差是:%.15f\n', errorMinCurrent);
+
 %% 变量存储
 % 训练结果预测
 modelOriginCpuRes = modelOriginGPU.cpu;
