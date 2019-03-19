@@ -89,6 +89,8 @@ modelOriginCpuRes = modelOriginGPU.cpu;
 errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
+
 save data/data_test6extra3_multi_0_n.mat ...
     XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D ...
-    realSplitVecLearn errorTrainLearn errorValLearn;
+    realSplitVecLearn errorTrainLearn errorValLearn ...
+    XTrain YTrain XVal YVal;

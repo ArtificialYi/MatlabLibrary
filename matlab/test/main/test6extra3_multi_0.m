@@ -232,8 +232,8 @@ plot(XTrain(posTrain, 1), XTrain(posTrain, 2), 'k+','LineWidth', 1, 'MarkerSize'
 hold on;
 plot(XTrain(negTrain, 1), XTrain(negTrain, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
 contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
-title('原始数据图');
-fprintf('原始数据图\n');
+title('训练集图');
+fprintf('训练集图\n');
 hold off;
 
 %% 交叉验证集图
@@ -245,6 +245,6 @@ plot(XVal(posVal, 1), XVal(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
 hold on;
 plot(XVal(negVal, 1), XVal(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
 contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
-title('原始数据图');
-fprintf('原始数据图\n');
+title('交叉验证集图');
+fprintf('交叉验证集图\n');
 hold off;
