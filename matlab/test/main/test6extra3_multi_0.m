@@ -25,8 +25,8 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-l = 1;
-s = 1;
+l = 0.1;
+s = 0.1;
 p = 2;
 kernelFunc = @(X1, X2) svmKernelPolynomial(X1, X2, l, s, p);
 KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
@@ -44,7 +44,7 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 4.239306;
+CTrain = 4239.306;
 tolTrain = 1e-15;
 maxIterTrain = 50000;
 alphaTrain = zeros(m, 1);

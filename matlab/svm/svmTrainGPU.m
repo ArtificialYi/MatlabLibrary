@@ -1,4 +1,4 @@
-function [model] = svmTrainGPU(XGPU, YGPU, CGPU, alphaGPU, tolGPU, maxIterGPU)
+function [model] = svmTrainGPU(KGPU, YGPU, CGPU, alphaGPU, tolGPU, maxIterGPU)
 %svmTrain SVM基础模型训练函数-SMO算法，C越大，收敛概率越低
 % X 原始数据
 % Y 结果集
@@ -9,16 +9,26 @@ function [model] = svmTrainGPU(XGPU, YGPU, CGPU, alphaGPU, tolGPU, maxIterGPU)
 % 传入数据本身就应该是GPU中的数据
 
 % 初始化参数
-mGPU = gpuArray(size(XGPU, 1));
+mGPU = gpuArray(size(KGPU, 1));
 YGPU(YGPU==0) = -1;
+
+% 收敛队列和收敛比例
+mQueueGPU = mGPU;
+tolScaleGPU = ceil(1/tolGPU);
+tolQueueGPU = zeros(1, mQueueGPU);
+indexQueueGPU = 1;
+minQueueGPU = 0;
+
+% 如果不收敛
+repeatExistTimeMaxGPU = floor(sqrt(mGPU));
+repeatExistTimeGPU = 0;
+isMinErrorGPU = 0;
 
 % 初始化浮点误差和精度范围
 floatErrorUnitGPU = CGPU*1e-14;
 tolGPU = max(floatErrorUnitGPU, tolGPU);
 floatErrorMaxGPU = min(floatErrorUnitGPU, tolGPU);
 
-% 初始化核函数 m*m
-KGPU = XGPU * XGPU';
 % 初始化数据差 m*m
 etaGPU = diag(KGPU) + diag(KGPU)' - KGPU*2;
 etaGPU(etaGPU==0) = -1;
@@ -62,8 +72,12 @@ alphaErrorGPU = alphaGPU'*YGPU;
 % 随机数
 destinyGPU = gpuArray.zeros(mGPU, mGPU);
 
+
+
 % 开始循环计算
-while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
+while timeTmpGPU < timeMaxGPU && ...
+        tolTimeTmpGPU < tolTimeMaxGPU && ...
+        (repeatExistTimeGPU < repeatExistTimeMaxGPU || ~isMinErrorGPU)
     % 获取函数误差 m*1
     EGPU(:) = KGPU*(alphaGPU.*YGPU)-YGPU + bGPU;
     % 获取两两误差和误差梯度 m*m
@@ -182,9 +196,8 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
         end
     end
     
-    % 找到theta
-    wGPU = ((alphaGPU'.*YGPU') * XGPU)';
-    JErrorGPU = svmCost(XGPU, YGPU, wGPU, bGPU, 1/CGPU);
+    % 找到代价
+    JErrorGPU = svmCost(KGPU, YGPU, KGPU, YGPU, alphaGPU, bGPU, 1/CGPU);
     fprintf('Iter:%d, error:%f\n', timeTmpGPU, JErrorGPU);
     
     % 连续误差小于某个范围，确定已经收敛
@@ -193,27 +206,40 @@ while timeTmpGPU < timeMaxGPU && tolTimeTmpGPU < tolTimeMaxGPU
     else
         tolTimeTmpGPU = 0;
     end
+    
+    % 另类收敛方案，如果无限重复不收敛的话,尝试判断重复，并且强制收敛
+    % 获取比例缩放后的误差
+    errorScaleGPU = floor(JError * tolScaleGPU);
+    % 查看队列中是否已经存在该值
+    if find(tolQueueGPU==errorScaleGPU)
+        repeatExistTimeGPU = repeatExistTimeGPU + 1;
+    else
+        repeatExistTimeGPU = 0;
+    end
+    % 如果当前是最小值,则可以考虑退出循环
+    isMinErrorGPU = minQueueGPU==errorScaleGPU;
+    % 将新值插入队列
+    tolQueueGPU(indexQueueGPU) = errorScaleGPU;
+    minQueueGPU = min(tolQueueGPU);
+    % 移动队尾指针
+    indexQueueGPU = indexQueueGPU+1;
+    indexQueueGPU(indexQueueGPU>mQueueGPU) = indexQueueGPU-mQueueGPU;
 end
 
-% 找到theta和b
-wGPU = ((alphaGPU'.*YGPU') * XGPU)';
-
-model.w = wGPU;
-model.cpu.w = gather(wGPU);
-model.b = bGPU;
+model.gpu.b = bGPU;
 model.cpu.b = gather(bGPU);
-model.alpha = alphaGPU;
+model.gpu.alpha = alphaGPU;
 model.cpu.alpha = gather(alphaGPU);
 
-model.maxTime = timeTmpGPU;
+model.gpu.maxTime = timeTmpGPU;
 model.cpu.maxTime = gather(timeTmpGPU);
-model.point = pointGPU;
+model.gpu.point = pointGPU;
 model.cpu.point = gather(pointGPU);
-model.error = alphaErrorGPU;
+model.gpu.error = alphaErrorGPU;
 model.cpu.error = gather(alphaErrorGPU);
-model.tol = tolGPU;
+model.gpu.tol = tolGPU;
 model.cpu.tol = gather(tolGPU);
-model.floatError = floatErrorMaxGPU;
+model.gpu.floatError = floatErrorMaxGPU;
 model.cpu.floatError = gather(floatErrorMaxGPU);
 
 end
