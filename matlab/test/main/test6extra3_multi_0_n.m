@@ -5,6 +5,11 @@ function [tmp] = test6extra3_multi_0_n(p, l, s, C)
 % s 低阶参数
 % C svm训练参数
 
+p = str2double(p);
+l = str2double(l);
+s = str2double(s);
+C = str2double(C);
+
 %% 读取数据
 % 读取数据
 data = load('resource/ex2data1.txt');
