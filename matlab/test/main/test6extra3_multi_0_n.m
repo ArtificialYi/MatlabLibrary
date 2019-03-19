@@ -5,11 +5,6 @@ function [tmp] = test6extra3_multi_0_n(p, l, s, C)
 % s 低阶参数
 % C svm训练参数
 
-%% 初始化环境
-clear; close all; clc;
-% 开启gpu
-gpuDevice(1);
-
 %% 读取数据
 % 读取数据
 data = load('resource/ex2data1.txt');
