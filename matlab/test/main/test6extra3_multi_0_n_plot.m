@@ -59,15 +59,15 @@ hold off;
 figure(5);
 hold on;
 
-split = 51;
+split = 101;
 nVec = [1 3 10 100];
 plotVec = ["k." "r." "g." "b."];
-tmpPointVec = linspace(0,0.3, split);
+tmpPointVec = linspace(0, 1, split);
 
 for i=1:length(nVec)
     n = nVec(i);
-    tmpUpMatrix = (tmpPointVec.*1)'*(tmpPointVec.*n)*(n+1);
-    tmpDownMatrix = ((tmpPointVec.*1)'+(tmpPointVec.*n))*n;
+    tmpUpMatrix = (tmpPointVec.*1)'*(tmpPointVec.*1)*(n+1);
+    tmpDownMatrix = (tmpPointVec.*1)'+(tmpPointVec.*n);
     tmpValueMatrix = tmpUpMatrix./tmpDownMatrix;
 
     for j=1:length(tmpPointVec)
@@ -78,3 +78,10 @@ end
 xlabel('1-point');
 ylabel('error');
 hold off;
+
+%% 
+figure(6)
+plot3([1 2], [2 3], [3 4], 'rx');
+xlabel('x');
+ylabel('y');
+zlabel('z');

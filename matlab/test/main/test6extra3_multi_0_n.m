@@ -96,9 +96,9 @@ KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
 
 % 先用等比数列找到最优数值
 CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
-[errorTrainCurrentTmp, errorValCurrentTmp] = ...
+[errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
     svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
-indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU);
+indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
 if length(indexCurrentGPU) > 1
     indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
 end
@@ -112,7 +112,7 @@ while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
     CVecCurrentGPU = linspace(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU);
     [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
         svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
-    indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU);
+    indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
     if length(indexCurrentGPU) > 1
         indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
     end
@@ -124,7 +124,7 @@ end
 
 % 将当前最优C打印出来
 CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
-errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU);
+errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, :);
 fprintf('当前最优C是:%.15f\n', CCurrentGPU);
 fprintf('当前最小误差是:%.15f\n', errorMinCurrent);
 
