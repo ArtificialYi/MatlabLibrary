@@ -209,7 +209,7 @@ while timeTmpGPU < timeMaxGPU && ...
     
     % 另类收敛方案，如果无限重复不收敛的话,尝试判断重复，并且强制收敛
     % 获取比例缩放后的误差
-    errorScaleGPU = floor(JError * tolScaleGPU);
+    errorScaleGPU = floor(JErrorGPU * tolScaleGPU);
     % 查看队列中是否已经存在该值
     if find(tolQueueGPU==errorScaleGPU)
         repeatExistTimeGPU = repeatExistTimeGPU + 1;
