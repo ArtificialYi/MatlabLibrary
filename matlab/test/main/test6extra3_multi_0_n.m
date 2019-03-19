@@ -66,8 +66,29 @@ KTestTmp = kernelFunc(XOriginNorm, XTestTmpNorm);
 predYTestTmp = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestTmp+modelOriginGPU.cpu.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
+%% 学习曲线训练
+%CPU->GPU
+XTrainNormGPU = gpuArray(XTrainNorm);
+YTrainGPU = gpuArray(YTrain);
+XValNormGPU = gpuArray(XValNorm);
+YValGPU = gpuArray(YVal);
+CLearnGPU = gpuArray(3.26);
+tolLearnGPU = gpuArray(1e-15);
+maxIterLearnGPU = gpuArray(50000);
+splitLearnGPU = gpuArray(51);
+
+[errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
+    svmLearningCurve(XTrainNormGPU, YTrainGPU, ...
+        XValNormGPU, YValGPU, CLearnGPU, ...
+        tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
+
 %% 变量存储
 % 训练结果预测
 modelOriginCpuRes = modelOriginGPU.cpu;
+% 学习曲线
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
 save data/data_test6extra3_multi_0_n.mat ...
-    XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D;
+    XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D ...
+    realSplitVecLearn errorTrainLearn errorValLearn;

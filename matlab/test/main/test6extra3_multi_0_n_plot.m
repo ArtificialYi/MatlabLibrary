@@ -18,3 +18,12 @@ contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
 title('原始数据图');
 fprintf('原始数据图\n');
 hold off;
+
+%% 学习曲线
+figure(2);
+plot(realSplitVecLearn, errorTrainLearn, realSplitVecLearn, errorValLearn);
+title('学习曲线');
+legend('训练集', '交叉验证集');
+xlabel('数量');
+ylabel('误差');
+fprintf('学习曲线\n');
