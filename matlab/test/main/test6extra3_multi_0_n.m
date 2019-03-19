@@ -96,9 +96,12 @@ CRightCurrentGPU = gpuArray(1e4);
 tolCurrentGPU = gpuArray(1e-15);
 maxIterCurrentGPU = gpuArray(50000);
 
-function [CCurrentGPU, errorMinCurrentGPU] = findCurrentMinCFunc()
-    KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
-    KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+
+function [CCurrentGPU, errorMinCurrentGPU] = ...
+        findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
+        KTrainGPU, YTrainGPU, KValGPU, YValGPU)
 
     % 先用等比数列找到最优数值
     CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
@@ -133,16 +136,82 @@ function [CCurrentGPU, errorMinCurrentGPU] = findCurrentMinCFunc()
 end
 
 %% 寻找全局最优C
+%% 将当前最优各种参数打印出来
+pVec = 2:10;
+lVec = linspace(0.1, 1.9, 3);
+sVec = linspace(0.1, 1.9, 3);
+
+function [errorMinMatrix3, CMinMatrix3] = ...
+        findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
+            XTrainNorm, YTrainGPU, XValNorm, YValGPU, findCurrentFunc, ...
+            CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
+            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU)
+    errorMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
+    CMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
+    for i=1:length(pVec)
+        for j=1:length(lVec)
+            for k=1:length(sVec)
+                pCurrent = pVec(i);
+                lCurrent = lVec(j);
+                sCurrent = sVec(k);
+                lCurrentReal = sqrt(lCurrent/sCurrent);
+                sCurrentReal = sqrt(sCurrent/lCurrent);
+
+                kernelFuncTmp = @(X1, X2) svmKernelPolynomial(X1, X2, lCurrentReal, sCurrentReal, pCurrent);
+                KTrainTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XTrainNorm));
+                KValTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XValNorm));
+
+                [CCurrentTmpGPU, errorMinCurrentTmpGPU] = ...
+                    findCurrentFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
+                        predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
+                        KTrainTmpGPU, YTrainGPU, KValTmpGPU, YValGPU);
+
+                errorMinMatrix3(i, j, k) = gather(errorMinCurrentTmpGPU);
+                CMinMatrix3(i, j, k) = gather(CCurrentTmpGPU);
+            end
+        end
+    end
+end
 
 %% 如果是训练模式,找到最优的C
 CCurrent = 0;
 errorMinCurrent = 1;
 
+pMin = p;
+lMin = l;
+sMin = s;
+lMinReal = sqrt(lMin/sMin);
+sMinReal = sqrt(sMin/lMin);
+CMin = 0;
+errorMin = 1;
+
 if isTrain
-    [CCurrentGPU, errorMinCurrentGPU] = findCurrentMinCFunc();
+    [CCurrentGPU, errorMinCurrentGPU] = ...
+        findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
+            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
+            KTrainGPU, YTrainGPU, KValGPU, YValGPU);
+        
+    findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
+            XTrainNorm, YTrainGPU, XValNorm, YValGPU, findCurrentFunc, ...
+            CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
+            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU)
     % 将当前最优C打印出来
     fprintf('当前最优C是:%.15f\n', CCurrentGPU);
     fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
+    
+    % 找到最优的p、l、s、C
+    [iMin, indexMin] = find(min(min(min(errorMinMatrix3))));
+    kMin = mod(indexMin, length(sVec));
+    kMin(kMin==0) = length(sVec);
+    jMin = (indexMin-kMin)/length(lVec)+1;
+
+    pMin = pVec(iMin);
+    lMin = lVec(jMin);
+    sMin = sVec(kMin);
+    lMinReal = sqrt(lMin/sMin);
+    sMinReal = sqrt(sMin/lMin);
+    CMin = CMinMatrix3(iMin, jMin, kMin);
+    errorMin = errorMinMatrix3(iMin, jMin, kMin);
 end
 
 %% 变量存储
@@ -160,6 +229,7 @@ save fileName ...
     XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D ...
     realSplitVecLearn errorTrainLearn errorValLearn ...
     XTrain YTrain XVal YVal ...
-    CCurrent errorMinCurrent;
+    CCurrent errorMinCurrent ...
+    pMin lMin lMinReal sMin sMinReal CMin errorMin;
 
 end
