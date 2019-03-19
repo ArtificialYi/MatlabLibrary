@@ -46,13 +46,16 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 1;
-tolTrain = 1e-15;
-maxIterTrain = 50000;
-alphaTrain = zeros(m, 1);
+% CPU->GPU
+KOriginGPU = gpuArray(KOrigin);
+YOriginGPU = gpuArray(YOrigin);
+CTrainGPU = gpuArray(1);
+tolTrainGPU = gpuArray(1e-15);
+maxIterTrainGPU = gpuArray(50000);
+alphaTrainGPU = gpuArray.zeros(m, 1);
 
-modelOrigin = ...
-    svmTrainGPU(KOrigin, YOrigin, CTrain, alphaTrain, tolTrain, maxIterTrain);
+modelOriginGPU = ...
+    svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaTrainGPU, tolTrainGPU, maxIterTrainGPU);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
@@ -60,5 +63,11 @@ XTestTmpNorm = ...
     mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 KTestTmp = kernelFunc(XOriginNorm, XTestTmpNorm);
 
-predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
+predYTestTmp = (modelOrigin.cpu.alpha .* YOrigin)'*KTestTmp+modelOrigin.cpu.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
+
+%% 变量存储
+% 训练结果预测
+modelOriginCpuRes = modelOriginGPU.cpu;
+save data/data_test6extra3_multi_0_n.mat ...
+    XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D;
