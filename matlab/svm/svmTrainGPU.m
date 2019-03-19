@@ -15,14 +15,14 @@ YGPU(YGPU==0) = -1;
 % 收敛队列和收敛比例
 mQueueGPU = mGPU;
 tolScaleGPU = ceil(1/tolGPU);
-tolQueueGPU = zeros(1, mQueueGPU);
-indexQueueGPU = 1;
-minQueueGPU = 0;
+tolQueueGPU = gpuArray.zeros(1, mQueueGPU);
+indexQueueGPU = gpuArray(1);
+minQueueGPU = gpuArray(0);
 
 % 如果不收敛
 repeatExistTimeMaxGPU = floor(sqrt(mGPU));
-repeatExistTimeGPU = 0;
-isMinErrorGPU = 0;
+repeatExistTimeGPU = gpuArray(0);
+isMinErrorGPU = gpuArray(0);
 
 % 初始化浮点误差和精度范围
 floatErrorUnitGPU = CGPU*1e-14;
