@@ -44,7 +44,7 @@ vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
-CTrain = 501;
+CTrain = 4.239306;
 tolTrain = 1e-15;
 maxIterTrain = 50000;
 alphaTrain = zeros(m, 1);
@@ -62,7 +62,7 @@ predYTestTmp = (modelOrigin.alpha .* YOrigin)'*KTestTmp+modelOrigin.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线训练
-CLearn = 696;
+CLearn = 3.26;
 tolLearn = 1e-15;
 maxIterLearn = 50000;
 splitLearn = 51;
@@ -74,17 +74,34 @@ splitLearn = 51;
     
 %% 尝试找到最优C
 % 计算最优C
-splitCCurrent = 101;
+splitCCurrent = 11;
 predCurrent = 1e-3;
 CLeftCurrent = 1e-6; % 精度的一半
-CRightCurrent = 1e3;
-tolCurrent = 1e-6;
+CRightCurrent = 1e4;
+tolCurrent = 1e-15;
 maxIterCurrent = 50000;
 
+KTrain = kernelFunc(XTrainNorm, XTrainNorm);
+KVal = kernelFunc(XTrainNorm, XValNorm);
+
+% 先用等比数列找到最优数值
+CVecCurrent = logspace(log10(CLeftCurrent), log10(CRightCurrent), splitCCurrent);
+[errorTrainCurrentTmp, errorValCurrentTmp] = ...
+    svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+indexCurrent = indexMinForVec(errorValCurrentTmp);
+if length(indexCurrent) > 1
+    indexCurrent = indexCurrent(length(indexCurrent));
+end
+[indexCurrentLeftTmp, indexCurrentRightTmp] = ...
+    getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
+CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
+CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+
+% 再开始用等差数列做循环
 while CRightCurrent - CLeftCurrent > predCurrent
     CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
     [errorTrainCurrentTmp, errorValCurrentTmp] = ...
-        svmTrainForCVec(XTrainNorm, YTrain, XValNorm, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+        svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
     indexCurrent = indexMinForVec(errorValCurrentTmp);
     if length(indexCurrent) > 1
         indexCurrent = indexCurrent(length(indexCurrent));
@@ -97,7 +114,91 @@ end
 
 % 将当前最优C打印出来
 CCurrent = CVecCurrent(indexCurrent);
+errorMinCurrent = errorValCurrentTmp(indexCurrent);
 fprintf('当前最优C是:%.15f\n', CCurrent);
+fprintf('当前最小误差是:%.15f\n', errorMinCurrent);
+
+%% 将当前最优各种参数打印出来
+pVec = 2:10;
+lVec = linspace(0.1, 1.9, 3);
+sVec = linspace(0.1, 1.9, 3);
+
+errorMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
+CMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
+
+for i=1:length(pVec)
+    for j=1:length(lVec)
+        for k=1:length(sVec)
+            pCurrent = pVec(i);
+            lCurrent = lVec(j);
+            sCurrent = sVec(k);
+            
+            splitCCurrent = 11;
+            predCurrent = 1e-3;
+            CLeftCurrent = 1e-6; % 精度的一半
+            CRightCurrent = 1e4;
+            tolCurrent = 1e-8;
+            maxIterCurrent = 50000;
+            
+            kernelFuncTmp = @(X1, X2) svmKernelPolynomial(X1, X2, lCurrent, sCurrent, pCurrent);
+            KTrain = kernelFuncTmp(XTrainNorm, XTrainNorm);
+            KVal = kernelFuncTmp(XTrainNorm, XValNorm);
+
+            % 先用等比数列找到最优数值
+            CVecCurrent = logspace(log10(CLeftCurrent), log10(CRightCurrent), splitCCurrent);
+            [errorTrainCurrentTmp, errorValCurrentTmp] = ...
+                svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+            indexCurrent = indexMinForVec(errorValCurrentTmp);
+            if length(indexCurrent) > 1
+                indexCurrent = indexCurrent(length(indexCurrent));
+            end
+            [indexCurrentLeftTmp, indexCurrentRightTmp] = ...
+                getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
+            CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
+            CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+
+            % 再开始用等差数列做循环
+            while CRightCurrent - CLeftCurrent > predCurrent
+                CVecCurrent = linspace(CLeftCurrent, CRightCurrent, splitCCurrent);
+                [errorTrainCurrentTmp, errorValCurrentTmp] = ...
+                    svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVecCurrent, tolCurrent, maxIterCurrent);
+                indexCurrent = indexMinForVec(errorValCurrentTmp);
+                if length(indexCurrent) > 1
+                    indexCurrent = indexCurrent(length(indexCurrent));
+                end
+                [indexCurrentLeftTmp, indexCurrentRightTmp] = ...
+                    getLeftAndRightIndex(indexCurrent, 1, splitCCurrent);
+                CLeftCurrent = CVecCurrent(indexCurrentLeftTmp);
+                CRightCurrent = CVecCurrent(indexCurrentRightTmp);
+            end
+
+            % 将当前最优C打印出来
+            CCurrent = CVecCurrent(indexCurrent);
+            errorMinCurrent = errorValCurrentTmp(indexCurrent);
+            
+            errorMinMatrix3(i, j, k) = errorMinCurrent;
+            CMinMatrix3(i, j, k) = CCurrent;
+        end
+    end
+end
+
+%% 找到最优的p、l、s、C
+[iMin, indexMin] = find(min(min(min(errorMinCurrent))));
+kMin = mod(indexMin, length(sVec));
+kMin(kMin==0) = length(sVec);
+jMin = (indexMin-kMin)/length(lVec)+1;
+
+pMin = pVec(iMin);
+lMin = lVec(jMin);
+sMin = sVec(kMin);
+CMin = CMinMatrix3(iMin, jMin, kMin);
+errorMin = errorMinMatrix3(iMin, jMin, kMin);
+
+fprintf('最优多项式:%d\n', pMin);
+fprintf('最优高阶系数:%d\n', lMin);
+fprintf('最优低阶系数:%d\n', sMin);
+fprintf('最优SVM系数:%d\n', CMin);
+fprintf('最优误差值:%d\n', errorMin);
 
 %% 画出数据图
 % 原始数据图

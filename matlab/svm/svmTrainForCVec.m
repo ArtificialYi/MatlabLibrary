@@ -1,5 +1,5 @@
 function [errorTrainVec, errorValVec] = ...
-    svmTrainForCVec(XTrain, YTrain, XVal, YVal, CVec, tol, maxIter)
+    svmTrainForCVec(KTrain, YTrain, KVal, YVal, CVec, tol, maxIter)
 %svmTrainForC SVM在不同C下的结果
 
 % 错误集合
@@ -7,11 +7,8 @@ errorTrainVec = zeros(length(CVec), 1);
 errorValVec = zeros(length(CVec), 1);
 
 % 初始化alpha
-m = size(XTrain, 1);
+m = size(KTrain, 1);
 alpha = zeros(m, 1);
-
-KTrain = svmKernelLinear(XTrain, XTrain);
-KVal = svmKernelLinear(XTrain, XVal);
 
 for i = 1:length(CVec)
     modelTmp = svmTrain(KTrain, YTrain, CVec(i), alpha, tol, maxIter);
