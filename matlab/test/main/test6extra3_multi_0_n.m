@@ -1,3 +1,10 @@
+function [tmp] = test6extra3_multi_0_n(p, l, s, C)
+%% 测试函数
+% p 多项式的值
+% l 高阶参数
+% s 低阶参数
+% C svm训练参数
+
 %% 初始化环境
 clear; close all; clc;
 % 开启gpu
@@ -27,9 +34,6 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-l = 1;
-s = 1;
-p = 2;
 kernelFunc = @(X1, X2) svmKernelPolynomial(X1, X2, l, s, p);
 KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
 
@@ -49,7 +53,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 % CPU->GPU
 KOriginGPU = gpuArray(KOrigin);
 YOriginGPU = gpuArray(YOrigin);
-CTrainGPU = gpuArray(1);
+CTrainGPU = gpuArray(C);
 tolTrainGPU = gpuArray(1e-15);
 maxIterTrainGPU = gpuArray(50000);
 alphaTrainGPU = gpuArray.zeros(m, 1);
@@ -72,7 +76,7 @@ XTrainNormGPU = gpuArray(XTrainNorm);
 YTrainGPU = gpuArray(YTrain);
 XValNormGPU = gpuArray(XValNorm);
 YValGPU = gpuArray(YVal);
-CLearnGPU = gpuArray(3.26);
+CLearnGPU = gpuArray(C);
 tolLearnGPU = gpuArray(1e-15);
 maxIterLearnGPU = gpuArray(50000);
 splitLearnGPU = gpuArray(51);
@@ -126,11 +130,9 @@ end
 CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
 errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, :);
 fprintf('当前最优C是:%.15f\n', CCurrentGPU);
-fprintf('当前最小误差是:%.15f\n', errorMinCurrent);
+fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
 
 %% 变量存储
-% 训练结果预测
-modelOriginCpuRes = modelOriginGPU.cpu;
 % 学习曲线
 errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
@@ -139,8 +141,12 @@ realSplitVecLearn = gather(realSplitVecLearnGPU);
 CCurrent = gather(CCurrentGPU);
 errorMinCurrent = gather(errorMinCurrentGPU);
 
-save data/data_test6extra3_multi_0_n.mat ...
+% 获取文件名
+fileName = strcat('data/data_test6extra3_multi_0_n_', datestr(now, 'yyyymmddHHMMss'), '.mat');
+save fileName ...
     XOrigin YOrigin vecX1 vecX2 predYTestTmp_2D ...
     realSplitVecLearn errorTrainLearn errorValLearn ...
     XTrain YTrain XVal YVal ...
     CCurrent errorMinCurrent;
+
+end
