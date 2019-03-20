@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-load data/data_test6extra3_multi_0_n.mat;
+load data/data_test6extra3_multi_0_n_20190320170454.mat;
 
 %% 画出数据图
 % 原始数据图
@@ -53,35 +53,3 @@ contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
 title('交叉验证集图');
 fprintf('交叉验证集图\n');
 hold off;
-
-%% 测试图
-
-figure(5);
-hold on;
-
-split = 101;
-nVec = [1 3 10 100];
-plotVec = ["k." "r." "g." "b."];
-tmpPointVec = linspace(0, 1, split);
-
-for i=1:length(nVec)
-    n = nVec(i);
-    tmpUpMatrix = (tmpPointVec.*1)'*(tmpPointVec.*1)*(n+1);
-    tmpDownMatrix = (tmpPointVec.*1)'+(tmpPointVec.*n);
-    tmpValueMatrix = tmpUpMatrix./tmpDownMatrix;
-
-    for j=1:length(tmpPointVec)
-        plot3(zeros(split, 1)+tmpPointVec(j), tmpPointVec, tmpValueMatrix(j, :), plotVec(i),'LineWidth', 1, 'MarkerSize', 7);
-    end
-end
-
-xlabel('1-point');
-ylabel('error');
-hold off;
-
-%% 
-figure(6)
-plot3([1 2], [2 3], [3 4], 'rx');
-xlabel('x');
-ylabel('y');
-zlabel('z');
