@@ -197,8 +197,8 @@ while timeTmpGPU < timeMaxGPU && ...
     end
     
     % 找到代价
-    JErrorGPU = svmCost(KGPU, YGPU, KGPU, YGPU, alphaGPU, bGPU, 1/CGPU);
-    fprintf('Iter:%d, error:%f\n', timeTmpGPU, JErrorGPU);
+    [JErrorGPU, JPointGPU] = svmCost(KGPU, YGPU, KGPU, YGPU, alphaGPU, bGPU, 1/CGPU);
+    fprintf('Iter:%d, error:%f, pred:%f\n', timeTmpGPU, JErrorGPU, JPointGPU);
     
     % 连续误差小于某个范围，确定已经收敛
     if tolTmpGPU < tolGPU
