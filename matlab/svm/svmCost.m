@@ -17,6 +17,5 @@ predTheta(predTheta>1)=1;
 J = (sum(1-predTheta) + ((alpha.*YOrigin)'*KOrigin*(alpha.*YOrigin))*lambda/2) / mPred;
 YOriginPred = (alpha.*YOrigin)'*KPred+b;
 point = mean(YPred==YOriginPred);
-
 end
 
