@@ -80,7 +80,7 @@ YValGPU = gpuArray(YVal);
 CLearnGPU = gpuArray(C);
 tolLearnGPU = gpuArray(1e-15);
 maxIterLearnGPU = gpuArray(50000);
-splitLearnGPU = gpuArray(51);
+splitLearnGPU = gpuArray(11);
 
 [errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
     svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
