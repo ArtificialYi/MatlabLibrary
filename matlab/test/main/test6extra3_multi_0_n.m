@@ -199,6 +199,10 @@ if isTrain
     fprintf('当前最优C是:%.15f\n', CCurrentGPU);
     fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
     
+    % 当前最优C
+    CCurrent = gather(CCurrentGPU);
+    errorMinCurrent = gather(errorMinCurrentGPU);
+    
     % 找到最优的p、l、s、C
     [iMin, indexMin] = find(min(min(min(errorMinMatrix3))));
     kMin = mod(indexMin, length(sVec));
@@ -219,9 +223,6 @@ end
 errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
-% 当前最优C
-CCurrent = gather(CCurrentGPU);
-errorMinCurrent = gather(errorMinCurrentGPU);
 
 % 获取文件名
 fileName = strcat('data/data_test6extra3_multi_0_n_', datestr(now, 'yyyymmddHHMMss'), '.mat');
