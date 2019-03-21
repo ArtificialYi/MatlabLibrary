@@ -132,7 +132,7 @@ function [CCurrentGPU, errorMinCurrentGPU] = ...
     end
     
     CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
-    errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, :);
+    errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, 3);
 end
 
 %% 寻找全局最优C
