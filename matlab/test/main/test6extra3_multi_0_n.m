@@ -209,21 +209,46 @@ if isTrain
     errorMinCurrent = gather(errorMinCurrentGPU);
     
     % 找到最优的p、l、s、C
-    indexMin3 = find(errorMinMatrix3(:)==min(errorMinMatrix3(:)));
+    indexMin3 = indexMinForMulti(errorMinMatrix3);
     lenP = length(pVec);
     lenL = length(lVec);
     indexPL = mod(indexMin3, lenP*lenL);
     indexPL(indexPL==0)=lenP*lenL;
-    indexKMin = (indexMin3-indexPL)/(lenP*lenL)+1;
+    indexKMin = (indexMin3-indexPL)./(lenP*lenL)+1;
     indexJMin = mod(indexPL, lenP);
     indexJMin(indexJMin==0)=lenP;
-    indexIMin = (indexPL-indexJMin)/lenP+1;
+    indexIMin = (indexPL-indexJMin)./lenP+1;
 
-    pMin = pVec(indexIMin);
-    lMin = lVec(indexJMin);
-    sMin = sVec(indexKMin);
-    lMinReal = sqrt(lMin/sMin);
-    sMinReal = sqrt(sMin/lMin);
+    pMinVec = pVec(indexIMin);
+    lMinVec = lVec(indexJMin);
+    sMinVec = sVec(indexKMin);
+    lMinRealVec = sqrt(lMin./sMin);
+    sMinRealVec = sqrt(sMin./lMin);
+    
+    % 找到最小的P的索引
+    indexPMin = indexMinForMulti(pMinVec); % [1 2 3]
+    % 找到最接近1的L的索引
+    lMinRealPointVec = abs(log(lMinRealVec)); % [0 0.5 1]
+    indexLMin = indexMinForMulti(lMinRealPointVec(indexPMin)); % [1 2 3]
+    indexLMinReal = indexPMin(indexLMin); % [1 2 3]
+    % 找到最接近1的S的索引
+    sMinRealPointVec = abs(log(sMinRealVec)); % [0 0.5 1]
+    indexSMin = indexMinForMulti(sMinRealPointVec(indexLMinReal));
+    indexSMinReal = indexLMinReal(indexSMin); % [1 2 3]
+    % 找到原始L中最接近1的索引
+    lMinPointVec = abs(log(lMinVec));
+    indexLMinOrigin = indexMinForMulti(lMinPointVec(indexSMinReal));
+    indexLMinOriginReal = indexSMinReal(indexLMinOrigin); % [1 2 3]
+    % 取以上4次过滤后的最大的索引值
+    indexMinEnd = indexLMinOriginReal(end);
+    
+    % 找到真实的最优
+    pMin = pMinVec(indexMinEnd);
+    lMin = lMinVec(indexMinEnd);
+    sMin = sMinVec(indexMinEnd);
+    lMinReal = lMinRealVec(indexMinEnd);
+    sMinReal = sMinRealVec(indexMinEnd);
+    
     CMin = CMinMatrix3(iMin, jMin, kMin);
     errorMin = errorMinMatrix3(iMin, jMin, kMin);
 end
