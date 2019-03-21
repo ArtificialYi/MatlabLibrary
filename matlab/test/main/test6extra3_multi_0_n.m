@@ -196,7 +196,7 @@ if isTrain
             KTrainGPU, YTrainGPU, KValGPU, YValGPU) findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
             predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
             KTrainGPU, YTrainGPU, KValGPU, YValGPU);
-    findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
+    [errorMinMatrix3, CMinMatrix3] = findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
             XTrainNorm, YTrainGPU, XValNorm, YValGPU, findGlobalFunc, ...
             CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
             predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU)
@@ -209,14 +209,19 @@ if isTrain
     errorMinCurrent = gather(errorMinCurrentGPU);
     
     % 找到最优的p、l、s、C
-    [iMin, indexMin] = find(min(min(min(errorMinMatrix3))));
-    kMin = mod(indexMin, length(sVec));
-    kMin(kMin==0) = length(sVec);
-    jMin = (indexMin-kMin)/length(lVec)+1;
+    indexMin3 = find(errorMinMatrix3(:)==min(errorMinMatrix3(:)));
+    lenP = length(pVec);
+    lenL = length(lVec);
+    indexPL = mod(indexMin3, lenP*lenL);
+    indexPL(indexPL==0)=lenP*lenL;
+    indexKMin = (indexMin3-indexPL)/(lenP*lenL)+1;
+    indexJMin = mod(indexPL, lenP);
+    indexJMin(indexJMin==0)=lenP;
+    indexIMin = (indexPL-indexJMin)/lenP+1;
 
-    pMin = pVec(iMin);
-    lMin = lVec(jMin);
-    sMin = sVec(kMin);
+    pMin = pVec(indexIMin);
+    lMin = lVec(indexJMin);
+    sMin = sVec(indexKMin);
     lMinReal = sqrt(lMin/sMin);
     sMinReal = sqrt(sMin/lMin);
     CMin = CMinMatrix3(iMin, jMin, kMin);
