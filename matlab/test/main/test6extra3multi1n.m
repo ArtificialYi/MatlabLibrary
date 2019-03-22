@@ -89,7 +89,7 @@ errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% 尝试找到全局最优C&gu
-guVec = linspace(0, gu, 101);
+guVec = linspace(0, gu, guSplit);
 guVec = guVec(2:end);
 mGu = size(guVec, 2);
 

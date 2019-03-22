@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-load data/data_test6extra3multi1n_20190322134516.mat;
+load data/data_test6extra3multi1n_20190322143200.mat;
 
 %% 画出数据图
 % 原始数据图
