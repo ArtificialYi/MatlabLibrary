@@ -82,8 +82,14 @@ splitLearnGPU = gpuArray(101);
     svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
         XValNormGPU, YValGPU, CLearnGPU, ...
         tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
+    
+% 学习曲线CPU数据
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% save
+
 % 获取文件名
 fileName = sprintf('data/data_test6extra3multi1n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName);
