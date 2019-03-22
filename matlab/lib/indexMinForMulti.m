@@ -5,9 +5,10 @@ function [indexMinVec] = indexMinForMulti(M3)
 % 多轴长度
 lenVec = size(M3);
 n = length(lenVec);
-numAll = numel(M3);
 
 % 初始化结果函数
+dVMatrix(:) = M3(:);
+dVMatrix(:) = 0;
 
 % 所有元素沿X轴上下移动一位
 for i=1:n
@@ -20,7 +21,7 @@ for i=1:n
     % 转化为牛顿导数
     M3dVReal = abs((4*M3dV+M3dVLeft+M3dVRight)/6);
     % 导数结果
-    dVMatrix = dVMatrix(:)+M3dVReal(:).^2;
+    dVMatrix(:) = dVMatrix(:)+M3dVReal(:).^2;
 end
 
 % 找出原生多维数据中的最小值
