@@ -1,11 +1,11 @@
-function [tmp] = test6extra3multi1n(gu, C, maxIter)
+function [tmp] = test6extra3multi1n(gu, C, maxIter, guSplit)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
 gu = str2double(gu);
 C = str2double(C);
 maxIter = str2double(maxIter);
-
+guSplit = str2double(guSplit);
 
 %% 读取数据
 % 读取数据
@@ -75,8 +75,8 @@ XValNormGPU = gpuArray(XValNorm);
 YValGPU = gpuArray(YVal);
 CLearnGPU = gpuArray(C);
 tolLearnGPU = gpuArray(1e-15);
-maxIterLearnGPU = gpuArray(50000);
-splitLearnGPU = gpuArray(101);
+maxIterLearnGPU = gpuArray(maxIter);
+splitLearnGPU = gpuArray(50);
 
 [errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
     svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
@@ -88,14 +88,46 @@ errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
 
-%% save
+%% 尝试找到全局最优C&gu
+guVec = linspace(0, gu, 101);
+guVec = guVec(2:end);
+mGu = size(guVec, 2);
 
+predCurrentGPU = gpuArray(1e-3);
+tolCurrentGPU = gpuArray(1e-15);
+maxIterCurrentGPU = gpuArray(maxIter);
+
+errorMinVec = zeros(mGu, 1);
+CMinVec = zeros(mGu, 1);
+
+for i=1:length(guVec)
+    kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
+    KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+    KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+    
+    [CCurrentGPU, errorMinCurrentGPU] = ...
+        svmFindCurrentMinC(KTrainGPU, YTrainGPU, KValGPU, YValGPU, tolCurrentGPU, maxIterCurrentGPU, predCurrentGPU);
+    errorMinVec(i) = gather(errorMinCurrentGPU);
+    CMinVec(i) = gather(CCurrentGPU);
+end
+
+% 找到最优C&gu
+indexMinVec = indexMinForMulti(errorMinVec);
+
+guMinVec = guVec(indexMinVec);
+CMinVec = CMinVec(indexMinVec);
+% 直接用最大的那个就完事了
+guMin = guMinVec(end);
+CMin = CMinVec(end);
+
+%% save
 % 获取文件名
 fileName = sprintf('data/data_test6extra3multi1n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName);
 save(fileName, ...
     'XOrigin', 'YOrigin', 'vecX1', 'vecX2', 'predYTestTmp_2D', ...
-    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn');
+    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn', ...
+    'XTrain', 'YTrain', 'XVal', 'YVal', 'guMin', 'CMin', 'guMinVec', 'CMinVec');
 fprintf('保存完毕\n');
 end
 
