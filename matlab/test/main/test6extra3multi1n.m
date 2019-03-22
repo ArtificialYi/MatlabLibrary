@@ -67,10 +67,29 @@ KTestTmp = kernelFunc(XOriginNorm, XTestTmpNorm);
 predYTestTmp = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestTmp'+modelOriginGPU.cpu.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
+%% 学习曲线
+%CPU->GPU
+XTrainNormGPU = gpuArray(XTrainNorm);
+YTrainGPU = gpuArray(YTrain);
+XValNormGPU = gpuArray(XValNorm);
+YValGPU = gpuArray(YVal);
+CLearnGPU = gpuArray(C);
+tolLearnGPU = gpuArray(1e-15);
+maxIterLearnGPU = gpuArray(50000);
+splitLearnGPU = gpuArray(101);
+
+[errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
+    svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
+        XValNormGPU, YValGPU, CLearnGPU, ...
+        tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test6extra3multi1n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
+fprintf('正在保存文件:%s\n', fileName);
 save(fileName, ...
-    'XOrigin', 'YOrigin', 'vecX1', 'vecX2', 'predYTestTmp_2D');
+    'XOrigin', 'YOrigin', 'vecX1', 'vecX2', 'predYTestTmp_2D', ...
+    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn');
+fprintf('保存完毕\n');
 end
 
