@@ -1,11 +1,12 @@
-function [tmp] = test6extra3multi1n(gu, C, maxIter, guSplit)
+function [tmp] = test6extra3multi1n(gu, C, maxIter, guMax, isTrain)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
 gu = str2double(gu);
 C = str2double(C);
 maxIter = str2double(maxIter);
-guSplit = str2double(guSplit);
+guMax = str2double(guMax);
+isTrain = str2double(isTrain);
 
 %% 读取数据
 % 读取数据
@@ -89,7 +90,7 @@ errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% 尝试找到全局最优C&gu
-guVec = linspace(0, gu, guSplit);
+guVec = linspace(0, guMax, 101);
 guVec = guVec(2:end);
 mGu = size(guVec, 2);
 
@@ -100,15 +101,17 @@ maxIterCurrentGPU = gpuArray(maxIter);
 errorMinVec = zeros(mGu, 1);
 CMinVec = zeros(mGu, 1);
 
-for i=1:length(guVec)
-    kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
-    KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
-    KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
-    
-    [CCurrentGPU, errorMinCurrentGPU] = ...
-        svmFindCurrentMinC(KTrainGPU, YTrainGPU, KValGPU, YValGPU, tolCurrentGPU, maxIterCurrentGPU, predCurrentGPU);
-    errorMinVec(i) = gather(errorMinCurrentGPU);
-    CMinVec(i) = gather(CCurrentGPU);
+if isTrain
+    for i=1:length(guVec)
+        kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
+        KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+        KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+
+        [CCurrentGPU, errorMinCurrentGPU] = ...
+            svmFindCurrentMinC(KTrainGPU, YTrainGPU, KValGPU, YValGPU, tolCurrentGPU, maxIterCurrentGPU, predCurrentGPU);
+        errorMinVec(i) = gather(errorMinCurrentGPU);
+        CMinVec(i) = gather(CCurrentGPU);
+    end
 end
 
 % 找到最优C&gu
