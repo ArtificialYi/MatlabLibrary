@@ -63,6 +63,11 @@ XTestTmpNorm = ...
     mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 KTestTmp = kernelFunc(XOriginNorm, XTestTmpNorm);
 
+disp(size(modelOriginGPU.cpu.alpha));
+disp(size(YOrigin));
+disp(size(KTestTmp));
+disp(size(modelOriginGPU.cpu.b));
+
 predYTestTmp = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestTmp+modelOriginGPU.cpu.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
