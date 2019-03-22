@@ -68,7 +68,7 @@ disp(size(YOrigin));
 disp(size(KTestTmp));
 disp(size(modelOriginGPU.cpu.b));
 
-predYTestTmp = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestTmp+modelOriginGPU.cpu.b;
+predYTestTmp = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestTmp'+modelOriginGPU.cpu.b;
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% save
