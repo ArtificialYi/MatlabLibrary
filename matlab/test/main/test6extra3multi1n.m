@@ -1,8 +1,8 @@
-function [tmp] = test6extra3multi1n(sigma)
+function [tmp] = test6extra3multi1n(gu)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
-sigma = str2double(sigma);
+gu = str2double(gu);
 
 %% 读取数据
 % 读取数据
@@ -28,7 +28,7 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, sigma);
+kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, gu);
 KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
 
 % 边界线数据准备
