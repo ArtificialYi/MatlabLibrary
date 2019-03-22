@@ -1,8 +1,9 @@
-function [tmp] = test6extra3multi1n(gu, maxIter)
+function [tmp] = test6extra3multi1n(gu, C, maxIter)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
 gu = str2double(gu);
+C = str2double(C);
 maxIter = str2double(maxIter);
 
 %% 读取数据
