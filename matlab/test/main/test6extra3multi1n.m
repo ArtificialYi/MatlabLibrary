@@ -6,6 +6,7 @@ gu = str2double(gu);
 C = str2double(C);
 maxIter = str2double(maxIter);
 
+
 %% 读取数据
 % 读取数据
 data = load('resource/ex2data1.txt');
