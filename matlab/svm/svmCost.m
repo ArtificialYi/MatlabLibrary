@@ -11,11 +11,11 @@ mPred = size(YPred,1);
 YOrigin(YOrigin==0) = -1;
 YPred(YPred==0) = -1;
 
-predTheta = (((alpha.*YOrigin)'*KPred)'+b).*YPred;
+predTheta = (((alpha.*YOrigin)'*KPred')'+b).*YPred;
 predTheta(predTheta>1)=1;
 
 J = (sum(1-predTheta) + ((alpha.*YOrigin)'*KOrigin*(alpha.*YOrigin))*lambda/2) / mPred;
-YOriginPred = KPred'*(alpha.*YOrigin)+b;
+YOriginPred = KPred*(alpha.*YOrigin)+b;
 YOriginPred(YOriginPred>0)=1;
 YOriginPred(YOriginPred<0)=-1;
 point = mean(YPred==YOriginPred);
