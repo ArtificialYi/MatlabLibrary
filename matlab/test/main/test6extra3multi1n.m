@@ -1,16 +1,12 @@
-function [tmp] = test6extra3multi1n(p, l, s, C, isTrain)
-%test6extra3multi1n SVM-多项式-GPU-芯片数据与质量
+function [tmp] = test6extra3multi1n(sigma)
+%test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
-p = str2double(p);
-l = str2double(l);
-s = str2double(s);
-C = str2double(C);
-isTrain = str2double(isTrain);
+sigma = str2double(sigma);
 
 %% 读取数据
 % 读取数据
-data = load('resource/ex2data2.txt');
+data = load('resource/ex2data1.txt');
 XOrigin = data(:,1:2);
 YOrigin = data(:,3);
 YOrigin(YOrigin==0)=-1;
@@ -32,7 +28,7 @@ XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
 % 获取核结果
-kernelFunc = @(X1, X2) svmKernelPolynomial(X1, X2, l, s, p);
+kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, sigma);
 KOrigin = kernelFunc(XOriginNorm, XOriginNorm);
 
 % 边界线数据准备
