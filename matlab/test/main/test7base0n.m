@@ -41,7 +41,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 % CPU->GPU
 indexVecRand = randperm(m, K);
 XOriginNormGPU = gpuArray(XOriginNorm);
-centroidsGPU = XOriginNormGPU(indexVecRand);
+centroidsGPU = XOriginNormGPU(indexVecRand, :);
 maxIterGPU = gpuArray(maxIter);
 
 [centroidsOriginGPU, YOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
