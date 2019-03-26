@@ -23,8 +23,8 @@ for i = 1:length(CVecGPU)
 end
 
 errorTrainVecGPU(:, 3) = ...
-    errorTrainVecGPU(:, 1).*(1-errorTrainVecGPU(:, 2))*(n+1)./(errorTrainVecGPU(:, 1)*n+(1-errorTrainVecGPU(:, 2)));
+    errorTrainVecGPU(:, 1).*(1-errorTrainVecGPU(:, 2)+0.01)*(n+1)./(errorTrainVecGPU(:, 1)*n+(1-errorTrainVecGPU(:, 2)+0.01));
 errorValVecGPU(:, 3) = ...
-    errorValVecGPU(:, 1).*(1-errorValVecGPU(:, 2))*(n+1)./(errorValVecGPU(:, 1)*n+(1-errorValVecGPU(:, 2)));
+    errorValVecGPU(:, 1).*(1-errorValVecGPU(:, 2)+0.01)*(n+1)./(errorValVecGPU(:, 1)*n+(1-errorValVecGPU(:, 2)+0.01));
 
 end

@@ -1,4 +1,4 @@
-function [tmp] = test6extra3_multi_0_n(p, l, s, C, isTrain)
+function [tmp] = test6extra3_multi_0_n(p, l, s, C, maxIter, isTrain, pVecMax)
 %% 测试函数
 % p 多项式的值
 % l 高阶参数
@@ -9,7 +9,11 @@ p = str2double(p);
 l = str2double(l);
 s = str2double(s);
 C = str2double(C);
+maxIter = str2double(maxIter);
 isTrain = str2double(isTrain);
+pVecMax = str2double(pVecMax);
+
+tol = 1e-8;
 
 %% 读取数据
 % 读取数据
@@ -55,8 +59,8 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 KOriginGPU = gpuArray(KOrigin);
 YOriginGPU = gpuArray(YOrigin);
 CTrainGPU = gpuArray(C);
-tolTrainGPU = gpuArray(1e-15);
-maxIterTrainGPU = gpuArray(50000);
+tolTrainGPU = gpuArray(1e-8);
+maxIterTrainGPU = gpuArray(maxIter);
 alphaTrainGPU = gpuArray.zeros(m, 1);
 
 modelOriginGPU = ...
@@ -78,105 +82,34 @@ YTrainGPU = gpuArray(YTrain);
 XValNormGPU = gpuArray(XValNorm);
 YValGPU = gpuArray(YVal);
 CLearnGPU = gpuArray(C);
-tolLearnGPU = gpuArray(1e-15);
-maxIterLearnGPU = gpuArray(50000);
-splitLearnGPU = gpuArray(11);
+tolLearnGPU = gpuArray(tol);
+maxIterLearnGPU = gpuArray(maxIter);
+splitLearnGPU = gpuArray(50);
 
 [errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
     svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
         XValNormGPU, YValGPU, CLearnGPU, ...
         tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
 
-%% 尝试找到最优C
-% CPU->GPU
-splitCCurrentGPU = gpuArray(11);
-predCurrentGPU = gpuArray(1e-3);
-CLeftCurrentGPU = gpuArray(1e-6); % 精度的一半
-CRightCurrentGPU = gpuArray(1e4);
-tolCurrentGPU = gpuArray(1e-15);
-maxIterCurrentGPU = gpuArray(50000);
-
-KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
-KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
-
-function [CCurrentGPU, errorMinCurrentGPU] = ...
-        findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
-        KTrainGPU, YTrainGPU, KValGPU, YValGPU)
-
-    % 先用等比数列找到最优数值
-    CVecCurrentGPU = logspace(log10(CLeftCurrentGPU), log10(CRightCurrentGPU), splitCCurrentGPU);
-    [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
-        svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
-    indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
-    if length(indexCurrentGPU) > 1
-        indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
-    end
-    [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
-        getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
-    CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
-    CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
-
-    % 再开始用等差数列做循环
-    while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
-        CVecCurrentGPU = linspace(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU);
-        [errorTrainCurrentTmpGPU, errorValCurrentTmpGPU] = ...
-            svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU, tolCurrentGPU, maxIterCurrentGPU);
-        indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
-        if length(indexCurrentGPU) > 1
-            indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
-        end
-        [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
-            getLeftAndRightIndex(indexCurrentGPU, 1, splitCCurrentGPU);
-        CLeftCurrentGPU = CVecCurrentGPU(indexCurrentLeftTmpGPU);
-        CRightCurrentGPU = CVecCurrentGPU(indexCurrentRightTmpGPU);
-    end
-    
-    CCurrentGPU = CVecCurrentGPU(indexCurrentGPU);
-    errorMinCurrentGPU = errorValCurrentTmpGPU(indexCurrentGPU, 3);
-end
+% 学习曲线
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% 寻找全局最优C
 %% 将当前最优各种参数打印出来
-pVec = 2:10;
+pVec = 1:pVecMax;
 lVec = linspace(0.1, 1.9, 3);
 sVec = linspace(0.1, 1.9, 3);
 
-function [errorMinMatrix3, CMinMatrix3] = ...
-        findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
-            XTrainNorm, YTrainGPU, XValNorm, YValGPU, findCurrentFunc, ...
-            CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU)
-    errorMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
-    CMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
-    for i=1:length(pVec)
-        for j=1:length(lVec)
-            for k=1:length(sVec)
-                pCurrent = pVec(i);
-                lCurrent = lVec(j);
-                sCurrent = sVec(k);
-                lCurrentReal = sqrt(lCurrent/sCurrent);
-                sCurrentReal = sqrt(sCurrent/lCurrent);
+predCurrentGPU = gpuArray(1e-3);
+tolCurrentGPU = gpuArray(tol);
+maxIterCurrentGPU = gpuArray(maxIter);
 
-                kernelFuncTmp = @(X1, X2) svmKernelPolynomial(X1, X2, lCurrentReal, sCurrentReal, pCurrent);
-                KTrainTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XTrainNorm));
-                KValTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XValNorm));
+errorMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
+CMinMatrix3 = zeros(length(pVec), length(lVec), length(sVec));
 
-                [CCurrentTmpGPU, errorMinCurrentTmpGPU] = ...
-                    findCurrentFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-                        predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
-                        KTrainTmpGPU, YTrainGPU, KValTmpGPU, YValGPU);
-
-                errorMinMatrix3(i, j, k) = gather(errorMinCurrentTmpGPU);
-                CMinMatrix3(i, j, k) = gather(CCurrentTmpGPU);
-            end
-        end
-    end
-end
-
-%% 如果是训练模式,找到最优的C
-CCurrent = 0;
-errorMinCurrent = 1;
-
+% 最小化结果集
 pMin = p;
 lMin = l;
 sMin = s;
@@ -186,27 +119,30 @@ CMin = 0;
 errorMin = 1;
 
 if isTrain
-    [CCurrentGPU, errorMinCurrentGPU] = ...
-        findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
-            KTrainGPU, YTrainGPU, KValGPU, YValGPU);
-        
-    findGlobalFunc = @(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
-            KTrainGPU, YTrainGPU, KValGPU, YValGPU) findCurrentMinCFunc(CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU, ...
-            KTrainGPU, YTrainGPU, KValGPU, YValGPU);
-    [errorMinMatrix3, CMinMatrix3] = findGlobalMinPLSCFunc(pVec, lVec, sVec, ...
-            XTrainNorm, YTrainGPU, XValNorm, YValGPU, findGlobalFunc, ...
-            CLeftCurrentGPU, CRightCurrentGPU, splitCCurrentGPU, ...
-            predCurrentGPU, tolCurrentGPU, maxIterCurrentGPU)
-    % 将当前最优C打印出来
-    fprintf('当前最优C是:%.15f\n', CCurrentGPU);
-    fprintf('当前最小误差是:%.15f\n', errorMinCurrentGPU);
-    
-    % 当前最优C
-    CCurrent = gather(CCurrentGPU);
-    errorMinCurrent = gather(errorMinCurrentGPU);
+    for i=1:length(pVec)
+        for j=1:length(lVec)
+            for k=1:length(sVec)
+                pCurrent = pVec(i);
+                lCurrent = lVec(j);
+                sCurrent = sVec(k);
+                fprintf('1s后开始:p-%d,l-%.2f,s-%.2f\n', pCurrent, lCurrent, sCurrent);
+                pause(1);
+                
+                lCurrentReal = sqrt(lCurrent/sCurrent);
+                sCurrentReal = sqrt(sCurrent/lCurrent);
+
+                kernelFuncTmp = @(X1, X2) svmKernelPolynomial(X1, X2, lCurrentReal, sCurrentReal, pCurrent);
+                KTrainTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XTrainNorm));
+                KValTmpGPU = gpuArray(kernelFuncTmp(XTrainNorm, XValNorm));
+
+                [CCurrentGPU, errorMinCurrentGPU] = ...
+                    svmFindCurrentMinC(KTrainTmpGPU, YTrainGPU, KValTmpGPU, YValGPU, tolCurrentGPU, maxIterCurrentGPU, predCurrentGPU);
+
+                errorMinMatrix3(i, j, k) = gather(errorMinCurrentGPU);
+                CMinMatrix3(i, j, k) = gather(CCurrentGPU);
+            end
+        end
+    end
     
     % 找到最优的p、l、s、C
     indexMin3 = indexMinForMulti(errorMinMatrix3);
@@ -254,10 +190,6 @@ if isTrain
 end
 
 %% 变量存储
-% 学习曲线
-errorTrainLearn = gather(errorTrainLearnGPU);
-errorValLearn = gather(errorValLearnGPU);
-realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 % 获取文件名
 fileName = sprintf('data/data_test6extra3_multi_0_n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
