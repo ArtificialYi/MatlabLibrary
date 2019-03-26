@@ -39,6 +39,7 @@ bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
 % 设置最大循环次数
 timeMaxGPU = maxIterGPU;
 timeTmpGPU = gpuArray(0);
+timeFixError = gpuArray(0);
 
 % 连续最小循环次数
 tolTimeMaxGPU = floor(sqrt(mGPU));
@@ -72,7 +73,9 @@ alphaErrorGPU = alphaGPU'*YGPU;
 % 随机数
 destinyGPU = gpuArray.zeros(mGPU, mGPU);
 
-
+% 缓存数据
+JErrorGPU = 0;
+JPointGPU = 0;
 
 % 开始循环计算
 while timeTmpGPU < timeMaxGPU && ...
@@ -190,15 +193,12 @@ while timeTmpGPU < timeMaxGPU && ...
             alpha3GPU = alpha1GPU*(tolErrorGPU/sumAlphaGPU) + alpha2GPU;
             alphaGPU = alphaGPU + alpha3GPU;
             bGPU = -sum(KGPU*(alphaGPU.*YGPU)-YGPU) / mGPU;
-            fprintf('success:\n%.20f\n%.20f\n', alphaErrorGPU, alphaGPU'*YGPU);
-        else
-            fprintf('modify float fail:%d\n', sumAlphaGPU);
+            timeFixError=timeFixError+1;
         end
     end
     
     % 找到代价
     [JErrorGPU, JPointGPU] = svmCost(KGPU, YGPU, KGPU, YGPU, alphaGPU, bGPU, 1/CGPU);
-    fprintf('Iter:%d, error:%f, pred:%f\n', timeTmpGPU, JErrorGPU, JPointGPU);
     
     % 连续误差小于某个范围，确定已经收敛
     if tolTmpGPU < tolGPU
@@ -225,6 +225,8 @@ while timeTmpGPU < timeMaxGPU && ...
     indexQueueGPU = indexQueueGPU+1;
     indexQueueGPU(indexQueueGPU>mQueueGPU) = indexQueueGPU-mQueueGPU;
 end
+
+fprintf('C:%f, Iter:%d, error:%f, pred:%f\n', CGPU, timeTmpGPU, JErrorGPU, JPointGPU);
 
 model.gpu.b = bGPU;
 model.cpu.b = gather(bGPU);
