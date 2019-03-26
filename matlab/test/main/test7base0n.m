@@ -61,20 +61,25 @@ YTest = gather(YTestGPU);
 
 %% 最佳点数训练模型
 % 
-subMatrix = vec2subMatrix(1:m, K);
-mSubMatrix = size(subMatrix, 1);
+
+mSubMatrix = numOfC(m, K);
+mTrain = ceil(sqrt(mSubMatrix));
+timeTrain = 0;
+
 centroidsOriginMinGPU = centroidsOriginGPU;
 errorOriginMinGPU = errorOriginGPU;
-for i=1:mSubMatrix
-    strTmp = sprintf('第%d次结束, 共%d次', i, mSubMatrix);
-    centroidsGPU(:) = XOriginNormGPU(subMatrix(i,:), :);
+
+while timeTrain < mTrain
+    indexVecRand = randperm(m, K);
+    centroidsGPU(:) = XOriginNormGPU(indexVecRand, :);
     [centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+    timeTrain=timeTrain+1;
     if errorOriginGPU<errorOriginMinGPU
         centroidsOriginMinGPU(:) = centroidsOriginGPU;
         errorOriginMinGPU = errorOriginGPU;
-        strTmp = [strTmp ', 找到更小值'];
+        fprintf('%d:%d, 找到更小值!.\n', mTrain, timeTrain);
+        timeTrain = 1;
     end
-    fprintf('%s.\n', strTmp);
 end
 
 % 优化结果预测
