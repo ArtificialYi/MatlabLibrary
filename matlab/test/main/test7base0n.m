@@ -1,5 +1,7 @@
-function [tmp] = test7base0n()
+function [tmp] = test7base0n(K)
 %test7base0n 无监督初始化
+
+K = str2double(K);
 
 %% 读取数据
 % 读取数据
@@ -34,12 +36,35 @@ vecX2 = linspace(minX2, maxX2, splitTrain)';
 vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
+%% 基础训练模型
+% CPU->GPU
+indexVecRand = randperm(m, K);
+XOriginNormGPU = gpuArray(XOriginNorm);
+centroidsGPU = XOriginNormGPU(indexVecRand);
+maxIterGPU = gpuArray(maxIter);
+
+[centroidsOriginGPU, YOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+
+% 训练结果预测
+XTestTmp = [vecX1Repeat vecX2Multi];
+XTestTmpNorm = ...
+    mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+
+XTestTmpNormGPU = gpuArray(XTestTmpNorm);
+
+[~, YTestGPU] = kMeanTrainGPU(XTestTmpNormGPU, centroidsOriginGPU, 1);
+
+% 输出数据准备
+centroidsOrigin = gather(centroidsOriginGPU);
+YTest = gather(YTestGPU);
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName);
 save(fileName, ...
-    'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2');
+    'XOrigin', 'XTrain', 'XVal', ...
+    'centroidsOrigin', 'vecX1', 'vecX2', 'YTest');
 fprintf('保存完毕\n');
 
 end
