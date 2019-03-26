@@ -31,7 +31,7 @@ maxX1 = max(XOrigin(:,1));
 minX2 = min(XOrigin(:,2));
 maxX2 = max(XOrigin(:,2));
 
-splitTrain = 51;
+splitTrain = 101;
 vecX1 = linspace(minX1, maxX1, splitTrain)';
 vecX2 = linspace(minX2, maxX2, splitTrain)';
 vecX1Repeat = repeatMatrix(vecX1, splitTrain);
