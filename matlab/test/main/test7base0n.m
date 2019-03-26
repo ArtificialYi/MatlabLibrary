@@ -9,7 +9,7 @@ maxIter = str2double(maxIter);
 data = load('resource/ex7data1.mat');
 XOrigin = data.X;
 
-m = size(XOrigin, 1);
+[m, n] = size(XOrigin);
 trainPoint = 0.7;
 valPoint = 0.3;
 
@@ -44,7 +44,7 @@ XOriginNormGPU = gpuArray(XOriginNorm);
 centroidsGPU = XOriginNormGPU(indexVecRand, :);
 maxIterGPU = gpuArray(maxIter);
 
-[centroidsOriginGPU, YOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+[centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
@@ -58,6 +58,25 @@ XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 % 输出数据准备
 centroidsOrigin = gather(centroidsOriginGPU);
 YTest = gather(YTestGPU);
+
+%% 最佳点数训练模型
+% 
+subMatrix = vec2subMatrix(1:m, K);
+mSubMatrix = size(subMatrix, 1);
+centroidsOriginMinGPU = centroidsOriginGPU;
+errorOriginMinGPU = errorOriginGPU;
+for i=1:mSubMatrix
+    strTmp = sprintf('第%d次结束, 共%d次', i, mSubMatrix);
+    centroidsGPU(:) = XOriginNormGPU(subMatrix(i,:), :);
+    [centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+    if errorOriginGPU<errorOriginMinGPU
+        centroidsOriginMinGPU(:) = centroidsOriginGPU;
+        errorOriginMinGPU = errorOriginGPU;
+        strTmp = [strTmp ', 找到更小值'];
+    end
+    fprintf('%s.\n', strTmp);
+end
+kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
 
 %% save
 % 获取文件名

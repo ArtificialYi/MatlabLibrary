@@ -3,12 +3,13 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-load data/data_test7base0n_20190326180306.mat;
+fileName = strcat('data/', 'data_test7base0n_20190326183005.mat');
+load(fileName);
 
 mK = size(centroidsOrigin, 1);
 contourVec = mean(vec2subMatrix(2.^(1:mK), 2),2);
-if mK == 1
-    contourVec = [2 2];
+if length(contourVec)==1
+    contourVec = [contourVec contourVec];
 end
 m1 = size(vecX1, 1);
 pred2D = reshape(2.^YTest, m1, m1);
