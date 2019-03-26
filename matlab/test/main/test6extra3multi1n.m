@@ -106,6 +106,8 @@ CMinVec = zeros(mGu, 1);
 
 if isTrain
     for i=1:length(guVec)
+        fprintf('1s后执行gu:%f', guVec(i));
+        pause(1);
         kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
         KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
         KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
