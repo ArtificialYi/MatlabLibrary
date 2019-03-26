@@ -3,7 +3,7 @@ function [centroidsGPU, idxPtr] = kMeanTrainGPU(XGPU, centroidsGPU, maxIter)
 
 % 初始化参数
 [mGPU, nGPU] = size(XGPU);
-KGPU = size(centroidsGPU, 1)
+KGPU = size(centroidsGPU, 1);
 centroidsRepeatGPU = gpuArray.zeros(mGPU*KGPU, nGPU);
 matrixTmp = gpuArray.zeros(KGPU, mGPU);
 idxPre = gpuArray.zeros(mGPU, 1);

@@ -62,7 +62,7 @@ YTest = gather(YTestGPU);
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
-fprintf('正在保存文件:%s\n', fileName);
+fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', ...
     'centroidsOrigin', 'vecX1', 'vecX2', 'YTest');
