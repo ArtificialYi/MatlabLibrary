@@ -1,18 +1,15 @@
 function [normNoneConstX, mu, sigma, noneIndex] = featureNormalize(X)
-%featureNormalize ç‰¹å¾ç¼©æ”¾
-% X åŸå§‹æ•°æ®é›†
+%featureNormalize ÌØÕ÷Ëõ·Å
+% X Ô­Ê¼Êı¾İ¼¯
 
-% æ·»åŠ å¼•ç”¨
-addpath('./base');
-
-% æ¸…é™¤å¸¸é‡å˜é‡
+% Çå³ı³£Á¿±äÁ¿
 [noneConstX, noneIndex] = trimConst(X);
 
-% å‡å»å¹³å‡å€¼
+% ¼õÈ¥Æ½¾ùÖµ
 mu = mean(noneConstX);
 avgNoneConstX = bsxfun(@minus, noneConstX, mu);
 
-% é™¤å»æ ‡å‡†å·®
+% ³ıÈ¥±ê×¼²î
 sigma = std(avgNoneConstX);
 normNoneConstX = bsxfun(@rdivide, avgNoneConstX, sigma);
 

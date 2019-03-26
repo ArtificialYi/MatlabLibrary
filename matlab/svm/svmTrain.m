@@ -1,4 +1,4 @@
-function [model] = svmTrain(X, Y, C, alpha, tol, maxIter)
+function [model] = svmTrain(K, Y, C, alpha, tol, maxIter)
 %svmTrain SVM基础模型训练函数-SMO算法，C越大，收敛概率越低
 % X 原始数据
 % Y 结果集
@@ -7,8 +7,15 @@ function [model] = svmTrain(X, Y, C, alpha, tol, maxIter)
 % maxIter 最大迭代次数
 
 % 初始化参数
-m = size(X, 1);
+m = size(K, 1);
 Y(Y==0) = -1;
+
+% 收敛队列和收敛比例
+mQueue = m;
+tolScale = ceil(1/tol);
+tolQueue = zeros(1, mQueue);
+indexQueue = 1;
+minQueue = 0;
 
 % 初始化浮点误差和精度范围
 floatErrorUnit = C*1e-14;
@@ -16,7 +23,6 @@ tol = max(floatErrorUnit, tol);
 floatErrorMax = min(floatErrorUnit, tol);
 
 % 初始化核函数 m*m
-K = X * X';
 % 初始化数据差 m*m
 eta = diag(K) + diag(K)' - K*2;
 eta(eta==0) = -1;
@@ -59,10 +65,17 @@ alphaError = alpha'*Y;
 
 % 随机数
 destiny = zeros(m, m);
-sumY = sum(Y);
+
+% 如果不收敛
+repeatExistTimeMax = floor(sqrt(m));
+repeatExistTime = 0;
+isMinError = 0;
 
 % 开始循环计算
-while timeTmp < timeMax && tolTimeTmp < tolTimeMax
+% 如果循环次数没有到最大次数 && 没有连续小于误差 && (不收敛检测失败 或 当前误差不是队列最小值)
+while timeTmp < timeMax && ...
+        tolTimeTmp < tolTimeMax && ...
+        (repeatExistTime < repeatExistTimeMax || ~isMinError)
     % 获取函数误差 m*1
     E(:) = K*(alpha.*Y)-Y + b;
     % 获取两两误差和误差梯度 m*m
@@ -152,14 +165,13 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     alpha(index2) = alphaNewMatrix(index1, index2);
     alpha(index1) = alphaOld1 + sMatrix(index1, index2)*(alphaOld2-alpha(index2));
 
-    % 每隔开方次就矫正一次alpha
+    % 获取新的b
+    b = -sum(K*(alpha.*Y)-Y) / m;
 
+    %% 以下代码决定收敛速度
     % 获取误差
     timeTmp = timeTmp + 1;
     tolTmp = tolMatrix(index1, index2);
-
-    % 获取新的b
-    b = -sum(K*(alpha.*Y)-Y) / m;
 
     % 如果alpha浮点误差超过误差极限了，尝试重新计算alpha
     alphaError = alpha'*Y;
@@ -185,10 +197,8 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
         end
     end
     
-
-    % 找到theta
-    w = ((alpha'.*Y') * X)';
-    JError = svmCost(X, Y, w, b, 1/C);
+    % 找到代价
+    JError = svmCost(K, Y, K, Y, alpha, b, 1/C);
     fprintf('Iter:%d, error:%f\n', timeTmp, JError);
     
     % 连续误差小于某个范围，确定已经收敛
@@ -197,15 +207,30 @@ while timeTmp < timeMax && tolTimeTmp < tolTimeMax
     else
         tolTimeTmp = 0;
     end
+    
+    % 另类收敛方案，如果无限重复不收敛的话,尝试判断重复，并且强制收敛
+    % 获取比例缩放后的误差
+    errorScale = floor(JError * tolScale);
+    % 查看队列中是否已经存在该值
+    if find(tolQueue==errorScale)
+        repeatExistTime = repeatExistTime + 1;
+    else
+        repeatExistTime = 0;
+    end
+    % 如果当前是最小值,则可以考虑退出循环
+    isMinError = minQueue==errorScale;
+    % 将新值插入队列
+    tolQueue(indexQueue) = errorScale;
+    minQueue = min(tolQueue);
+    % 移动队尾指针
+    indexQueue = indexQueue+1;
+    indexQueue(indexQueue>mQueue) = indexQueue-mQueue;
 end
 
-% 找到theta和b
-w = ((alpha'.*Y') * X)';
-
-model.w = w;
 model.b = b;
-model.maxTime = timeTmp;
 model.alpha = alpha;
+
+model.maxTime = timeTmp;
 model.point = point;
 model.error = alphaError;
 model.tol = tol;

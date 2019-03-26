@@ -1,18 +1,23 @@
-function [J] = svmCost(X, Y, w, b, lambda)
+function [J, point] = svmCost(KOrigin, YOrigin, KPred, YPred, alpha, b, lambda)
 %svmCost SVM代价函数
-% X 原始数据
+% 只有K=m*m的时候这个代价函数生效
+% K 原始数据
 % Y 原始结果
-% w theta
+% alpha alpha
 % b 截距
 % lambda 正则化程度
 
-m = size(Y,1);
-Y(Y==0) = -1;
+mPred = size(YPred,1);
+YOrigin(YOrigin==0) = -1;
+YPred(YPred==0) = -1;
 
-predTheta = (X*w+b).*Y;
+predTheta = (((alpha.*YOrigin)'*KPred')'+b).*YPred;
 predTheta(predTheta>1)=1;
 
-J = (sum(1-predTheta) + w'*w*lambda/2) / m;
-
+J = (sum(1-predTheta) + ((alpha.*YOrigin)'*KOrigin*(alpha.*YOrigin))*lambda/2) / mPred;
+YOriginPred = KPred*(alpha.*YOrigin)+b;
+YOriginPred(YOriginPred>0)=1;
+YOriginPred(YOriginPred<0)=-1;
+point = mean(YPred==YOriginPred);
 end
 
