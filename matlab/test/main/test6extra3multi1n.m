@@ -1,12 +1,15 @@
-function [tmp] = test6extra3multi1n(gu, C, maxIter, guMax, isTrain)
+function [tmp] = test6extra3multi1n(gu, C, maxIter, guLeft, guRight, isTrain)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据
 gu = str2double(gu);
 C = str2double(C);
 maxIter = str2double(maxIter);
-guMax = str2double(guMax);
+guLeft = str2double(guLeft);
+guRight = str2double(guRight);
 isTrain = str2double(isTrain);
+
+tol = 1e-8;
 
 %% 读取数据
 % 读取数据
@@ -52,7 +55,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 KOriginGPU = gpuArray(KOrigin);
 YOriginGPU = gpuArray(YOrigin);
 CTrainGPU = gpuArray(C);
-tolTrainGPU = gpuArray(1e-15);
+tolTrainGPU = gpuArray(tol);
 maxIterTrainGPU = gpuArray(maxIter);
 alphaTrainGPU = gpuArray.zeros(m, 1);
 
@@ -75,7 +78,7 @@ YTrainGPU = gpuArray(YTrain);
 XValNormGPU = gpuArray(XValNorm);
 YValGPU = gpuArray(YVal);
 CLearnGPU = gpuArray(C);
-tolLearnGPU = gpuArray(1e-15);
+tolLearnGPU = gpuArray(tol);
 maxIterLearnGPU = gpuArray(maxIter);
 splitLearnGPU = gpuArray(50);
 
@@ -90,12 +93,12 @@ errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% 尝试找到全局最优C&gu
-guVec = linspace(0, guMax, 21);
+guVec = linspace(guLeft, guRight, 21);
 guVec = guVec(2:end);
 mGu = size(guVec, 2);
 
 predCurrentGPU = gpuArray(1e-3);
-tolCurrentGPU = gpuArray(1e-15);
+tolCurrentGPU = gpuArray(tol);
 maxIterCurrentGPU = gpuArray(maxIter);
 
 errorMinVec = zeros(mGu, 1);
