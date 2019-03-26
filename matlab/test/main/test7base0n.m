@@ -6,7 +6,7 @@ maxIter = str2double(maxIter);
 
 %% 读取数据
 % 读取数据
-data = load('resource/ex7data1.mat');
+data = load('resource/ex7data2.mat');
 XOrigin = data.X;
 
 [m, n] = size(XOrigin);
