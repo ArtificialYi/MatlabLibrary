@@ -16,15 +16,13 @@ for i = 1:length(CVecGPU)
     
     [errorTrainTmp, pointTrainTmp] = svmCost(KTrainGPU, YTrainGPU, KTrainGPU, YTrainGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
     [errorValTmp, pointValTmp] = svmCost(KTrainGPU, YTrainGPU, KValGPU, YValGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
-    errorTrainVecGPU(i,1) = errorTrainTmp;
-    errorTrainVecGPU(i,2) = 1 - pointTrainTmp;
-    errorValVecGPU(i,1) = errorValTmp;
-    errorValVecGPU(i,2) = 1 - pointValTmp;
+    errorTrainVecGPU(i, 1) = errorTrainTmp;
+    errorTrainVecGPU(i, 2) = 1 - pointTrainTmp + 0.01;
+    errorTrainVecGPU(i, 3) = errorTrainVecGPU(i, 1).*errorTrainVecGPU(i, 2)*(n+1)./(errorTrainVecGPU(i, 1)*n+errorTrainVecGPU(i, 2));
+    errorValVecGPU(i, 1) = errorValTmp;
+    errorValVecGPU(i, 2) = 1 - pointValTmp + 0.01;
+    errorValVecGPU(i, 3) = ...
+        errorValVecGPU(i, 1).*errorValVecGPU(i, 2)*(n+1)./(errorValVecGPU(i, 1)*n+errorValVecGPU(i, 2));
+    fprintf('cross-error:%f, pred:%f, comp:%f\n', errorValVecGPU(i, 1), errorValVecGPU(i, 2), errorValVecGPU(i, 3));
 end
-
-errorTrainVecGPU(:, 3) = ...
-    errorTrainVecGPU(:, 1).*(1-errorTrainVecGPU(:, 2)+0.01)*(n+1)./(errorTrainVecGPU(:, 1)*n+(1-errorTrainVecGPU(:, 2)+0.01));
-errorValVecGPU(:, 3) = ...
-    errorValVecGPU(:, 1).*(1-errorValVecGPU(:, 2)+0.01)*(n+1)./(errorValVecGPU(:, 1)*n+(1-errorValVecGPU(:, 2)+0.01));
-
 end
