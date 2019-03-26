@@ -10,7 +10,7 @@ errorValVecGPU = gpuArray.zeros(length(CVecGPU), 3);
 mGPU = size(KTrainGPU, 1);
 alphaGPU = gpuArray.zeros(mGPU, 1);
 
-n = 2;
+n = 1;
 for i = 1:length(CVecGPU)
     modelTmpGPU = svmTrainGPU(KTrainGPU, YTrainGPU, CVecGPU(i), alphaGPU, tolGPU, maxIterGPU);
     
@@ -23,6 +23,5 @@ for i = 1:length(CVecGPU)
     errorValVecGPU(i, 2) = 1 - pointValTmp + 0.01;
     errorValVecGPU(i, 3) = ...
         errorValVecGPU(i, 1).*errorValVecGPU(i, 2)*(n+1)./(errorValVecGPU(i, 1)*n+errorValVecGPU(i, 2));
-    fprintf('cross-error:%f, pred:%f, comp:%f\n', errorValVecGPU(i, 1), errorValVecGPU(i, 2), errorValVecGPU(i, 3));
 end
 end
