@@ -1,4 +1,4 @@
-function [tmp] = test6extra3_multi_0_n(p, l, s, C, maxIter, isTrain, pVecMax)
+function [tmp] = test6extra3multi0n(p, l, s, C, maxIter, isTrain, pVecMax)
 %% 测试函数
 % p 多项式的值
 % l 高阶参数
