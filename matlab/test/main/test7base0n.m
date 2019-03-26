@@ -1,7 +1,8 @@
-function [tmp] = test7base0n(K)
+function [tmp] = test7base0n(K, maxIter)
 %test7base0n 无监督初始化
 
 K = str2double(K);
+maxIter = str2double(maxIter);
 
 %% 读取数据
 % 读取数据
