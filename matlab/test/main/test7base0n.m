@@ -76,15 +76,21 @@ for i=1:mSubMatrix
     end
     fprintf('%s.\n', strTmp);
 end
-kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+
+% 优化结果预测
+[~, YMinGPU] = kMeanTrainGPU(XTestTmpNormGPU, centroidsOriginMinGPU, 1);
+
+% 输出数据准备
+centroidsOriginMin = gather(centroidsOriginMinGPU);
+YMin = gather(YMinGPU);
 
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
-    'XOrigin', 'XTrain', 'XVal', ...
-    'centroidsOrigin', 'vecX1', 'vecX2', 'YTest');
+    'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
+    'centroidsOrigin', 'YTest', 'centroidsOriginMin', 'YMin');
 fprintf('保存完毕\n');
 
 end
