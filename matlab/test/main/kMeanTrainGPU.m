@@ -28,8 +28,7 @@ for i=1:maxIter
     
     idxPre(:) = idxPtr;
 end
-
-fprintf('k-mean:%d 完毕\n', KGPU);
+fprintf('K:%d, iter:%d\n', KGPU, i);
 
 end
 
