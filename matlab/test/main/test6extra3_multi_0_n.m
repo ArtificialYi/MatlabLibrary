@@ -192,7 +192,8 @@ end
 %% 变量存储
 
 % 获取文件名
-fileName = sprintf('data/data_test6extra3_multi_0_n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
+fileName = sprintf('data/data_test6extra3multi0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
+fprintf('正在保存文件:%s\n', fileName);
 save(fileName, ...
     'XOrigin', 'YOrigin', 'vecX1', 'vecX2', 'predYTestTmp_2D', ...
     'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn', ...
