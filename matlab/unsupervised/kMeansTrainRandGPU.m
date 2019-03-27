@@ -8,8 +8,8 @@ K = gather(KGPU);
 mTrain = ceil(sqrt(m*n*K));
 timeTrain = 0;
 
-centroidsGPU = gpuArray.zeros(KGPU, n);
-[centroidsGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, 1);
+centroidsGPU = findInitPointRand(XGPU, KGPU);
+[centroidsGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
 
 centroidsMinGPU = centroidsGPU;
 errorMinGPU = errorTmpGPU;
