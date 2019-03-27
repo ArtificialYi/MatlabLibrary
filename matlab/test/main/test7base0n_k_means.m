@@ -70,7 +70,7 @@ errorElbowVec = zeros(mKVec, 1);
 if elbow
     for i=1:mKVec
         KTmpGPU = gpuArray(KVec(i));
-        [~, ~, errorTmpGPU] = kMeansTrainRandGPU(XOriginNormGPU, KTmpGPU, maxIterGPU)
+        [~, ~, errorTmpGPU] = kMeansTrainRandGPU(XOriginNormGPU, KTmpGPU, maxIterGPU);
         errorElbowVec(i) = gather(errorTmpGPU);
     end
 end
