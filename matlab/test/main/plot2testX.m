@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_test7base0n_20190327211639.mat'];
+fileName = ['data/', 'data_test7base0n_20190327212127.mat'];
 load(fileName);
 
 mK = size(centroidsOrigin, 1);
@@ -50,7 +50,7 @@ plot(KVec, errorElbowVec, KVec, errorElbowVec);
 hold on;
 plot(KVec, dV1ErrorElbowVec, KVec, dV1ErrorElbowVec);
 plot(KVec, dV2ErrorElbowVec, KVec, dV2ErrorElbowVec);
-legend('误差', '一阶导数', '二阶导数');
+legend('二阶导数', '一阶导数', '误差');
 xlabel('K个数');
 title('手肘法');
 hold off;
