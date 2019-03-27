@@ -5,7 +5,7 @@ function [centroidsMinGPU, YMinGPU, errorMinGPU] = kMeansTrainRandGPU(XGPU, KGPU
 [m, n] = size(XGPU); 
 K = gather(KGPU);
 
-mTrain = ceil(sqrt(m*n));
+mTrain = ceil(sqrt(m*n*K));
 timeTrain = 0;
 
 centroidsGPU = gpuArray.zeros(KGPU, n);

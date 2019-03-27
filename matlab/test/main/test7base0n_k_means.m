@@ -1,7 +1,9 @@
-function [tmp] = test7base0n_k_means(K, maxIter)
+function [tmp] = test7base0n_k_means(K, KLeft, KRight, maxIter)
 %test7base0n 无监督初始化
 
 K = str2double(K);
+KLeft = str2double(KLeft);
+KRight = str2double(KRight);
 maxIter = str2double(maxIter);
 
 %% 读取数据
@@ -58,13 +60,24 @@ XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 centroidsOrigin = gather(centroidsOriginGPU);
 YTest = gather(YTestGPU);
 
+%% 手肘法
+KVec = KLeft:KRight;
+mKVec = length(KVec);
+
+errorElbowVec = zeros(mKVec, 1);
+for i=1:mKVec
+    KTmpGPU = gpuArray(KVec(i));
+    [~, ~, errorTmpGPU] = kMeansTrainRandGPU(XOriginNormGPU, KTmpGPU, maxIterGPU);
+    errorElbowVec(i) = gather(errorTmpGPU);
+end
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'centroidsOrigin', 'YTest');
+    'centroidsOrigin', 'YTest', 'errorElbowVec');
 fprintf('保存完毕\n');
 
 end
