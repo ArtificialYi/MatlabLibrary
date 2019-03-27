@@ -1,4 +1,4 @@
-function [centroidsGPU, idxPtrGPU, distUnitGPU, iter] = kMeanTrainGPU(XGPU, centroidsGPU, maxIter)
+function [centroidsGPU, idxPtrGPU, distUnitGPU, iter] = kMeansTrainGPU(XGPU, centroidsGPU, maxIter)
 %kMeanTrainGPU K-mean算法训练函数
 
 % 初始化参数
