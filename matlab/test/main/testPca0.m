@@ -40,7 +40,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 XOriginNormGPU = gpuArray(XOriginNorm);
 nGPU = gpuArray(n);
 
-[UOrigin] = pcaTrainGPU(XOriginNormGPU);
+[UOrigin, SOrigin] = pcaTrainGPU(XOriginNormGPU);
 XOriginPcaGPU = data2pca(XOriginNormGPU, UOrigin, nGPU);
 XOriginPca = gather(XOriginPcaGPU);
 
@@ -50,6 +50,6 @@ fileName = sprintf('data/data_testPca0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'XOriginPca');
+    'XOriginPca', 'SOrigin');
 fprintf('保存完毕\n');
 end

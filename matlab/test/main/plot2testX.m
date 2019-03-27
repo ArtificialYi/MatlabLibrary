@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testPca0_20190328005707.mat'];
+fileName = ['data/', 'data_testPca0_20190328010208.mat'];
 load(fileName);
 
 %mK = size(centroidsOrigin, 1);
@@ -57,3 +57,8 @@ figure(5)
 legend('训练集', '交叉验证集');
 xlabel('训练集个数');
 title('学习曲线');
+
+%% pca
+figure(6)
+plot(XOriginPca(:, 1), XOriginPca(:, 2), 'r+','LineWidth', 1, 'MarkerSize', 7);
+title('PCA图');
