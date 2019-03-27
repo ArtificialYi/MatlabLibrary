@@ -27,5 +27,5 @@ while timeTrain < mTrainao
     end
 end
 fprintf('%d个分类完毕!.\n', KGPU);
+
 end
-a
