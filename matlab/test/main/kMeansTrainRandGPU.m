@@ -2,7 +2,8 @@ function [centroidsMinGPU, YMinGPU, errorMinGPU] = kMeansTrainRandGPU(XGPU, KGPU
 %kMeansTrainRandGPU 为kMeans算法添加随机因子
 %   此处显示详细说明
 
-[m, n] = size(XGPU); 
+[m, n] = gpuArray(size(XGPU)); 
+K = gather(KGPU);
 
 mTrain = ceil(sqrt(m*n));
 timeTrain = 0;
@@ -14,9 +15,7 @@ centroidsMinGPU = centroidsGPU;
 errorMinGPU = errorTmpGPU;
 YMinGPU = YTmpGPU;
 while timeTrain < mTrain
-    m
-    KGPU
-    indexVecRand = randperm(m, KGPU);
+    indexVecRand = randperm(m, K);
     centroidsGPU(:) = XGPU(indexVecRand, :);
     [centroidsTmpGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
     timeTrain=timeTrain+1;
