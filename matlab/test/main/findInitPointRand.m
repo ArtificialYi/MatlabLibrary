@@ -8,10 +8,12 @@ indexTmp = ceil(rand()*m);
 
 centroids(1, :) = XGPU(indexTmp, :);
 
-for i=2:KGPU
+for i=1:KGPU
     [pointTmp, findSuccess] = findFarPoint(XGPU, centroids(1:i-1, :));
     if ~findSuccess 
-        centroids = centroids(1:i-1, :);
+        iTmp = i-1;
+        iTmp(iTmp<1)=1;
+        centroids = centroids(1:iTmp, :);
         break;
     end
     centroids(i, :) = pointTmp;
