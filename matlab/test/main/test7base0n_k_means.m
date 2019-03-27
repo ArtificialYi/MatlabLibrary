@@ -62,8 +62,7 @@ YTest = gather(YTestGPU);
 %% 最佳点数训练模型
 % 
 
-mSubMatrix = numOfC(m, K);
-mTrain = ceil(sqrt(mSubMatrix));
+mTrain = ceil(sqrt(m*n));
 timeTrain = 0;
 
 centroidsOriginMinGPU = centroidsOriginGPU;
