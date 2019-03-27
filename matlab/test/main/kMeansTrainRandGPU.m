@@ -14,6 +14,8 @@ centroidsMinGPU = centroidsGPU;
 errorMinGPU = errorTmpGPU;
 YMinGPU = YTmpGPU;
 while timeTrain < mTrain
+    m
+    KGPU
     indexVecRand = randperm(m, KGPU);
     centroidsGPU(:) = XGPU(indexVecRand, :);
     [centroidsTmpGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
