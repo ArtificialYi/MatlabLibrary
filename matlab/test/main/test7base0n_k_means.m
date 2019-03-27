@@ -77,7 +77,7 @@ fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'centroidsOrigin', 'YTest', 'errorElbowVec');
+    'centroidsOrigin', 'YTest', 'KVec', 'errorElbowVec');
 fprintf('保存完毕\n');
 
 end
