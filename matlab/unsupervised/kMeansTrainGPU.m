@@ -13,8 +13,10 @@ XGPUMultiGPU = multiMatrix(XGPU, KGPU);
 for i=1:maxIter
     % 划分数据点到聚类点
     centroidsRepeatGPU(:) = repeatMatrix(centroidsGPU, mGPU);
-    idxMatrixTmpGPU = reshape(sum((XGPUMultiGPU-centroidsRepeatGPU).^2, 2), mGPU, KGPU);
+    idxMatrixTmpGPU = reshape(sum((XGPUMultiGPU-centroidsRepeatGPU).^2, 2), mGPU, KGPU)
+    pause;
     [distGPU, idxPtrGPU] = min(idxMatrixTmpGPU, [], 2)
+    pause;
 
     % 如果没有误差变动
     if all(idxPreGPU==idxPtrGPU)
