@@ -7,6 +7,7 @@ centroids = gpuArray.zeros(K, n);
 indexTmp = ceil(rand()*m);
 
 centroids(1, :) = X(indexTmp, :);
+X(indexTmp, :) = [];
 for i=2:K
     indexFar = findFarPoint(X, centroids(1:i-1, :));
     centroids(i, :) = X(indexFar, :);
