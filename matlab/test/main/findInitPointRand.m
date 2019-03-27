@@ -7,6 +7,7 @@ centroids = gpuArray.zeros(KGPU, n);
 indexTmp = ceil(rand()*m);
 
 centroids(1, :) = XGPU(indexTmp, :);
+i = 1;
 for i=2:KGPU
     [pointTmp, findSuccess] = findFarPoint(XGPU, centroids(1:i-1, :));
     if ~findSuccess 
