@@ -3,7 +3,7 @@ function [centroids] = findInitPointRand(X, K)
 
 [m, n] = size(X);
 
-centroids = zeros(K, n);
+centroids = gpuArray.zeros(K, n);
 indexTmp = ceil(rand()*m);
 
 centroids(1, :) = X(indexTmp, :);
