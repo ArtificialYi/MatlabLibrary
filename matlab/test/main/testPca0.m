@@ -40,9 +40,10 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 XOriginNormGPU = gpuArray(XOriginNorm);
 nGPU = gpuArray(n);
 
-[UOrigin, SOrigin] = pcaTrainGPU(XOriginNormGPU);
-XOriginPcaGPU = data2pca(XOriginNormGPU, UOrigin, nGPU);
+[UOriginGPU, SOriginGPU] = pcaTrainGPU(XOriginNormGPU);
+XOriginPcaGPU = data2pca(XOriginNormGPU, UOriginGPU, nGPU);
 XOriginPca = gather(XOriginPcaGPU);
+SOrigin = gather(SOriginGPU);
 
 %% save
 % 获取文件名
