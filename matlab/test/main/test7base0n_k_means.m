@@ -39,12 +39,11 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 %% 基础训练模型
 % CPU->GPU
-indexVecRand = randperm(m, K);
 XOriginNormGPU = gpuArray(XOriginNorm);
-centroidsGPU = XOriginNormGPU(indexVecRand, :);
+KGPU = gpuArray(K);
 maxIterGPU = gpuArray(maxIter);
 
-[centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
+[centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeansTrainRandGPU(XOriginNormGPU, KGPU, maxIterGPU);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
@@ -59,42 +58,13 @@ XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 centroidsOrigin = gather(centroidsOriginGPU);
 YTest = gather(YTestGPU);
 
-%% 最佳点数训练模型
-% 
-
-mTrain = ceil(sqrt(m*n));
-timeTrain = 0;
-
-centroidsOriginMinGPU = centroidsOriginGPU;
-errorOriginMinGPU = errorOriginGPU;
-
-while timeTrain < mTrain
-    indexVecRand = randperm(m, K);
-    centroidsGPU(:) = XOriginNormGPU(indexVecRand, :);
-    [centroidsOriginGPU, YOriginGPU, errorOriginGPU] = kMeanTrainGPU(XOriginNormGPU, centroidsGPU, maxIterGPU);
-    timeTrain=timeTrain+1;
-    if errorOriginGPU<errorOriginMinGPU
-        centroidsOriginMinGPU(:) = centroidsOriginGPU;
-        errorOriginMinGPU = errorOriginGPU;
-        fprintf('%d:%d, 找到更小值!.\n', mTrain, timeTrain);
-        timeTrain = 1;
-    end
-end
-
-% 优化结果预测
-[~, YMinGPU] = kMeanTrainGPU(XTestTmpNormGPU, centroidsOriginMinGPU, 1);
-
-% 输出数据准备
-centroidsOriginMin = gather(centroidsOriginMinGPU);
-YMin = gather(YMinGPU);
-
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'centroidsOrigin', 'YTest', 'centroidsOriginMin', 'YMin');
+    'centroidsOrigin', 'YTest');
 fprintf('保存完毕\n');
 
 end
