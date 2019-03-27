@@ -11,13 +11,11 @@ i = 1;
 for i=2:KGPU
     [pointTmp, findSuccess] = findFarPoint(XGPU, centroids(1:i-1, :));
     if ~findSuccess 
+        centroids = centroids(1:i-1, :);
         break;
     end
     centroids(i, :) = pointTmp;
 end
-
-fprintf('i:%d\n', i);
-centroids = centroids(1:i, :);
 
 end
 
