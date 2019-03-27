@@ -1,4 +1,4 @@
-function [tmp] = test6extra3multi1n(gu, C, maxIter, guLeft, guRight, isTrain)
+function [tmp] = test6extra3multi1n_svm_gaus(gu, C, maxIter, guLeft, guRight, isTrain)
 %test6extra3multi1n SVM-高斯-GPU-考试成绩
 
 % 初始化数据

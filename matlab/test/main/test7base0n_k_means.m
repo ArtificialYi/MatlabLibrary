@@ -1,4 +1,4 @@
-function [tmp] = test7base0n(K, maxIter)
+function [tmp] = test7base0n_k_means(K, maxIter)
 %test7base0n 无监督初始化
 
 K = str2double(K);
