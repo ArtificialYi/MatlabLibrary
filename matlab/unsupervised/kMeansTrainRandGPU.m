@@ -8,11 +8,11 @@ K = gather(KGPU);
 mTrain = ceil(sqrt(m*n*K));
 timeTrain = 0;
 
-centroidsGPU = findInitPointRand(XGPU, KGPU)
+centroidsGPU = findInitPointRand(XGPU, KGPU);
 [centroidsGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
 
 centroidsMinGPU = centroidsGPU;
-errorMinGPU = errorTmpGPU
+errorMinGPU = errorTmpGPU;
 YMinGPU = YTmpGPU;
 while timeTrain < mTrain
     indexVecRand = randperm(m, K);

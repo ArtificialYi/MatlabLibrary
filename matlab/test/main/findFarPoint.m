@@ -8,7 +8,7 @@ XMulti = multiMatrix(X, K);
 centroidsRepeat = repeatMatrix(centroids, m);
 
 distMatrix = reshape(sum((XMulti-centroidsRepeat).^2, 2), m, K);
-distVec = sum(distMatrix, 2)
+distVec = sum(distMatrix, 2);
 
 [~, indexMax] = max(distVec);
 
