@@ -7,7 +7,7 @@ lenVec = size(M3);
 n = length(lenVec);
 
 % 初始化结果函数
-dVMatrix(:) = M3(:);
+dVMatrix = M3;
 dVMatrix(:) = 0;
 
 % 所有元素沿X轴上下移动一位
@@ -29,6 +29,5 @@ indexMinOrigin = find(min(M3(:))==M3(:));
 indexMinDV = dVMatrix(indexMinOrigin) == max(dVMatrix(indexMinOrigin));
 indexMinVec = indexMinOrigin(indexMinDV);
 
-dVMatrix = reshape(dVMatrix, lenVec);
 end
 
