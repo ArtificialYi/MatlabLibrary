@@ -52,7 +52,7 @@ XTestTmpNorm = ...
 
 XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 
-[~, YTestGPU] = kMeanTrainGPU(XTestTmpNormGPU, centroidsOriginGPU, 1);
+[~, YTestGPU] = kMeansTrainGPU(XTestTmpNormGPU, centroidsOriginGPU, 1);
 
 % 输出数据准备
 centroidsOrigin = gather(centroidsOriginGPU);
