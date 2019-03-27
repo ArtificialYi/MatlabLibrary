@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testPca0_20190328012019.mat'];
+fileName = ['data/', 'data_testPca0_20190328014238.mat'];
 load(fileName);
 
 %mK = size(centroidsOrigin, 1);
@@ -13,6 +13,7 @@ load(fileName);
 %end
 %m1 = size(vecX1, 1);
 %pred2D = reshape(2.^YTest, m1, m1);
+XOriginRecKBack = XOriginRecK.*sigma+mu;
 
 %% 画出数据图
 % 原始数据图
@@ -21,7 +22,7 @@ figure(1);
 plot(XTrain(:, 1), XTrain(:, 2), 'r+','LineWidth', 1, 'MarkerSize', 7);
 hold on;
 plot(XVal(:, 1), XVal(:, 2), 'b+','LineWidth', 1, 'MarkerSize', 7);
-%contour(vecX1, vecX2, pred2D, contourVec);
+plot(XOriginRecKBack(:, 1), XOriginRecKBack(:, 2), 'go','LineWidth', 1, 'MarkerSize', 7);
 title('原始数据图');
 fprintf('原始数据图\n');
 hold off;
@@ -76,5 +77,3 @@ SVecScall(:) = SVecSum/SVecSum(end);
 plot(1:length(SVec), SVec, 1:length(SVec), SVecSum, 1:length(SVec), SVecScall);
 legend('方差', '方差和', '比例');
 title('pca曲线');
-
-%% pca-1
