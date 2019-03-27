@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testPca0_20190328011858.mat'];
+fileName = ['data/', 'data_testPca0_20190328012019.mat'];
 load(fileName);
 
 %mK = size(centroidsOrigin, 1);
@@ -52,13 +52,29 @@ xlabel('K个数');
 title('手肘法');
 
 %% 学习曲线
-figure(5)
+figure(5);
 %plot(realSplitVecLearn, errorTrainLearn, realSplitVecLearn, errorValLearn);
 legend('训练集', '交叉验证集');
 xlabel('训练集个数');
 title('学习曲线');
 
 %% pca
-figure(6)
+figure(6);
 plot(XOriginPca(:, 1), XOriginPca(:, 2), 'r+','LineWidth', 1, 'MarkerSize', 7);
 title('PCA图');
+
+%% pca曲线
+figure(7);
+SVec = [0; diag(SOrigin)];
+SVecSum = SVec;
+SVecScall = SVec;
+for i=2:length(SVec)
+    SVecSum(i) = SVecSum(i-1)+SVec(i);
+end
+SVecScall(:) = SVecSum/SVecSum(end);
+
+plot(1:length(SVec), SVec, 1:length(SVec), SVecSum, 1:length(SVec), SVecScall);
+legend('方差', '方差和', '比例');
+title('pca曲线');
+
+%% pca-1

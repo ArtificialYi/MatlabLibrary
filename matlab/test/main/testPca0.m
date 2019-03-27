@@ -1,7 +1,8 @@
-function [pcaRes] = testPca0()
+function [pcaRes] = testPca0(K)
 %testPca0 pca测试
 
 %% str2double
+K = str2double(K);
 
 %% 读取数据
 data = load('resource/ex7data1.mat');
@@ -39,18 +40,25 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 % CPU->GPU
 XOriginNormGPU = gpuArray(XOriginNorm);
 nGPU = gpuArray(n);
+KGPU = gpuArray(K);
 
 [UOriginGPU, SOriginGPU] = pcaTrainGPU(XOriginNormGPU);
 XOriginPcaGPU = data2pca(XOriginNormGPU, UOriginGPU, nGPU);
-XOriginPca = gather(XOriginPcaGPU);
+XOriginPcaKGPU = data2pca(XOriginNormGPU, UOriginGPU, KGPU);
+XOriginRecKGPU = pca2data(XOriginPcaKGPU, UOriginGPU, KGPU);
+
+UOrigin = gather(UOriginGPU);
 SOrigin = gather(SOriginGPU);
+XOriginPca = gather(XOriginPcaGPU);
+XOriginPcaK = gather(XOriginPcaKGPU);
+XOriginRecK = gather(XOriginRecKGPU);
 
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testPca0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
-    'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'XOriginPca', 'SOrigin');
+    'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', 'sigma', 'mu', ...
+    'UOrigin', 'SOrigin', 'XOriginPca', 'XOriginPcaK', 'XOriginRecK');
 fprintf('保存完毕\n');
 end
