@@ -79,7 +79,17 @@ end
 [~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
 
 %% 学习曲线
+% CPU->GPU
+XTrainNormGPU = gpuArray(XTrainNorm);
+XValNormGPU = gpuArray(XValNorm);
+splitGPU = gpuArray(101);
 
+[errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
+    kMeansLearningCurveGPU(XTrainNormGPU, XValNormGPU, KGPU, maxIterGPU, splitGPU);
+% 学习曲线CPU数据
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% save
 % 获取文件名
@@ -87,7 +97,8 @@ fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'vecX1', 'vecX2', ...
-    'centroidsOrigin', 'YTest', 'KVec', 'errorElbowVec', 'dV1ErrorElbowVec', 'dV2ErrorElbowVec');
+    'centroidsOrigin', 'YTest', 'KVec', 'errorElbowVec', 'dV1ErrorElbowVec', 'dV2ErrorElbowVec', ...
+    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn');
 fprintf('保存完毕\n');
 
 end
