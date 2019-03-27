@@ -1,4 +1,4 @@
-function [indexMinVec] = indexMinForMulti(M3)
+function [indexMinVec, dVMatrix] = indexMinForMulti(M3)
 %indexMinFor3 流式多维数组中的最小值所在的索引
 %   此处显示详细说明
 
@@ -28,5 +28,7 @@ end
 indexMinOrigin = find(min(M3(:))==M3(:));
 indexMinDV = dVMatrix(indexMinOrigin) == max(dVMatrix(indexMinOrigin));
 indexMinVec = indexMinOrigin(indexMinDV);
+
+dVMatrix = reshape(dVMatrix, lenVec);
 end
 

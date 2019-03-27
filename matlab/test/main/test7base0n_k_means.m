@@ -75,6 +75,8 @@ if elbow
     end
 end
 
+[~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
+[~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
 
 %% save
 % 获取文件名
