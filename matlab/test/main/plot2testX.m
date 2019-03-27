@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_test7base0n_20190327140536.mat'];
+fileName = ['data/', 'data_test7base0n_20190327152910.mat'];
 load(fileName);
 
 mK = size(centroidsOrigin, 1);
@@ -13,9 +13,6 @@ if length(contourVec)==1
 end
 m1 = size(vecX1, 1);
 pred2D = reshape(2.^YTest, m1, m1);
-
-tmpVec1 = errorElbowVec([2:end end])-errorElbowVec([1 1:end-1]);
-tmpVec2 = tmpVec1([2:end end])-tmpVec1([1 1:end-1]);
 
 %% 画出数据图
 % 原始数据图
@@ -51,8 +48,8 @@ title('交叉验证集图')
 figure(4);
 plot(KVec, errorElbowVec, KVec, errorElbowVec);
 hold on;
-plot(KVec, tmpVec1, KVec, tmpVec1);
-plot(KVec, tmpVec2, KVec, tmpVec2);
+plot(KVec, dV1ErrorElbowVec, KVec, dV1ErrorElbowVec);
+plot(KVec, dV2ErrorElbowVec, KVec, dV2ErrorElbowVec);
 legend('误差', '一阶导数', '二阶导数');
 xlabel('K个数');
 title('手肘法');
