@@ -7,11 +7,15 @@ centroids = gpuArray.zeros(K, n);
 indexTmp = ceil(rand()*m);
 
 centroids(1, :) = X(indexTmp, :);
-X(indexTmp, :) = [];
 for i=2:K
-    indexFar = findFarPoint(X, centroids(1:i-1, :));
-    centroids(i, :) = X(indexFar, :);
+    [pointTmp, findSuccess] = findFarPoint(X, centroids(1:i-1, :));
+    if ~findSuccess 
+        break;
+    end
+    centroids(i, :) = pointTmp;
 end
+
+centroids = centroids(1:i, :);
 
 end
 
