@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_test7base0n_20190327212127.mat'];
+fileName = ['data/', 'data_test7base0n_20190327220218.mat'];
 load(fileName);
 
 mK = size(centroidsOrigin, 1);
@@ -46,11 +46,15 @@ title('交叉验证集图')
 
 %% 手肘法
 figure(4);
-plot(KVec, errorElbowVec, KVec, errorElbowVec);
-hold on;
-plot(KVec, dV1ErrorElbowVec, KVec, dV1ErrorElbowVec);
-plot(KVec, dV2ErrorElbowVec, KVec, dV2ErrorElbowVec);
+plot(KVec, errorElbowVec, KVec, dV1ErrorElbowVec, KVec, dV2ErrorElbowVec);
+
 legend('二阶导数', '一阶导数', '误差');
 xlabel('K个数');
 title('手肘法');
-hold off;
+
+%% 学习曲线
+figure(5)
+plot(realSplitVecLearn, errorTrainLearn, realSplitVecLearn, errorValLearn);
+legend('训练集', '交叉验证集');
+xlabel('训练集个数');
+title('学习曲线');
