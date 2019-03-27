@@ -22,13 +22,13 @@ for i=1:realSplitGPU
     fprintf('学习曲线-%d:%d-%d\n', realSplitGPU, i, currentIndexGPU);
     XTmpGPU = XTrainGPU(1:currentIndexGPU, :);
     
-    [centroidsTrainGPU, ~, errorTrainGPU] = kMeansTrainRandGPU(XTmpGPU, KTmpGPU, maxIterGPU);
+    [centroidsTrainTmpGPU, ~, errorTrainTmpGPU] = kMeansTrainRandGPU(XTmpGPU, KTmpGPU, maxIterGPU);
     
-    [~, ~, errorValGPU] = kMeansTrainGPU(XValGPU, centroidsTrainGPU, 1);
+    [~, ~, errorValTmpGPU] = kMeansTrainGPU(XValGPU, centroidsTrainTmpGPU, 1);
     
     realSplitVecGPU(i) = currentIndexGPU;
-    errorTrainGPU(i) = errorTrainGPU;
-    errorValGPU(i) = errorValGPU;
+    errorTrainGPU(i) = errorTrainTmpGPU;
+    errorValGPU(i) = errorValTmpGPU;
 end
 
 end

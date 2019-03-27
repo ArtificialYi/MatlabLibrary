@@ -85,11 +85,11 @@ XValNormGPU = gpuArray(XValNorm);
 splitGPU = gpuArray(101);
 
 [errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
-    kMeansLearningCurveGPU(XTrainNormGPU, XValNormGPU, KGPU, maxIterGPU, splitGPU)
+    kMeansLearningCurveGPU(XTrainNormGPU, XValNormGPU, KGPU, maxIterGPU, splitGPU);
 % 学习曲线CPU数据
-errorTrainLearn = gather(errorTrainLearnGPU)
-errorValLearn = gather(errorValLearnGPU)
-realSplitVecLearn = gather(realSplitVecLearnGPU)
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% save
 % 获取文件名
