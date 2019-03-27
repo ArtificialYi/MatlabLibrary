@@ -78,6 +78,9 @@ end
 [~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
 [~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
 
+%% 学习曲线
+
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_test7base0n_%s.mat', datestr(now, 'yyyymmddHHMMss'));
