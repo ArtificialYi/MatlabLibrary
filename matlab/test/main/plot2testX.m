@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_test7base0n_20190327222343.mat'];
+fileName = ['data/', 'data_test7base0n_20190327223526.mat'];
 load(fileName);
 
 mK = size(centroidsOrigin, 1);
@@ -42,7 +42,7 @@ plot(XVal(:, 1), XVal(:, 2), 'b+','LineWidth', 1, 'MarkerSize', 7);
 hold on;
 contour(vecX1, vecX2, pred2D, contourVec);
 hold off;
-title('交叉验证集图')
+title('交叉验证集图');
 
 %% 手肘法
 figure(4);
