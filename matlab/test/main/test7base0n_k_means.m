@@ -1,7 +1,8 @@
-function [tmp] = test7base0n_k_means(K, KLeft, KRight, maxIter)
+function [tmp] = test7base0n_k_means(K, elbow, KLeft, KRight, maxIter)
 %test7base0n 无监督初始化
 
 K = str2double(K);
+elbow = str2double(elbow);
 KLeft = str2double(KLeft);
 KRight = str2double(KRight);
 maxIter = str2double(maxIter);
@@ -65,11 +66,15 @@ KVec = KLeft:KRight;
 mKVec = length(KVec);
 
 errorElbowVec = zeros(mKVec, 1);
-for i=1:mKVec
-    KTmpGPU = gpuArray(KVec(i));
-    [~, ~, errorTmpGPU] = kMeansTrainRandGPU(XOriginNormGPU, KTmpGPU, maxIterGPU);
-    errorElbowVec(i) = gather(errorTmpGPU);
+
+if elbow
+    for i=1:mKVec
+        KTmpGPU = gpuArray(KVec(i));
+        [~, ~, errorTmpGPU] = kMeansTrainRandGPU(XOriginNormGPU, KTmpGPU, maxIterGPU);
+        errorElbowVec(i) = gather(errorTmpGPU);
+    end
 end
+
 
 %% save
 % 获取文件名
