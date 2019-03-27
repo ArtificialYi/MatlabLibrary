@@ -8,12 +8,12 @@ K = gather(KGPU);
 mTrain = ceil(sqrt(m*n*K));
 timeTrain = 0;
 centroidsGPU = findInitPointRand(XGPU, KGPU);
-[centroidsGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
+[centroidsGPU(:), YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
 
 centroidsMinGPU = centroidsGPU;
 errorMinGPU = errorTmpGPU;
 YMinGPU = YTmpGPU;
-while timeTrain < mTrain
+while timeTrain < mTrainao
     indexVecRand = randperm(m, K);
     centroidsGPU(:) = XGPU(indexVecRand, :);
     [centroidsTmpGPU, YTmpGPU, errorTmpGPU] = kMeansTrainGPU(XGPU, centroidsGPU, maxIterGPU);
@@ -28,4 +28,4 @@ while timeTrain < mTrain
 end
 fprintf('%d个分类完毕!.\n', KGPU);
 end
-
+a

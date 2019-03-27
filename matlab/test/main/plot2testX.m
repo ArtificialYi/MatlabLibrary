@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_test7base0n_20190327153643.mat'];
+fileName = ['data/', 'data_test7base0n_20190327173621.mat'];
 load(fileName);
 
 mK = size(centroidsOrigin, 1);

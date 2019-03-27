@@ -1,22 +1,22 @@
-function [centroids] = findInitPointRand(XGPU, KGPU)
+function [centroids, KReal] = findInitPointRand(XGPU, KGPU)
 %findPointRand 在X上寻找K个初始点，使用最远距离方案
 
-[m, n] = size(XGPU);
+[~, n] = size(XGPU);
 
 centroids = gpuArray.zeros(KGPU, n);
-indexTmp = ceil(rand()*m);
-
-centroids(1, :) = XGPU(indexTmp, :);
 
 for i=1:KGPU
-    [pointTmp, findSuccess] = findFarPoint(XGPU, centroids(1:i-1, :));
-    if ~findSuccess 
-        iTmp = i-1;
-        iTmp(iTmp<1)=1;
-        centroids = centroids(1:iTmp, :);
+    m = size(XGPU, 1);
+    if m < 1
+        KReal = i - 1;
+        centroids = centroids(1:KReal, :);
         break;
     end
-    centroids(i, :) = pointTmp;
+    % 从现有的XGPU中随机取出一行
+    indexTmp = ceil(rand()*m);
+    centroids(i, :) = XGPU(indexTmp, :);
+    % 移除已经成为中心点的点
+    XGPU(all(XGPU==centroids(i, :),2), :) = [];
 end
 
 end
