@@ -185,8 +185,8 @@ if isTrain
     lMinReal = lMinRealVec(indexMinEnd);
     sMinReal = sMinRealVec(indexMinEnd);
     
-    CMin = CMinMatrix3(iMin, jMin, kMin);
-    errorMin = errorMinMatrix3(iMin, jMin, kMin);
+    CMin = CMinMatrix3(indexIMin(indexMinEnd), indexJMin(indexMinEnd), indexKMin(indexMinEnd));
+    errorMin = errorMinMatrix3(indexIMin(indexMinEnd), indexJMin(indexMinEnd), indexKMin(indexMinEnd));
 end
 
 %% 变量存储
