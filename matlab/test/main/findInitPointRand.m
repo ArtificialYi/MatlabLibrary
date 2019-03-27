@@ -4,6 +4,7 @@ function [centroids] = findInitPointRand(X, K)
 [m, n] = size(X);
 
 centroids = gpuArray.zeros(K, n);
+indexVec = gpuArray.zeros();
 indexTmp = ceil(rand()*m);
 
 centroids(1, :) = X(indexTmp, :);
