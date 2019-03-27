@@ -17,14 +17,14 @@ realSplitVecGPU = gpuArray.zeros(realSplitGPU, 1);
 
 for i=1:realSplitGPU
     currentIndexGPU = floor(m * i / realSplitGPU); 
-    KTmpGPU = min(currentIndexGPU, KGPU)
+    KTmpGPU = min(currentIndexGPU, KGPU);
     
     fprintf('学习曲线-%d:%d-%d\n', realSplitGPU, i, currentIndexGPU);
     XTmpGPU = XTrainGPU(1:currentIndexGPU, :);
     
-    [centroidsTrainGPU, ~, errorTrainGPU] = kMeansTrainRandGPU(XTmpGPU, KTmpGPU, maxIterGPU)
+    [centroidsTrainGPU, ~, errorTrainGPU] = kMeansTrainRandGPU(XTmpGPU, KTmpGPU, maxIterGPU);
     
-    [~, ~, errorValGPU] = kMeansTrainGPU(XValGPU, centroidsTrainGPU, 1)
+    [~, ~, errorValGPU] = kMeansTrainGPU(XValGPU, centroidsTrainGPU, 1);
     
     realSplitVecGPU(i) = currentIndexGPU;
     errorTrainGPU(i) = errorTrainGPU;
