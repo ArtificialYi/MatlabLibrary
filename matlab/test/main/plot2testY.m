@@ -3,7 +3,8 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-load data/data_testLogisticReg0_20190328205822.mat;
+fileName = ['data/', 'data_testLogisticReg0_20190328210451.mat'];
+load(fileName);
 
 posFlag = 1;
 negFlag = 0;

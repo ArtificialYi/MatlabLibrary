@@ -6,7 +6,7 @@ data = load('resource/ex2data1.txt');
 XOrigin = data(:, 1:2);
 YOrigin = data(:, 3);
 
-m = size(XOrigin, 1);
+[m, n] = size(XOrigin);
 
 trainPoint = 0.7;
 valPoint = 0.3;
@@ -37,13 +37,31 @@ vecX2 = linspace(minX2, maxX2, splitTrain)';
 vecX1Repeat = repeatMatrix(vecX1, splitTrain);
 vecX2Multi = multiMatrix(vecX2, splitTrain);
 
+%% GPU数据准备
+% pca
+XOriginNormGPU = gpuArray(XOriginNorm);
+XTrainNormGPU = gpuArray(XTrainNorm);
+XValNormGPU = gpuArray(XValNorm);
+nGPU = gpuArray(n);
+
+%% pca提取
+[UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
+
+XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, nGPU);
+XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, nGPU);
+XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, nGPU);
+
+XOriginNormPca = gather(XOriginNormPcaGPU);
+XTrainNormPca = gather(XTrainNormPcaGPU);
+XValNormPca = gather(XValNormPcaGPU);
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testLogisticReg0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'YOrigin', 'YTrain', 'YVal', 'YTest', ...
-    'vecX1', 'vecX2');
+    'XOriginNormPca', 'XTrainNormPca', 'XValNormPca', 'vecX1', 'vecX2');
 fprintf('保存完毕\n');
 end
 
