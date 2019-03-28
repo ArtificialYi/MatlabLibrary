@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190328210451.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190328213050.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -44,6 +44,34 @@ hold on;
 plot(XVal(negVal, 1), XVal(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
 title('交叉验证集图');
 fprintf('交叉验证集图\n');
+hold off;
+
+%% 画出pca图像
+% 原始数据图
+figure(4);
+plot(XOriginNormPca(posOrigin, 1), XOriginNormPca(posOrigin, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
+hold on;
+plot(XOriginNormPca(negOrigin, 1), XOriginNormPca(negOrigin, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+title('PCA-原始数据图');
+fprintf('PCA-原始数据图\n');
+hold off;
+
+%% 训练集图
+figure(5);
+plot(XTrainNormPca(posTrain, 1), XTrainNormPca(posTrain, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
+hold on;
+plot(XTrainNormPca(negTrain, 1), XTrainNormPca(negTrain, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+title('PCA-训练集图');
+fprintf('PCA-训练集图\n');
+hold off;
+
+%% 交叉验证集图
+figure(6);
+plot(XValNormPca(posVal, 1), XValNormPca(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', 7);
+hold on;
+plot(XValNormPca(negVal, 1), XValNormPca(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+title('PCA-交叉验证集图');
+fprintf('PCA-交叉验证集图\n');
 hold off;
 
 %% 在各个图上画分割结果

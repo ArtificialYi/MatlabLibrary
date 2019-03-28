@@ -55,6 +55,8 @@ XOriginNormPca = gather(XOriginNormPcaGPU);
 XTrainNormPca = gather(XTrainNormPcaGPU);
 XValNormPca = gather(XValNormPcaGPU);
 
+%% 基础训练模型
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testLogisticReg0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
