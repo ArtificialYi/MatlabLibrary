@@ -3,7 +3,7 @@ function [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
         XValGPU, YValGPU, thetaInitGPU, maxIterGPU, splitGPU)
 %logisticRegLearningCurveGPU 逻辑回归-学习曲线
 
-mGPU = gpuArray(size(X, 1));
+mGPU = gpuArray(size(XTrainGPU, 1));
 
 realSplitGPU = min(mGPU, splitGPU);
 
