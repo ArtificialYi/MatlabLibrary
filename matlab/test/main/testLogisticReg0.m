@@ -88,19 +88,15 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
-XTestTmpNorm = ...
-    mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
-mTestTmp = size(XTestTmp, 1);
-
-XTestTmpNormGPU = gpuArray(XTestTmpNorm);
-XTestTmpNormRealGPU = [ones(mTestTmp, 1) XTestTmpNormGPU];
+XTestTmpGPU = gpuArray(XTestTmp);
+XTestTmpRealGPU = [ones(mTestTmp, 1) XTestTmpGPU];
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
     logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
 
 % 预测结果
-predYTestTmpGPU = logisticHypothesis(XTestTmpNormRealGPU, thetaOriginGPU);
+predYTestTmpGPU = logisticHypothesis(XTestTmpRealGPU, thetaOriginGPU);
 predYTestTmp = gather(predYTestTmpGPU);
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
