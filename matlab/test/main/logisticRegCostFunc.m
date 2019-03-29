@@ -4,7 +4,8 @@ function [J, grad] = logisticRegCostFunc(X, Y, theta)
 m = size(X, 1);
 
 h = logisticHypothesis(X, theta);
-J = sum(-Y.*log(h) - (1-Y).*log(1-h))/m;
+J = (-Y'.*log(h) - (1-Y').*log(1-h))/m;
 grad = (h-Y)'*X/m;
+grad = grad(:);
 end
 

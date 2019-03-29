@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190329201910.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190329203055.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -78,7 +78,7 @@ hold off;
 for i=1:3
     figure(i);
     hold on;
-    contour(vecX1, vecX2, predYTestTmp_2D, [0 0]);
+    contour(vecX1, vecX2, predYTestTmp_2D, [0.5 0.5]);
     hold off;
 end
 
