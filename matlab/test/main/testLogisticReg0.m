@@ -58,9 +58,12 @@ YOriginGPU = gpuArray(YOrigin);
 thetaInitGPU = gpuArray.zeros(n+1, 1);
 maxIterGPU = gpuArray(maxIter);
 XTestTmpNormGPU = gpuArray(XTestTmpNorm);
+XTestTmpNormRealGPU = [ones(size(XTestTmpNormGPU, 1), 1) XTestTmpNormGPU];
 
 % 学习曲线
+XTrainNormRealGPU = gpuArray(XTrainNormGPU);
 YTrainGPU = gpuArray(YTrain);
+XValNormRealGPU = gpuArray(XValNormGPU);
 YValGPU = gpuArray(YVal);
 splitLearningCurveGPU = gpuArray(50);
 
@@ -80,13 +83,13 @@ XValNormPca = gather(XValNormPcaGPU);
     logisticRegTrainGPU(XOriginNormRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
 
 % 预测结果
-predYTestTmpGPU = logisticHypothesis(XTestTmpNormGPU, thetaOriginGPU);
+predYTestTmpGPU = logisticHypothesis(XTestTmpNormRealGPU, thetaOriginGPU);
 predYTestTmp = gather(predYTestTmpGPU);
 predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线
 [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
-    logisticRegLearningCurveGPU(XTrainNormGPU, YTrainGPU, XValNormGPU, YValGPU, ...
+    logisticRegLearningCurveGPU(XTrainNormRealGPU, YTrainGPU, XValNormRealGPU, YValGPU, ...
         thetaInitGPU, maxIterGPU, splitLearningCurveGPU);
 
 % 画图
