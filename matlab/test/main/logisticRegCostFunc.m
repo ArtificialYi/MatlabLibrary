@@ -5,7 +5,6 @@ m = size(X, 1);
 
 h = logisticHypothesis(X, theta);
 J = (-Y'.*log(h) - (1-Y').*log(1-h))/m;
-grad = (h-Y)'*X/m;
-grad = grad(:);
+grad = X'*(h-Y)/m;
 end
 

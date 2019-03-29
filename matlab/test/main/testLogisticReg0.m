@@ -88,7 +88,7 @@ XTrainNormPca = gather(XTrainNormPcaGPU);
 XValNormPca = gather(XValNormPcaGPU);
 
 %% 基础训练模型
-[thetaOriginGPU, costOriginGPU] = ...
+[thetaOriginGPU, ~] = ...
     logisticRegTrainGPU(XOriginNormRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
 
 % 预测结果
