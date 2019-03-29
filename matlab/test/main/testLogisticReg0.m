@@ -72,6 +72,8 @@ YValGPU = gpuArray(YVal);
 % 默认参数
 thetaInitGPU = gpuArray.zeros(n+1, 1);
 maxIterGPU = gpuArray(maxIter);
+
+% 学习曲线
 splitLearningCurveGPU = gpuArray(50);
 
 %% pca提取

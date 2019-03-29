@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190328213050.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190329201910.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -83,8 +83,8 @@ for i=1:3
 end
 
 %% 学习曲线
-figure(4);
-plot(realSplitVecLearn, errorTrainLearn, realSplitVecLearn, errorValLearn);
+figure(7);
+plot(realSplitVec, errorTrain, realSplitVec, errorVal);
 title('学习曲线');
 legend('训练集', '交叉验证集');
 xlabel('数量');
