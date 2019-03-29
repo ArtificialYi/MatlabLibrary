@@ -21,6 +21,10 @@ indexVecRand = randperm(m);
 [YTrain, YVal, YTest] = ...
     splitData(YOrigin, indexVecRand, trainPoint, valPoint);
 
+% 获取数据
+mTrain = size(XTrain, 1);
+mVal = size(XVal, 1);
+
 % 归一化数据
 [XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
 XOriginNorm = ...
@@ -44,27 +48,30 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 XTestTmp = [vecX1Repeat vecX2Multi];
 XTestTmpNorm = ...
     mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+mTestTmp = size(XTestTmp, 1);
 
 %% GPU数据准备
-% pca
+% 归一化数据
 XOriginNormGPU = gpuArray(XOriginNorm);
 XTrainNormGPU = gpuArray(XTrainNorm);
 XValNormGPU = gpuArray(XValNorm);
+XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 nGPU = gpuArray(n);
 
-% 基础训练模型
+% 真实数据
 XOriginNormRealGPU = [ones(m, 1) XOriginNormGPU];
+XTrainNormRealGPU = [ones(mTrain, 1) XTrainNormGPU];
+XValNormRealGPU = [ones(mVal, 1) XValNormGPU];
+XTestTmpNormRealGPU = [ones(mTestTmp, 1) XTestTmpNormGPU];
+
+% 结果数据
 YOriginGPU = gpuArray(YOrigin);
+YTrainGPU = gpuArray(YTrain);
+YValGPU = gpuArray(YVal);
+
+% 默认参数
 thetaInitGPU = gpuArray.zeros(n+1, 1);
 maxIterGPU = gpuArray(maxIter);
-XTestTmpNormGPU = gpuArray(XTestTmpNorm);
-XTestTmpNormRealGPU = [ones(size(XTestTmpNormGPU, 1), 1) XTestTmpNormGPU];
-
-% 学习曲线
-XTrainNormRealGPU = gpuArray(XTrainNormGPU);
-YTrainGPU = gpuArray(YTrain);
-XValNormRealGPU = gpuArray(XValNormGPU);
-YValGPU = gpuArray(YVal);
 splitLearningCurveGPU = gpuArray(50);
 
 %% pca提取
