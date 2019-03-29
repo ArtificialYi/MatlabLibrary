@@ -6,7 +6,7 @@ X = gather(XGPU);
 Y = gather(YGPU);
 thetaInit = gather(thetaInitGPU);
 
-options = optimset('GradObj', 'on', 'MaxIter', maxIter);
+options = optimoptions('fminunc', 'Display', 'off', 'MaxIter', maxIter);
 
 func = @(t) logisticRegCostFunc(X, Y, t);
 
