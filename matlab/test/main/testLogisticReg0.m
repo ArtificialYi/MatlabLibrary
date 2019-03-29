@@ -88,6 +88,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 
 % 训练结果预测
 XTestTmp = [vecX1Repeat vecX2Multi];
+mTestTmp = size(XTestTmp, 1);
 XTestTmpGPU = gpuArray(XTestTmp);
 XTestTmpRealGPU = [ones(mTestTmp, 1) XTestTmpGPU];
 
