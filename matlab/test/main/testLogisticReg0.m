@@ -32,37 +32,17 @@ XOriginNorm = ...
 XValNorm = ...
     mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
 
-% 边界线数据准备
-minX1 = min(XOrigin(:,1));
-maxX1 = max(XOrigin(:,1));
-minX2 = min(XOrigin(:,2));
-maxX2 = max(XOrigin(:,2));
-
-splitTrain = 101;
-vecX1 = linspace(minX1, maxX1, splitTrain)';
-vecX2 = linspace(minX2, maxX2, splitTrain)';
-vecX1Repeat = repeatMatrix(vecX1, splitTrain);
-vecX2Multi = multiMatrix(vecX2, splitTrain);
-
-% 训练结果预测
-XTestTmp = [vecX1Repeat vecX2Multi];
-XTestTmpNorm = ...
-    mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
-mTestTmp = size(XTestTmp, 1);
-
 %% GPU数据准备
 % 归一化数据
 XOriginNormGPU = gpuArray(XOriginNorm);
 XTrainNormGPU = gpuArray(XTrainNorm);
 XValNormGPU = gpuArray(XValNorm);
-XTestTmpNormGPU = gpuArray(XTestTmpNorm);
 nGPU = gpuArray(n);
 
 % 真实数据
 XOriginNormRealGPU = [ones(m, 1) XOriginNormGPU];
 XTrainNormRealGPU = [ones(mTrain, 1) XTrainNormGPU];
 XValNormRealGPU = [ones(mVal, 1) XValNormGPU];
-XTestTmpNormRealGPU = [ones(mTestTmp, 1) XTestTmpNormGPU];
 
 % 结果数据
 YOriginGPU = gpuArray(YOrigin);
@@ -79,17 +59,45 @@ splitLearningCurveGPU = gpuArray(50);
 %% pca提取
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
 
+% pca-gpu
 XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, nGPU);
 XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, nGPU);
 XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, nGPU);
 
+% pca-cpu
 XOriginNormPca = gather(XOriginNormPcaGPU);
 XTrainNormPca = gather(XTrainNormPcaGPU);
 XValNormPca = gather(XValNormPcaGPU);
 
+% 真实数据
+XOriginNormPcaRealGPU = [ones(m, 1) XOriginNormPcaGPU];
+XTrainNormPcaRealGPU = [ones(mTrain, 1) XTrainNormPcaGPU];
+XValNormPcaRealGPU = [ones(mVal, 1) XValNormPcaGPU];
+
+% 边界线数据准备
+minX1 = min(XOriginNormPca(:,1));
+maxX1 = max(XOriginNormPca(:,1));
+minX2 = min(XOriginNormPca(:,2));
+maxX2 = max(XOriginNormPca(:,2));
+
+splitTrain = 101;
+vecX1 = linspace(minX1, maxX1, splitTrain)';
+vecX2 = linspace(minX2, maxX2, splitTrain)';
+vecX1Repeat = repeatMatrix(vecX1, splitTrain);
+vecX2Multi = multiMatrix(vecX2, splitTrain);
+
+% 训练结果预测
+XTestTmp = [vecX1Repeat vecX2Multi];
+XTestTmpNorm = ...
+    mapFeatureWithParam(XTestTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+mTestTmp = size(XTestTmp, 1);
+
+XTestTmpNormGPU = gpuArray(XTestTmpNorm);
+XTestTmpNormRealGPU = [ones(mTestTmp, 1) XTestTmpNormGPU];
+
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
-    logisticRegTrainGPU(XOriginNormRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
+    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
 
 % 预测结果
 predYTestTmpGPU = logisticHypothesis(XTestTmpNormRealGPU, thetaOriginGPU);
@@ -98,7 +106,7 @@ predYTestTmp_2D = reshape(predYTestTmp, splitTrain, splitTrain);
 
 %% 学习曲线
 [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
-    logisticRegLearningCurveGPU(XTrainNormRealGPU, YTrainGPU, XValNormRealGPU, YValGPU, ...
+    logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
         thetaInitGPU, maxIterGPU, splitLearningCurveGPU);
 
 % 画图
@@ -111,7 +119,8 @@ realSplitVec = gather(realSplitVecGPU);
 fileName = sprintf('data/data_testLogisticReg0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
-    'XOrigin', 'XTrain', 'XVal', 'YOrigin', 'YTrain', 'YVal', 'YTest', ...
+    'XOrigin', 'XTrain', 'XVal', 'XTest', ...
+    'YOrigin', 'YTrain', 'YVal', 'YTest', ...
     'XOriginNormPca', 'XTrainNormPca', 'XValNormPca', ...
     'vecX1', 'vecX2', 'predYTestTmp_2D', 'errorTrain', 'errorVal', 'realSplitVec');
 fprintf('保存完毕\n');
