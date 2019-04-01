@@ -10,5 +10,6 @@ showHy(m, 'm');
 showHy(h, 'h');
 showHy(J, 'J');
 showHy(grad, 'grad');
+pause;
 end
 
