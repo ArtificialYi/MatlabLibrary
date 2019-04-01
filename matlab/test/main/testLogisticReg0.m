@@ -123,7 +123,7 @@ mDataTmp = size(XDataTmp, 1);
 XDataTmpNorm = data2normFunc(XDataTmp);
 XDataTmpNormGPU = gpuArray(XDataTmpNorm);
 XDataTmpNormPcaGPU = data2pca(XDataTmpNormGPU, UTrainGPU, nGPU);
-XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU dataExtra];
+XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
