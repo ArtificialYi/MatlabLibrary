@@ -102,8 +102,9 @@ vecX2MultiPca = multiMatrix(vecX2Pca, splitTrain);
 % pca-训练结果预测
 XTestTmpPca = [vecX1RepeatPca vecX2MultiPca];
 mTestTmpPca = size(XTestTmpPca, 1);
+dataExtra = gpuArray.zeros(mTestTmpPca, n-2);
 XTestTmpPcaGPU = gpuArray(XTestTmpPca);
-XTestTmpPcaRealGPU = [ones(mTestTmpPca, 1) XTestTmpPcaGPU];
+XTestTmpPcaRealGPU = [ones(mTestTmpPca, 1) XTestTmpPcaGPU dataExtra];
 
 % data
 minX1 = min(XOrigin(:,1));
@@ -122,13 +123,14 @@ mDataTmp = size(XDataTmp, 1);
 XDataTmpNorm = data2normFunc(XDataTmp);
 XDataTmpNormGPU = gpuArray(XDataTmpNorm);
 XDataTmpNormPcaGPU = data2pca(XDataTmpNormGPU, UTrainGPU, nGPU);
-XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
+XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU dataExtra];
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
     logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU, predGPU);
 
 % pca预测-预测结果
+
 predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU, predGPU);
 predYPcaTmp = gather(predYPcaTmpGPU);
 predYPcaTmp_2D = reshape(predYPcaTmp, splitTrain, splitTrain);
