@@ -12,7 +12,7 @@ switch classX
                 fprintf('%s:%d, %d\n', str, size(X));
         end
     otherwise
-        printf('%s:未知对象\n', str);
+        fprintf('%s:未知对象\n', str);
 end
 
 end
