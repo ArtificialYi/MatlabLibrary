@@ -10,7 +10,7 @@ data = load('resource/ex2data1.txt');
 XOrigin = data(:, 1:2);
 YOrigin = data(:, 3);
 
-m = size(XOrigin);
+m = size(XOrigin, 1);
 
 trainPoint = 0.7;
 valPoint = 0.3;
