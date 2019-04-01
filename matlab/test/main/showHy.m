@@ -3,6 +3,10 @@ function [classX] = showHy(X, str)
 
 classX = class(X);
 
+if classX == 'gpuArray'
+    classX = class(gather(X));
+end
+
 switch classX
     case 'double'
         switch length(X)
