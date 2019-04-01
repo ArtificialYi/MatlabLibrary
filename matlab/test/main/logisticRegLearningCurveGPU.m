@@ -22,8 +22,8 @@ for i=1:realSplitGPU
     errorTrainGPU(i) = logisticRegCostFunc(XTrainTmpGPU, YTrainTmpGPU, thetaTmpGPU);
     
     showHy(XValGPU, 'XValGPU');
-    showHy(XValGPU, 'YValGPU');
-    showHy(XValGPU, 'thetaTmpGPU');
+    showHy(YValGPU, 'YValGPU');
+    showHy(thetaTmpGPU, 'thetaTmpGPU');
     errorValGPU(i) = logisticRegCostFunc(XValGPU, YValGPU, thetaTmpGPU);
     showHy(i, 'i');
     showHy(errorValGPU(i), 'errorValGPU(i)');

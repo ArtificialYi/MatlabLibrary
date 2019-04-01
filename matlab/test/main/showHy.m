@@ -16,7 +16,7 @@ switch classX
                 fprintf('%s:%d, %d\n', str, size(X));
         end
     otherwise
-        fprintf('%s:未知对象\n', str);
+        fprintf('%s:未知对象:%s\n', str, classX);
 end
 
 end
