@@ -6,10 +6,21 @@ h = logisticHypothesis(X, theta);
 J = (-Y'*log(h) - (1-Y')*log(1-h))/m;
 grad = X'*(h-Y)/m;
 
-showHy(m, 'm');
-showHy(h, 'h');
-showHy(J, 'J');
-showHy(grad, 'grad');
-pause;
+if isnan(J)
+    disp(X);
+    disp(Y);
+    disp(theta);
+    disp(h);
+    
+    showHy(X, 'X');
+    showHy(Y, 'Y');
+    showHy(theta, 'theta');
+    showHy(m, 'm');
+    showHy(h, 'h');
+    showHy(J, 'J');
+    showHy(grad, 'grad');
+    pause;
+end
+
 end
 
