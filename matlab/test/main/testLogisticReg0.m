@@ -13,6 +13,7 @@ YOrigin = data(:, 3);
 
 trainPoint = 0.7;
 valPoint = 0.3;
+pred = 1e-100;
 
 % 切成训练集、交叉验证集、测试集
 indexVecRand = randperm(m);
@@ -38,6 +39,7 @@ XOriginNormGPU = gpuArray(XOriginNorm);
 XTrainNormGPU = gpuArray(XTrainNorm);
 XValNormGPU = gpuArray(XValNorm);
 nGPU = gpuArray(n);
+predGPU = gpuArray(pred);
 
 % 真实数据
 XOriginNormRealGPU = [ones(m, 1) XOriginNormGPU];
@@ -115,22 +117,22 @@ XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
-    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU);
+    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU, predGPU);
 
 % pca预测-预测结果
-predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU);
+predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU, predGPU);
 predYPcaTmp = gather(predYPcaTmpGPU);
 predYPcaTmp_2D = reshape(predYPcaTmp, splitTrain, splitTrain);
 
 % pca2data预测
-predYDataTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaOriginGPU);
+predYDataTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaOriginGPU, predGPU);
 predYDataTmp = gather(predYDataTmpGPU);
 predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 
 %% 学习曲线
 [errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
-        thetaInitGPU, maxIterGPU, splitLearningCurveGPU);
+        thetaInitGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
 
 % 画图
 errorTrain = gather(errorTrainGPU);

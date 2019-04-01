@@ -1,8 +1,7 @@
-function [J, grad] = logisticRegCostFunc(X, Y, theta)
+function [J, grad] = logisticRegCostFunc(X, Y, theta, pred)
 %logisticCostFunc 逻辑回归的代价函数
 
 m = size(X, 1);
-pred = 1e-100;
 
 h = logisticHypothesis(X, theta, pred);
 

@@ -3,7 +3,7 @@ function [h] = logisticHypothesis(X, theta, pred)
 
 hUnit = 1 ./ (exp(-X*theta)+1);
 
-h = hUnit - 2*pred*hUnit + pred;
+h = (1-2*pred)*hUnit + pred;
 
 end
 
