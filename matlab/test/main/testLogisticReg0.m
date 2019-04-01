@@ -1,15 +1,16 @@
-function [logisticRes] = testLogisticReg0(maxIter)
+function [logisticRes] = testLogisticReg0(p, maxIter)
 %testLogisticReg0 逻辑回归测试函数
 
 %% str2double
 maxIter = str2double(maxIter);
+p = str2double(p);
 
 %% 读取数据
 data = load('resource/ex2data1.txt');
 XOrigin = data(:, 1:2);
 YOrigin = data(:, 3);
 
-[m, n] = size(XOrigin);
+m = size(XOrigin);
 
 trainPoint = 0.7;
 valPoint = 0.3;
@@ -27,11 +28,10 @@ mTrain = size(XTrain, 1);
 mVal = size(XVal, 1);
 
 % 归一化数据
-[XTrainNorm, mu, sigma, noneIndex] = featureNormalize(XTrain);
-XOriginNorm = ...
-    mapFeatureWithParam(XOrigin, 1, noneIndex, 1:length(noneIndex), mu, sigma);
-XValNorm = ...
-    mapFeatureWithParam(XVal, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+[XTrainNorm, data2normFunc] = data2featureWithNormalize(XTrain, p);
+n = size(XTrainNorm, 2);
+XOriginNorm = data2normFunc(XOrigin);
+XValNorm = data2normFunc(XVal);
 
 %% GPU数据准备
 % 归一化数据
@@ -76,6 +76,16 @@ XOriginNormPcaRealGPU = [ones(m, 1) XOriginNormPcaGPU];
 XTrainNormPcaRealGPU = [ones(mTrain, 1) XTrainNormPcaGPU];
 XValNormPcaRealGPU = [ones(mVal, 1) XValNormPcaGPU];
 
+% pcaVec
+pcaVecGPU = diag(STrainGPU);
+pcaSumVecGPU = pcaVecGPU;
+for i=2:length(pcaSumVecGPU)
+    pcaSumVecGPU(i) = pcaSumVecGPU(i-1)+pcaVecGPU(i);
+end
+
+pcaVec = gather(pcaVecGPU);
+pcaSumVec = gather(pcaSumVecGPU);
+
 %% 边界线数据准备
 splitTrain = 101;
 % pca
@@ -109,8 +119,7 @@ vecX2Multi = multiMatrix(vecX2, splitTrain);
 % data结果预测
 XDataTmp = [vecX1Repeat vecX2Multi];
 mDataTmp = size(XDataTmp, 1);
-XDataTmpNorm = ...
-    mapFeatureWithParam(XDataTmp, 1, noneIndex, 1:length(noneIndex), mu, sigma);
+XDataTmpNorm = data2normFunc(XDataTmp);
 XDataTmpNormGPU = gpuArray(XDataTmpNorm);
 XDataTmpNormPcaGPU = data2pca(XDataTmpNormGPU, UTrainGPU, nGPU);
 XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
@@ -138,7 +147,8 @@ predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 errorTrain = gather(errorTrainGPU);
 errorVal = gather(errorValGPU);
 realSplitVec = gather(realSplitVecGPU);
-    
+
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testLogisticReg0_%s.mat', datestr(now, 'yyyymmddHHMMss'));
@@ -147,6 +157,7 @@ save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', 'YTest', ...
     'XOriginNormPca', 'XTrainNormPca', 'XValNormPca', ...
+    'pcaVec', 'pcaSumVec', ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
     'errorTrain', 'errorVal', 'realSplitVec');

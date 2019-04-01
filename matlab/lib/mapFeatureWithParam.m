@@ -1,17 +1,24 @@
-function normPolyX = ...
-    mapFeatureWithParam(X, p, noneIndexOrigin, noneIndexNorm, mu, sigma)
+function XNormPolyNorm = ...
+    mapFeatureWithParam(X, p, ...
+    muNorm, sigmaNorm, indexNorm, ...
+    muPoly, sigmaPoly, indexPoly)
 %mapFeatureWithParam 将数据多项式扩充&标准化
 % X 待处理数据
 % p 多项式次数
-% noneIndexOrigin 扩充前非常量索引
-% noneIndexNorm 扩充后非常量索引
-% mu 扩充后均值
-% sigma 扩充后标准差
+% muNorm, sigmaNorm, indexNorm 第一次归一化所需参数
+% muPoly, sigmaPoly, indexPoly 第二次归一化所需参数
+
+% 清除常量&减去平均值
+XMu = bsxfun(@minus, X(:, indexNorm), muNorm);
+% 除去标准差
+XNorm = bsxfun(@rdivide, XMu, sigmaNorm);
 
 % 清除常量&扩充多项式
-polyX = mapFeature2polynomial(X(:, noneIndexOrigin), p);
+XNormPoly = mapFeature2polynomial(XNorm, p);
+
 % 清除常量&减去平均值
-muPolyX = bsxfun(@minus, polyX(:, noneIndexNorm), mu);
+XNormPolyMu = bsxfun(@minus, XNormPoly(:, indexPoly), muPoly);
 % 除去标准差
-normPolyX = bsxfun(@rdivide, muPolyX, sigma);
+XNormPolyNorm = bsxfun(@rdivide, XNormPolyMu, sigmaPoly);
+
 end
