@@ -5,10 +5,11 @@ maxIter = gather(maxIterGPU);
 X = gather(XGPU);
 Y = gather(YGPU);
 thetaInit = gather(thetaInitGPU);
+pred = gather(predGPU);
 
 options = optimoptions('fminunc', 'Display', 'off', 'MaxIter', maxIter);
 
-func = @(t) logisticRegCostFunc(X, Y, t, predGPU);
+func = @(t) logisticRegCostFunc(X, Y, t, pred);
 
 [thetaGPU, costGPU, exitFlag] = fminunc(func, thetaInit, options);
 
