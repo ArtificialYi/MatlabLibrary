@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190329221954.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190330035434.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -74,11 +74,17 @@ title('PCA-交叉验证集图');
 fprintf('PCA-交叉验证集图\n');
 hold off;
 
-%% 在各个图上画分割结果
+%% 在原始数据图上画分割结果
+for i=1:3
+    figure(i);
+    hold on;
+    contour(vecX1, vecX2, predYDataTmp_2D, [0.5 0.5]);
+    hold off;
+end
 for i=4:6
     figure(i);
     hold on;
-    contour(vecX1, vecX2, predYTestTmp_2D, [0.5 0.5]);
+    contour(vecX1Pca, vecX2Pca, predYPcaTmp_2D, [0.5 0.5]);
     hold off;
 end
 
