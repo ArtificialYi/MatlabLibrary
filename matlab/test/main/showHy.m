@@ -1,11 +1,7 @@
 function [classX] = showHy(X, str)
 %showHy 将一个数据渲染出来
 
-classX = class(X);
-
-if classX == 'gpuArray'
-    classX = class(gather(X));
-end
+classX = class(gather(X));
 
 switch classX
     case 'double'
