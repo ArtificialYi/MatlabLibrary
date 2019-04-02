@@ -1,9 +1,10 @@
-function [logisticRes] = testLogisticReg0(p, maxIter)
+function [logisticRes] = testLogisticReg0(p, lambda, maxIter)
 %testLogisticReg0 逻辑回归测试函数
 
 %% str2double
 maxIter = str2double(maxIter);
 p = str2double(p);
+lambda = str2double(lambda);
 
 %% 读取数据
 data = load('resource/ex2data1.txt');
@@ -53,6 +54,7 @@ YValGPU = gpuArray(YVal);
 
 % 默认参数
 thetaInitGPU = gpuArray.zeros(n+1, 1);
+lambdaGPU = gpuArray(lambda);
 maxIterGPU = gpuArray(maxIter);
 
 % 学习曲线
@@ -128,10 +130,9 @@ XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
-    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, maxIterGPU, predGPU);
+    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
 
 % pca预测-预测结果
-
 predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU, predGPU);
 predYPcaTmp = gather(predYPcaTmpGPU);
 predYPcaTmp_2D = reshape(predYPcaTmp, splitTrain, splitTrain);
@@ -144,7 +145,7 @@ predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 %% 学习曲线
 [errorTrainGPU, errorValGPU, realSplitVecGPU, thetaMatrixGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
-        thetaInitGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
+        thetaInitGPU, lambdaGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
 % 学习曲线的结果
 predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixGPU, predGPU);
 predYLearnDataTmp = gather(predYLearnTmpGPU);

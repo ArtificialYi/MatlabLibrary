@@ -1,15 +1,17 @@
-function [thetaGPU, costGPU, exitFlag] = logisticRegTrainGPU(XGPU, YGPU, thetaInitGPU, maxIterGPU, predGPU)
+function [thetaGPU, costGPU, exitFlag] = ...
+    logisticRegTrainGPU(XGPU, YGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU)
 %logisticRegTrainGPU 逻辑回归训练函数
 
 maxIter = gather(maxIterGPU);
 X = gather(XGPU);
 Y = gather(YGPU);
 thetaInit = gather(thetaInitGPU);
+lambda = gather(lambdaGPU);
 pred = gather(predGPU);
 
 options = optimoptions('fminunc', 'Display', 'off', 'MaxIter', maxIter);
 
-func = @(t) logisticRegCostFunc(X, Y, t, pred);
+func = @(t) logisticRegCostFunc(X, Y, t, lambda, pred);
 
 [thetaGPU, costGPU, exitFlag] = fminunc(func, thetaInit, options);
 
