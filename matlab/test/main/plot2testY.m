@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190402211903.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190402215100.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -140,6 +140,5 @@ for i=1:50
 end
 
 %% 最优化
-
 figure(3)
 plot(1:10, pErrorVec);

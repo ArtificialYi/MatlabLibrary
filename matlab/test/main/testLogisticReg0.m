@@ -213,6 +213,7 @@ pErrorVec = gather(pErrorVecGPU);
 % 最优解-CPU
 lambdaMin = gather(lambdaMinGPU);
 errorMin = gather(errorMinGPU);
+pMinGPU = pVec(gather(indexMinGPU));
 
 %% save
 % 获取文件名
