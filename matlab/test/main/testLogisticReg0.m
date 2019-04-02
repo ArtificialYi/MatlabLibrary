@@ -160,8 +160,7 @@ realSplitLearnVec = gather(realSplitLearnVecGPU);
 thetaMatrixLearn = gather(thetaMatrixLearnGPU);
 
 %% 最优化
-pMax = 1;
-pVec = 1:pMax;
+pVec = pLeft:pRight;
 predLambdaGPU = gpuArray(1e-3);
 
 pErrorVecGPU = gpuArray(pVec);
