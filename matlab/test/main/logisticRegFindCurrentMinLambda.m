@@ -21,7 +21,7 @@ while lambdaRightCurrentGPU - lambdaLeftCurrentGPU > predLambdaGPU
     indexCurrentGPU = indexCurrentGPU(1);
     
     [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
-        getLeftAndRightIndex(indexCurrentGPU, 1, lengt(lambdaVecCurrentGPU));
+        getLeftAndRightIndex(indexCurrentGPU, 1, length(lambdaVecCurrentGPU));
     lambdaLeftCurrentGPU = lambdaVecCurrentGPU(indexCurrentLeftTmpGPU);
     lambdaRightCurrentGPU = lambdaVecCurrentGPU(indexCurrentRightTmpGPU);
     
