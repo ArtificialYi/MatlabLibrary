@@ -168,38 +168,32 @@ pLambdaVecGPU = gpuArray(pVec);
 
 for i=1:length(pVec)
     fprintf('开始多项式最优化:%d\n', pVec(i));
-    fprintf('多项式&归一化数据\n');
     % 多项式&归一化数据
     [XTrainNormTmp, data2normFunc] = data2featureWithNormalize(XTrain, pVec(i));
     nTmp = size(XTrainNormTmp, 2);
     XValNormTmp = data2normFunc(XVal);
     
-    fprintf('转GPU\n');
     % 转GPU
     XTrainNormTmpGPU = gpuArray(XTrainNormTmp);
     XValNormTmpGPU = gpuArray(XValNormTmp);
     nTmpGPU = gpuArray(nTmp);
     
-    fprintf('pca化\n');
     % pca化
     [UTrainTmpGPU, ~] = pcaTrainGPU(XTrainNormTmpGPU);
     XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, nTmpGPU);
     XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, nTmpGPU);
     
-    fprintf('添加常量数据\n');
     % 添加常量数据
     XTrainNormTmpPcaRealGPU = [ones(mTrain, 1) XTrainNormTmpPcaGPU];
     XValNormTmpPcaRealGPU = [ones(mVal, 1) XValNormTmpPcaGPU];
     thetaInitTmpGPU = gpuArray.zeros(nTmpGPU+1, 1);
     
-    fprintf('开始计算\n');
     % 开始计算
     [lambdaCurrentGPU, errorCurrentGPU] = ...
         logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
         XValNormTmpPcaRealGPU, YValGPU, ...
         thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
     
-    fprintf('储存结果\n');
     % 储存结果
     pLambdaVecGPU(i) = lambdaCurrentGPU;
     pErrorVecGPU(i) = errorCurrentGPU;
