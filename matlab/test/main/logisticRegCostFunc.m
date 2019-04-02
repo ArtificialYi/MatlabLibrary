@@ -8,11 +8,11 @@ function [J, grad] = logisticRegCostFunc(X, Y, theta, lambda, pred)
 
 m = size(X, 1);
 
+lambdaVec = theta * lambda;
+lambdaVec(1) = 0;
+
 h = logisticHypothesis(X, theta, pred);
-
-thetaNone = theta(2:end);
-
-J = (-Y'*log(h) - (1-Y')*log(1-h) + thetaNone'*thetaNone*lambda/2)/m;
-grad = (X'*(h-Y) + thetaNone*lambda)*(1-2*pred)/m;
+J = (-Y'*log(h) - (1-Y')*log(1-h) + theta'*lambdaVec/2)/m;
+grad = (X'*(h-Y) + lambdaVec)*(1-2*pred)/m;
 end
 
