@@ -3,11 +3,12 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190402215432.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190402225345.mat'];
 load(fileName);
 
 posFlag = 1;
 negFlag = 0;
+high = (posFlag+negFlag)/2;
 
 markSize = 4;
 
@@ -19,73 +20,33 @@ negTrain = find(YTrain == negFlag);
 posVal = find(YVal == posFlag); 
 negVal = find(YVal == negFlag);
 
+%% 
+plotInitFunc = @(paramRowNum, paramOrigin, paramTrain, paramVal, paramStr) ...
+    plotInitY(paramRowNum, markSize, ...
+    paramOrigin, paramTrain, paramVal, paramStr, ...
+    posOrigin, negOrigin, ...
+    posTrain, negTrain, ...
+    posVal, negVal);
+plotInitFunc2 = @(paramRowNum, ...
+    paramOrigin, paramTrain, paramVal, ...
+    paramStr, paramPosTrain, paramNegTrain) ...
+    plotInitY(paramRowNum, markSize, ...
+    paramOrigin, paramTrain, paramVal, paramStr, ...
+    posOrigin, negOrigin, ...
+    paramPosTrain, paramNegTrain, ...
+    posVal, negVal);
+
 %% 画出数据图
 % 画出pca图像
 figure(1);
-
-subplot(3, 3, 1);
-plot(XOriginNormPca(posOrigin, 1), XOriginNormPca(posOrigin, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XOriginNormPca(negOrigin, 1), XOriginNormPca(negOrigin, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('PCA-原始数据图');
-fprintf('PCA-原始数据图\n');
-hold off;
-
-subplot(3, 3, 2);
-plot(XTrainNormPca(posTrain, 1), XTrainNormPca(posTrain, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XTrainNormPca(negTrain, 1), XTrainNormPca(negTrain, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('PCA-训练集图');
-fprintf('PCA-训练集图\n');
-hold off;
-
-subplot(3, 3, 3);
-plot(XValNormPca(posVal, 1), XValNormPca(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XValNormPca(negVal, 1), XValNormPca(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('PCA-交叉验证集图');
-fprintf('PCA-交叉验证集图\n');
-hold off;
-
-% 原始数据图
-subplot(3, 3, 4);
-plot(XOrigin(posOrigin, 1), XOrigin(posOrigin, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XOrigin(negOrigin, 1), XOrigin(negOrigin, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('原始数据图');
-fprintf('原始数据图\n');
-hold off;
-
-subplot(3, 3, 5);
-plot(XTrain(posTrain, 1), XTrain(posTrain, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XTrain(negTrain, 1), XTrain(negTrain, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('训练集图');
-fprintf('训练集图\n');
-hold off;
-
-subplot(3, 3, 6);
-plot(XVal(posVal, 1), XVal(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-hold on;
-plot(XVal(negVal, 1), XVal(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-title('交叉验证集图');
-fprintf('交叉验证集图\n');
-hold off;
-
-%% 在原始数据图上画分割结果
-figure(1)
-for i=1:3
-    subplot(3, 3, i+3);
-    hold on;
-    contour(vecX1, vecX2, predYDataTmp_2D, [0.5 0.5]);
-    hold off;
-end
-for i=1:3
-    subplot(3, 3, i);
-    hold on;
-    contour(vecX1Pca, vecX2Pca, predYPcaTmp_2D, [0.5 0.5]);
-    hold off;
-end
+plotInitFunc(1, XOriginNormPca, XTrainNormPca, XValNormPca, 'PCA');
+plotInitFunc(2, XOrigin, XTrain, XVal, 'origin');
+plotOn(1);
+plotOn(2);
+plotContourY(1, [vecX1Pca vecX2Pca], predYPcaTmp_2D, high);
+plotContourY(2, [vecX1 vecX2], predYDataTmp_2D, high);
+plotOff(1);
+plotOff(2);
 
 %% 学习曲线 & pca曲线
 figure(2);
@@ -106,36 +67,16 @@ ylabel('数据保留率');
 legend('');
 
 %% 学习曲线的所有细节
-figure(1)
+numRow = 3;
 for i=1:50
-    subplot(3, 3, 7);
-    plot(XOrigin(posOrigin, 1), XOrigin(posOrigin, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-    hold on;
-    plot(XOrigin(negOrigin, 1), XOrigin(negOrigin, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-    contour(vecX1, vecX2, predYLearnDataTmp_3D(:, :, i), [0.5 0.5]);
-    title('原始数据图');
-    fprintf('原始数据图\n');
-    hold off;
-    
+    figure(1);
     posTrainLearn = find(YTrain(1:realSplitLearnVec(i)) == posFlag); 
     negTrainLearn = find(YTrain(1:realSplitLearnVec(i)) == negFlag);
-    subplot(3, 3, 8);
-    plot(XTrain(posTrainLearn, 1), XTrain(posTrainLearn, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-    hold on;
-    plot(XTrain(negTrainLearn, 1), XTrain(negTrainLearn, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-    contour(vecX1, vecX2, predYLearnDataTmp_3D(:, :, i), [0.5 0.5]);
-    title('训练集图');
-    fprintf('训练集图\n');
-    hold off;
-    
-    subplot(3, 3, 9);
-    plot(XVal(posVal, 1), XVal(posVal, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
-    hold on;
-    plot(XVal(negVal, 1), XVal(negVal, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', markSize);
-    contour(vecX1, vecX2, predYLearnDataTmp_3D(:, :, i), [0.5 0.5]);
-    title('交叉验证集图');
-    fprintf('交叉验证集图\n');
-    hold off;
+    plotInitFunc2(numRow, XOrigin, XTrain, XVal, '学习曲线', ...
+        posTrainLearn, negTrainLearn);
+    plotOn(numRow);
+    plotContourY(numRow, [vecX1 vecX2], predYLearnDataTmp_3D(:, :, i), high);
+    plotOff(numRow);
     pause(1/60);
 end
 
