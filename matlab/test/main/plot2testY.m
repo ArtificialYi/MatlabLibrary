@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190402183033.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190402192639.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -91,7 +91,7 @@ end
 figure(2);
 
 subplot(2, 2, 1);
-plot(realSplitVec, errorTrain, realSplitVec, errorVal);
+plot(realSplitLearnVec, errorTrainLearn, realSplitLearnVec, errorValLearn);
 title('学习曲线');
 legend('训练集', '交叉验证集');
 xlabel('数量');
@@ -117,8 +117,8 @@ for i=1:50
     fprintf('原始数据图\n');
     hold off;
     
-    posTrainLearn = find(YTrain(1:realSplitVec(i)) == posFlag); 
-    negTrainLearn = find(YTrain(1:realSplitVec(i)) == negFlag);
+    posTrainLearn = find(YTrain(1:realSplitLearnVec(i)) == posFlag); 
+    negTrainLearn = find(YTrain(1:realSplitLearnVec(i)) == negFlag);
     subplot(3, 3, 8);
     plot(XTrain(posTrainLearn, 1), XTrain(posTrainLearn, 2), 'k+','LineWidth', 1, 'MarkerSize', markSize);
     hold on;
@@ -136,9 +136,7 @@ for i=1:50
     title('交叉验证集图');
     fprintf('交叉验证集图\n');
     hold off;
-    pause(0.1);
+    pause(1/60);
 end
 
 %% 最优化
-figure(3)
-plot(linspace(0, 100, 101), errorTrainVec, linspace(0, 100, 101), errorValVec);

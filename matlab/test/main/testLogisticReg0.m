@@ -160,12 +160,38 @@ thetaMatrixLearn = gather(thetaMatrixLearnGPU);
 %% 最优化
 pMax = 1;
 pVec = 1:pMax;
-
 predLambdaGPU = gpuArray(1e-3);
-[lambdaCurrentGPU, errorCurrentGPU] = ...
-    logisticRegFindCurrentMinLambda(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
+
+pErrorVecGPU = gpuArray(pVec);
+pLambdaVecGPU = gpuArray(pVec);
+
+for i=1:length(pVec)
+    % 多项式&归一化数据
+    [XTrainNormTmp, data2normFunc] = data2featureWithNormalize(XTrain, pVec(i));
+    nTmp = size(XTrainNormTmp, 2);
+    XValNormTmp = data2normFunc(XVal);
+    
+    % 转GPU
+    XTrainNormTmpGPU = gpuArray(XTrainNormTmp);
+    XValNormTmpGPU = gpuArray(XValNormTmp);
+    nTmpGPU = gpuArray(nTmp);
+    
+    % pca化
+    [UTrainTmpGPU, ~] = pcaTrainGPU(XTrainNormTmpGPU);
+    XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, nTmpGPU);
+    XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, nTmpGPU);
+    
+    % 开始计算
+    [lambdaCurrentGPU, errorCurrentGPU] = ...
+        logisticRegFindCurrentMinLambda(XTrainNormTmpPcaGPU, YTrainGPU, ...
+        XValNormTmpPcaGPU, YValGPU, ...
         thetaInitGPU, maxIterGPU, predGPU, predLambdaGPU);
     
+    % 储存结果
+    pLambdaVecGPU(i) = lambdaCurrentGPU;
+    pErrorVecGPU(i) = errorCurrentGPU;
+end
+
 lambdaCurrent = gather(lambdaCurrentGPU);
 errorCurrent = gather(errorCurrentGPU);
 
@@ -181,7 +207,7 @@ save(fileName, ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
-    'lambdaCurrent', 'errorCurrent');
+    'pLambdaVecGPU', 'pErrorVecGPU');
 fprintf('保存完毕\n');
 end
 
