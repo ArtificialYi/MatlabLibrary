@@ -12,9 +12,9 @@ pred = gather(predGPU);
 options = optimoptions('fminunc', 'Display', 'off', 'MaxIter', maxIter);
 
 func = @(t) logisticRegCostFunc(X, Y, t, lambda, pred);
-
+fprintf('训练前夕');
 [thetaGPU, costGPU, exitFlag] = fminunc(func, thetaInit, options);
-
+fprintf('训练完毕');
 exitFlag(exitFlag>0) = 1;
 exitFlag(exitFlag<0) = -1;
 

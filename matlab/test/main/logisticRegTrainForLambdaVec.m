@@ -10,6 +10,7 @@ lenLambda = length(lambdaVecGPU);
 
 for i=1:lenLambda
     % 计算不同lambda
+    fprintf('开始训练');
     [thetaTrainGPU, ~] = ...
         logisticRegTrainGPU(XTrainGPU, YTrainGPU, ...
             thetaInitGPU, lambdaVecGPU(i), maxIterGPU, predGPU);

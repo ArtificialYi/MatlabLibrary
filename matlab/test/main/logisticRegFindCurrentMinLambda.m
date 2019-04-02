@@ -13,13 +13,14 @@ lambdaRightCurrentGPU = lambdaVecCurrentGPU(end);
 
 % 再用等差数列做循环
 while lambdaRightCurrentGPU - lambdaLeftCurrentGPU > predLambdaGPU
-    showHy('等差数列里面的循环', '测试循环');
+    fprintf('等差数列里面的循环');
     [~, errorValCurrentTmpGPU] = ...
         logisticRegTrainForLambdaVec(XTrainGPU, YTrainGPU, XValGPU, YValGPU, ...
             thetaInitGPU, lambdaVecCurrentGPU, maxIterGPU, predGPU);
     indexCurrentGPU = indexMinForMulti(errorValCurrentTmpGPU);
     indexCurrentGPU = indexCurrentGPU(1);
     
+    fprintf('最优化训练完毕');
     [indexCurrentLeftTmpGPU, indexCurrentRightTmpGPU] = ...
         getLeftAndRightIndex(indexCurrentGPU, 1, length(lambdaVecCurrentGPU));
     lambdaLeftCurrentGPU = lambdaVecCurrentGPU(indexCurrentLeftTmpGPU);
