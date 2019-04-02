@@ -56,7 +56,8 @@ thetaInitGPU = gpuArray.zeros(n+1, 1);
 maxIterGPU = gpuArray(maxIter);
 
 % 学习曲线
-splitLearningCurveGPU = gpuArray(50);
+splitLearningCurve = 50;
+splitLearningCurveGPU = gpuArray(splitLearningCurve);
 
 %% pca提取
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
@@ -144,6 +145,10 @@ predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 [errorTrainGPU, errorValGPU, realSplitVecGPU, thetaMatrixGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
         thetaInitGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
+% 学习曲线的结果
+predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixGPU, predGPU);
+predYLearnDataTmp = gather(predYLearnTmpGPU);
+predYLearnDataTmp_3D = reshape(predYLearnDataTmp, splitTrain, splitTrain, splitLearningCurve);
 
 % 画图
 errorTrain = gather(errorTrainGPU);
@@ -163,7 +168,7 @@ save(fileName, ...
     'pcaVec', 'pcaSumVec', ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
-    'errorTrain', 'errorVal', 'realSplitVec', 'thetaMatrix');
+    'errorTrain', 'errorVal', 'realSplitVec', 'predYLearnDataTmp_2D');
 fprintf('保存完毕\n');
 end
 
