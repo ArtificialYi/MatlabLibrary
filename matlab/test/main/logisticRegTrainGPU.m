@@ -22,9 +22,9 @@ switch exitFlag
     case 1
         fprintf('收敛成功:%d\n', maxIterGPU);
     case 0
-        fprintf('达到最大收敛次数:%d\n', maxIterGPU);
+        error('达到最大收敛次数:%d\n', maxIterGPU);
     case -1
-        fprintf('无法收敛\n');
+        error('无法收敛\n');
 end
 
 end
