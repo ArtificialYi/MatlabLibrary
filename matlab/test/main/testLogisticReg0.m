@@ -182,11 +182,16 @@ for i=1:length(pVec)
     XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, nTmpGPU);
     XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, nTmpGPU);
     
+    % 添加常量数据
+    XTrainNormTmpPcaRealGPU = [ones(mTrain, 1) XTrainNormTmpPcaGPU];
+    XValNormTmpPcaRealGPU = [ones(mVal, 1) XValNormTmpPcaGPU];
+    thetaInitTmpGPU = gpuArray.zeros(nTmpGPU+1, 1);
+    
     % 开始计算
     [lambdaCurrentGPU, errorCurrentGPU] = ...
-        logisticRegFindCurrentMinLambda(XTrainNormTmpPcaGPU, YTrainGPU, ...
-        XValNormTmpPcaGPU, YValGPU, ...
-        thetaInitGPU, maxIterGPU, predGPU, predLambdaGPU);
+        logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
+        XValNormTmpPcaRealGPU, YValGPU, ...
+        thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
     
     % 储存结果
     pLambdaVecGPU(i) = lambdaCurrentGPU;
