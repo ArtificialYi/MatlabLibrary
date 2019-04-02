@@ -143,33 +143,31 @@ predYDataTmp = gather(predYDataTmpGPU);
 predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 
 %% 学习曲线
-[errorTrainGPU, errorValGPU, realSplitVecGPU, thetaMatrixGPU] = ...
+[errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
         thetaInitGPU, lambdaGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
 % 学习曲线的结果
-predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixGPU, predGPU);
+predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixLearnGPU, predGPU);
 predYLearnDataTmp = gather(predYLearnTmpGPU);
 predYLearnDataTmp_3D = reshape(predYLearnDataTmp, splitTrain, splitTrain, splitLearningCurve);
 
 % 画图
-errorTrain = gather(errorTrainGPU);
-errorVal = gather(errorValGPU);
-realSplitVec = gather(realSplitVecGPU);
-thetaMatrix = gather(thetaMatrixGPU);
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitLearnVec = gather(realSplitLearnVecGPU);
+thetaMatrixLearn = gather(thetaMatrixLearnGPU);
 
 %% 最优化
 pMax = 1;
 pVec = 1:pMax;
-lambdaVec = linspace(0, 100, 101);
 
-lambdaVecGPU = gpuArray(lambdaVec);
-
-[errorTrainVecGPU, errorValVecGPU] = ...
-    logisticRegTrainForLambdaVec(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
-        thetaInitGPU, lambdaVecGPU, maxIterGPU, predGPU);
+predLambdaGPU = gpuArray(1e-3);
+[lambdaCurrentGPU, errorCurrentGPU] = ...
+    logisticRegFindCurrentMinLambda(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
+        thetaInitGPU, maxIterGPU, predGPU, predLambdaGPU);
     
-errorTrainVec = gather(errorTrainVecGPU);
-errorValVec = gather(errorValVecGPU);
+lambdaCurrent = gather(lambdaCurrentGPU);
+errorCurrent = gather(errorCurrentGPU);
 
 %% save
 % 获取文件名
@@ -182,8 +180,8 @@ save(fileName, ...
     'pcaVec', 'pcaSumVec', ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
-    'errorTrain', 'errorVal', 'realSplitVec', 'predYLearnDataTmp_3D', ...
-    'errorTrainVec', 'errorValVec');
+    'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
+    'lambdaCurrent', 'errorCurrent');
 fprintf('保存完毕\n');
 end
 

@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190402171206.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190402183033.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -136,5 +136,9 @@ for i=1:50
     title('交叉验证集图');
     fprintf('交叉验证集图\n');
     hold off;
-    pause;
+    pause(0.1);
 end
+
+%% 最优化
+figure(3)
+plot(linspace(0, 100, 101), errorTrainVec, linspace(0, 100, 101), errorValVec);
