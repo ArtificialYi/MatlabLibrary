@@ -94,41 +94,54 @@ pcaSumVec = gather(pcaSumVecGPU);
 %% 边界线数据准备
 splitTrain = 101;
 % pca
-minX1Pca = min(XOriginNormPca(:,1));
-maxX1Pca = max(XOriginNormPca(:,1));
-minX2Pca = min(XOriginNormPca(:,2));
-maxX2Pca = max(XOriginNormPca(:,2));
+minXPca = min(XOriginNormPca(:, 1:min(end,3)));
+maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
 
-vecX1Pca = linspace(minX1Pca, maxX1Pca, splitTrain)';
-vecX2Pca = linspace(minX2Pca, maxX2Pca, splitTrain)';
-vecX1RepeatPca = repeatMatrix(vecX1Pca, splitTrain);
-vecX2MultiPca = multiMatrix(vecX2Pca, splitTrain);
+lenData = length(minXPca);
+splitTrainVec = zeros(lenData, 1)+splitTrain;
+matrixXPcaGPU = gpuArray.zeros(splitTrain, lenData);
 
-% pca-训练结果预测
-XTestTmpPca = [vecX1RepeatPca vecX2MultiPca];
-mTestTmpPca = size(XTestTmpPca, 1);
-dataExtra = gpuArray.zeros(mTestTmpPca, n-2);
-XTestTmpPcaGPU = gpuArray(XTestTmpPca);
-XTestTmpPcaRealGPU = [ones(mTestTmpPca, 1) XTestTmpPcaGPU dataExtra];
+% 初始化轴向量
+for i=1:lenData
+    matrixXPcaGPU(:, i) = linspace(minXPca(i), maxXPca(i), splitTrain)';
+end
+
+% 初始化结果集
+mTestTmpPca = splitTrain^lenData;
+XTestTmpPcaRealGPU = gpuArray.zeros(mTestTmpPca, n+1);
+XTestTmpPcaRealGPU(:, 1) = 1;
+XTestTmpPcaRealGPU(1:splitTrain, 2) = matrixXPcaGPU(:, 1);
+for i=2:lenData
+    XTestTmpPcaRealGPU(1:splitTrain^i, 2:i+1) = [
+        repeatMatrix(XTestTmpPcaRealGPU(1:splitTrain^(i-1), 2:i), splitTrain) ...
+        multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
+        ];
+end
 
 % data
-minX1 = min(XOrigin(:,1));
-maxX1 = max(XOrigin(:,1));
-minX2 = min(XOrigin(:,2));
-maxX2 = max(XOrigin(:,2));
+minX = min(XOrigin(:, 1:min(end,3)));
+maxX = max(XOrigin(:, 1:min(end,3)));
 
-vecX1 = linspace(minX1, maxX1, splitTrain)';
-vecX2 = linspace(minX2, maxX2, splitTrain)';
-vecX1Repeat = repeatMatrix(vecX1, splitTrain);
-vecX2Multi = multiMatrix(vecX2, splitTrain);
+matrixXGPU = gpuArray.zeros(splitTrain, lenData);
 
-% data结果预测
-XDataTmp = [vecX1Repeat vecX2Multi];
-mDataTmp = size(XDataTmp, 1);
-XDataTmpNorm = data2normFunc(XDataTmp);
-XDataTmpNormGPU = gpuArray(XDataTmpNorm);
-XDataTmpNormPcaGPU = data2pca(XDataTmpNormGPU, UTrainGPU, nGPU);
-XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
+% 初始化轴向量
+for i=1:lenData
+    matrixXGPU(:, i) = linspace(minX(i), maxX(i), splitTrain)';
+end
+
+% 初始化结果集
+mDataTmp = splitTrain^lenData;
+XDataTmpNormPcaRealGPU = gpuArray.zeros(mDataTmp, n+1);
+XDataTmpNormPcaRealGPU(:, 1) = 1;
+XDataTmpNormPcaRealGPU(1:splitTrain, 2) = matrixXGPU(:, 1);
+for i=2:lenData
+    XDataTmpNormPcaRealGPU(1:splitTrain^i, 2:i+1) = [
+        repeatMatrix(XDataTmpNormPcaRealGPU(1:splitTrain^(i-1), 2:i), splitTrain) ...
+        multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
+        ];
+end
+% 转pca
+XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:lenData+1), UTrainGPU, nGPU);
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
@@ -137,12 +150,12 @@ XDataTmpNormPcaRealGPU = [ones(mDataTmp, 1) XDataTmpNormPcaGPU];
 % pca预测-预测结果
 predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU, predGPU);
 predYPcaTmp = gather(predYPcaTmpGPU);
-predYPcaTmp_2D = reshape(predYPcaTmp, splitTrain, splitTrain);
+predYPcaTmp_DMulti = reshape(predYPcaTmp, splitTrainVec);
 
 % pca2data预测
 predYDataTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaOriginGPU, predGPU);
 predYDataTmp = gather(predYDataTmpGPU);
-predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
+predYDataTmp_DMulti = reshape(predYDataTmp, splitTrainVec);
 
 %% 学习曲线
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
@@ -224,8 +237,8 @@ save(fileName, ...
     'YOrigin', 'YTrain', 'YVal', 'YTest', ...
     'XOriginNormPca', 'XTrainNormPca', 'XValNormPca', ...
     'pcaVec', 'pcaSumVec', ...
-    'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
-    'vecX1', 'vecX2', 'predYDataTmp_2D', ...
+    'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_DMulti', ...
+    'vecX1', 'vecX2', 'predYDataTmp_DMulti', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
     'lambdaMin', 'errorMin', 'pMin', 'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');
