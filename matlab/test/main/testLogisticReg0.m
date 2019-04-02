@@ -1,10 +1,12 @@
-function [logisticRes] = testLogisticReg0(p, lambda, maxIter)
+function [logisticRes] = testLogisticReg0(p, lambda, pLeft, pRight, maxIter)
 %testLogisticReg0 逻辑回归测试函数
 
 %% str2double
 maxIter = str2double(maxIter);
 p = str2double(p);
 lambda = str2double(lambda);
+pLeft = str2double(pLeft);
+pRight = str2double(pRight);
 
 %% 读取数据
 data = load('resource/ex2data1.txt');
@@ -192,8 +194,8 @@ for i=1:length(pVec)
     pErrorVecGPU(i) = errorCurrentGPU;
 end
 
-lambdaCurrent = gather(lambdaCurrentGPU);
-errorCurrent = gather(errorCurrentGPU);
+pLambdaVec = gather(pLambdaVecGPU);
+pErrorVec = gather(pErrorVecGPU);
 
 %% save
 % 获取文件名
@@ -207,7 +209,7 @@ save(fileName, ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
-    'pLambdaVecGPU', 'pErrorVecGPU');
+    'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');
 end
 
