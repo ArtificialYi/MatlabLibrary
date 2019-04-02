@@ -17,7 +17,7 @@ fprintf('训练前夕');
 fprintf('训练完毕');
 exitFlag(exitFlag>0) = 1;
 exitFlag(exitFlag<0) = -1;
-
+showHy(exitFlag);
 switch exitFlag
     case 1
         fprintf('收敛成功:%d\n', maxIterGPU);
@@ -26,6 +26,7 @@ switch exitFlag
     case -1
         error('无法收敛\n');
 end
+showHy(exitFlag);
 
 end
 
