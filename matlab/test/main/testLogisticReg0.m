@@ -141,7 +141,7 @@ predYDataTmp = gather(predYDataTmpGPU);
 predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 
 %% 学习曲线
-[errorTrainGPU, errorValGPU, realSplitVecGPU] = ...
+[errorTrainGPU, errorValGPU, realSplitVecGPU, thetaMatrixGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
         thetaInitGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
 
@@ -149,6 +149,7 @@ predYDataTmp_2D = reshape(predYDataTmp, splitTrain, splitTrain);
 errorTrain = gather(errorTrainGPU);
 errorVal = gather(errorValGPU);
 realSplitVec = gather(realSplitVecGPU);
+thetaMatrix = gather(thetaMatrixGPU);
 
 
 %% save
@@ -162,7 +163,7 @@ save(fileName, ...
     'pcaVec', 'pcaSumVec', ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
-    'errorTrain', 'errorVal', 'realSplitVec');
+    'errorTrain', 'errorVal', 'realSplitVec', 'thetaMatrix');
 fprintf('保存完毕\n');
 end
 
