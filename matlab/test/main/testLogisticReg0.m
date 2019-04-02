@@ -157,6 +157,19 @@ errorVal = gather(errorValGPU);
 realSplitVec = gather(realSplitVecGPU);
 thetaMatrix = gather(thetaMatrixGPU);
 
+%% 最优化
+pMax = 1;
+pVec = 1:pMax;
+lambdaVec = linspace(0, 100, 101);
+
+lambdaVecGPU = gpuArray(lambdaVec);
+
+[errorTrainVecGPU, errorValVecGPU] = ...
+    logisticRegTrainForLambdaVec(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
+        thetaInitGPU, lambdaVecGPU, maxIterGPU, predGPU);
+    
+errorTrainVec = gather(errorTrainVecGPU);
+errorValVec = gather(errorValVecGPU);
 
 %% save
 % 获取文件名
@@ -169,7 +182,8 @@ save(fileName, ...
     'pcaVec', 'pcaSumVec', ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
-    'errorTrain', 'errorVal', 'realSplitVec', 'predYLearnDataTmp_3D');
+    'errorTrain', 'errorVal', 'realSplitVec', 'predYLearnDataTmp_3D', ...
+    'errorTrainVec', 'errorValVec');
 fprintf('保存完毕\n');
 end
 

@@ -15,21 +15,17 @@ thetaMatrixGPU = gpuArray.zeros(nGPU, realSplitGPU);
 
 for i=1:realSplitGPU
     currentIndexGPU = floor(mGPU*i/realSplitGPU);
+    realSplitVecGPU(i) = currentIndexGPU;
+    
+    fprintf('学习曲线:%d:%d:%d\n', mGPU, i, realSplitVecGPU(i));
     XTrainTmpGPU = XTrainGPU(1:currentIndexGPU, :);
     YTrainTmpGPU = YTrainGPU(1:currentIndexGPU, :);
     
     thetaTmpGPU = logisticRegTrainGPU(XTrainTmpGPU, YTrainTmpGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
     
     thetaMatrixGPU(:, i) = thetaTmpGPU;
-    realSplitVecGPU(i) = currentIndexGPU;
-    errorTrainGPU(i) = logisticRegCostFunc(XTrainTmpGPU, YTrainTmpGPU, thetaTmpGPU, lambdaGPU, predGPU);
-    
-    showHy(XValGPU, 'XValGPU');
-    showHy(YValGPU, 'YValGPU');
-    showHy(thetaTmpGPU, 'thetaTmpGPU');
-    errorValGPU(i) = logisticRegCostFunc(XValGPU, YValGPU, thetaTmpGPU, lambdaGPU, predGPU);
-    showHy(i, 'i');
-    showHy(errorValGPU(i), 'errorValGPU(i)');
+    errorTrainGPU(i) = logisticRegCostFunc(XTrainTmpGPU, YTrainTmpGPU, thetaTmpGPU, 0, predGPU);
+    errorValGPU(i) = logisticRegCostFunc(XValGPU, YValGPU, thetaTmpGPU, 0, predGPU);
 end
 
 end
