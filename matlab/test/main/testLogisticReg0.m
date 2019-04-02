@@ -14,7 +14,7 @@ m = size(XOrigin, 1);
 
 trainPoint = 0.7;
 valPoint = 0.3;
-pred = 1e-100;
+pred = 1e-16;
 
 % 切成训练集、交叉验证集、测试集
 indexVecRand = randperm(m);

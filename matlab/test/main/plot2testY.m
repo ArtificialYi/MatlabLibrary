@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190401191717.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190401233028.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -96,3 +96,8 @@ legend('训练集', '交叉验证集');
 xlabel('数量');
 ylabel('误差');
 fprintf('学习曲线\n');
+
+%% pca曲线
+figure(8);
+plot(1:length(pcaVec), pcaSumVec/pcaSumVec(end));
+title('pca曲线');
