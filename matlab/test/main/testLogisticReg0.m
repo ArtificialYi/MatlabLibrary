@@ -213,7 +213,7 @@ pErrorVec = gather(pErrorVecGPU);
 % 最优解-CPU
 lambdaMin = gather(lambdaMinGPU);
 errorMin = gather(errorMinGPU);
-pMinGPU = pVec(gather(indexMinGPU));
+pMin = pVec(gather(indexMinGPU));
 
 %% save
 % 获取文件名
@@ -227,7 +227,7 @@ save(fileName, ...
     'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_2D', ...
     'vecX1', 'vecX2', 'predYDataTmp_2D', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
-    'lambdaMin', 'errorMin', 'pLambdaVec', 'pErrorVec');
+    'lambdaMin', 'errorMin', 'pMin', 'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');
 end
 
