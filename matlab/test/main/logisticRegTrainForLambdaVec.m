@@ -9,7 +9,7 @@ errorValVecGPU = lambdaVecGPU;
 lenLambda = length(lambdaVecGPU);
 
 for i=1:lenLambda
-    fprintf('最优化:%d:%d:%d\n', lenLambda, i, lambdaVec(i));
+    fprintf('最优化:%d:%d:%d\n', lenLambda, i, lambdaVecGPU(i));
     % 计算不同lambda
     [thetaTrainGPU, ~] = ...
         logisticRegTrainGPU(XTrainGPU, YTrainGPU, ...
