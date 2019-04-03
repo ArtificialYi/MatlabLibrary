@@ -92,7 +92,7 @@ pcaVec = gather(pcaVecGPU);
 pcaSumVec = gather(pcaSumVecGPU);
 
 %% 边界线数据准备
-splitTrain = 51;
+splitTrain = 101;
 %% pca边界
 minXPca = min(XOriginNormPca(:, 1:min(end,3)));
 maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
@@ -108,8 +108,7 @@ end
 
 % 初始化结果集
 mTestTmpPca = splitTrain^lenDataPca;
-XTestTmpPcaRealGPU = gpuArray.zeros(mTestTmpPca, n+1);
-XTestTmpPcaRealGPU(:, 1) = 1;
+XTestTmpPcaRealGPU = gpuArray.ones(mTestTmpPca, n+1);
 XTestTmpPcaRealGPU(1:splitTrain, 2) = matrixXPcaGPU(:, 1);
 for i=2:lenDataPca
     XTestTmpPcaRealGPU(1:splitTrain^i, 2:i+1) = [
@@ -134,13 +133,12 @@ end
 
 % 初始化结果集
 mDataTmp = splitTrain^lenData;
-XDataTmpNormPcaRealGPU = gpuArray.zeros(mDataTmp, n+1);
-XDataTmpNormPcaRealGPU(:, 1) = 1;
+XDataTmpNormPcaRealGPU = gpuArray.ones(mDataTmp, n+1);
 XDataTmpNormPcaRealGPU(1:splitTrain, 2) = matrixXGPU(:, 1);
 for i=2:lenData
     XDataTmpNormPcaRealGPU(1:splitTrain^i, 2:i+1) = [
         repeatMatrix(XDataTmpNormPcaRealGPU(1:splitTrain^(i-1), 2:i), splitTrain) ...
-        multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
+        multiMatrix(matrixXGPU(:,i), splitTrain^(i-1)) ...
     ];
 end
 % 多项式&特征归一
