@@ -146,10 +146,6 @@ end
 XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpNormPcaRealGPU(:, 2:lenData+1));
 
 % 转pca
-showHy(lenData, 'lenData');
-showHy(XDataTmpNormPcaRealGPU, 'XDataTmpNormPcaRealGPU');
-showHy(UTrainGPU, 'UTrainGPU');
-showHy(nGPU, 'nGPU');
 XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTrainGPU, nGPU);
 
 %% 基础训练模型
