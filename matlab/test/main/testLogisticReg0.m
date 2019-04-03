@@ -140,9 +140,13 @@ for i=2:lenData
     XDataTmpNormPcaRealGPU(1:splitTrain^i, 2:i+1) = [
         repeatMatrix(XDataTmpNormPcaRealGPU(1:splitTrain^(i-1), 2:i), splitTrain) ...
         multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
-        ];
+    ];
 end
 % 转pca
+showHy(lenData, 'lenData');
+showHy(XDataTmpNormPcaRealGPU, 'XDataTmpNormPcaRealGPU');
+showHy(UTrainGPU, 'UTrainGPU');
+showHy(nGPU, 'nGPU');
 XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:lenData+1), UTrainGPU, nGPU);
 
 %% 基础训练模型
