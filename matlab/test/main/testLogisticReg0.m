@@ -142,12 +142,15 @@ for i=2:lenData
         multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
     ];
 end
+% 多项式&特征归一
+XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpNormPcaRealGPU(:, 2:lenData+1));
+
 % 转pca
 showHy(lenData, 'lenData');
 showHy(XDataTmpNormPcaRealGPU, 'XDataTmpNormPcaRealGPU');
 showHy(UTrainGPU, 'UTrainGPU');
 showHy(nGPU, 'nGPU');
-XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:lenData+1), UTrainGPU, nGPU);
+XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTrainGPU, nGPU);
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
