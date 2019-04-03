@@ -12,7 +12,10 @@ function multiX = multiMatrix(X, multi)
 %   3   4
 
 m = size(X, 1);
-tmpMultiEye = multiEye(m, multi);
-multiX = tmpMultiEye * X;
+
+indexRow = mod(1:m*multi, m);
+indexRow(indexRow==0)=m;
+
+multiX = X(indexRow, :);
 end
 

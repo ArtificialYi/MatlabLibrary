@@ -12,6 +12,9 @@ function repeatX = repeatMatrix(X,repeat)
 %   3   4
 
 m = size(X, 1);
-tmpRepeatEye = repeatEye(m, repeat);
-repeatX = tmpRepeatEye * X;
+
+indexRow = ceil((1:m*repeat)/repeat);
+
+repeatX = X(indexRow, :);
+
 end

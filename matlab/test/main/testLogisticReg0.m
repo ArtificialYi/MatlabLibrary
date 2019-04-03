@@ -92,7 +92,7 @@ pcaVec = gather(pcaVecGPU);
 pcaSumVec = gather(pcaSumVecGPU);
 
 %% 边界线数据准备
-splitTrain = 101;
+splitTrain = 51;
 % pca
 minXPca = min(XOriginNormPca(:, 1:min(end,3)));
 maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
