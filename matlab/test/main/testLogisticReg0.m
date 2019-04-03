@@ -93,7 +93,7 @@ pcaSumVec = gather(pcaSumVecGPU);
 
 %% 边界线数据准备
 splitTrain = 51;
-% pca
+%% pca边界
 minXPca = min(XOriginNormPca(:, 1:min(end,3)));
 maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
 
@@ -117,8 +117,9 @@ for i=2:lenDataPca
         multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
         ];
 end
+matrixXPca = gather(matrixXPcaGPU);
 
-% data
+%% data边界
 minX = min(XOrigin(:, 1:min(end,3)));
 maxX = max(XOrigin(:, 1:min(end,3)));
 
@@ -147,6 +148,7 @@ XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpNormPcaRealGPU(:, 2:len
 
 % 转pca
 XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTrainGPU, nGPU);
+matrixX = gather(matrixXGPU);
 
 %% 基础训练模型
 [thetaOriginGPU, ~] = ...
@@ -242,8 +244,7 @@ save(fileName, ...
     'YOrigin', 'YTrain', 'YVal', 'YTest', ...
     'XOriginNormPca', 'XTrainNormPca', 'XValNormPca', ...
     'pcaVec', 'pcaSumVec', ...
-    'vecX1Pca', 'vecX2Pca', 'predYPcaTmp_DMulti', ...
-    'vecX1', 'vecX2', 'predYDataTmp_DMulti', ...
+    'matrixXPca', 'predYPcaTmp_DMulti', 'matrixX', 'predYDataTmp_DMulti', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D', ...
     'lambdaMin', 'errorMin', 'pMin', 'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');
