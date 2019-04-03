@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testLogisticReg0_20190402225345.mat'];
+fileName = ['data/', 'data_testLogisticReg0_20190403133045.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -43,8 +43,8 @@ plotInitFunc(1, XOriginNormPca, XTrainNormPca, XValNormPca, 'PCA');
 plotInitFunc(2, XOrigin, XTrain, XVal, 'origin');
 plotOn(1);
 plotOn(2);
-plotContourY(1, [vecX1Pca vecX2Pca], predYPcaTmp_2D, high);
-plotContourY(2, [vecX1 vecX2], predYDataTmp_2D, high);
+plotContourY(1, matrixXPca, predYPcaTmp_DMulti, high);
+plotContourY(2, matrixX, predYDataTmp_DMulti, high);
 plotOff(1);
 plotOff(2);
 
@@ -75,7 +75,7 @@ for i=1:50
     plotInitFunc2(numRow, XOrigin, XTrain, XVal, '学习曲线', ...
         posTrainLearn, negTrainLearn);
     plotOn(numRow);
-    plotContourY(numRow, [vecX1 vecX2], predYLearnDataTmp_3D(:, :, i), high);
+    plotContourY(numRow, matrixX, predYLearnDataTmp_3D(:, :, i), high);
     plotOff(numRow);
     pause(1/60);
 end
