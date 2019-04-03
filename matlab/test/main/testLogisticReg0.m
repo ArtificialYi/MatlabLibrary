@@ -98,7 +98,7 @@ minXPca = min(XOriginNormPca(:, 1:min(end,3)));
 maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
 
 lenDataPca = length(minXPca);
-splitTrainVec = zeros(lenDataPca, 1)+splitTrain;
+splitTrainPcaVec = zeros(1, lenDataPca)+splitTrain;
 matrixXPcaGPU = gpuArray.zeros(splitTrain, lenDataPca);
 
 % 初始化轴向量
@@ -123,7 +123,7 @@ minX = min(XOrigin(:, 1:min(end,3)));
 maxX = max(XOrigin(:, 1:min(end,3)));
 
 lenData = size(minX, 2);
-
+splitTrainDataVec = zeros(1, lenData)+splitTrain;
 matrixXGPU = gpuArray.zeros(splitTrain, lenData);
 
 % 初始化轴向量
@@ -159,12 +159,12 @@ XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTra
 % pca预测-预测结果
 predYPcaTmpGPU = logisticHypothesis(XTestTmpPcaRealGPU, thetaOriginGPU, predGPU);
 predYPcaTmp = gather(predYPcaTmpGPU);
-predYPcaTmp_DMulti = reshape(predYPcaTmp, splitTrainVec);
+predYPcaTmp_DMulti = reshape(predYPcaTmp, splitTrainPcaVec);
 
 % pca2data预测
 predYDataTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaOriginGPU, predGPU);
 predYDataTmp = gather(predYDataTmpGPU);
-predYDataTmp_DMulti = reshape(predYDataTmp, splitTrainVec);
+predYDataTmp_DMulti = reshape(predYDataTmp, splitTrainDataVec);
 
 %% 学习曲线
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
