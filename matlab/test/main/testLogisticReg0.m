@@ -97,21 +97,21 @@ splitTrain = 51;
 minXPca = min(XOriginNormPca(:, 1:min(end,3)));
 maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
 
-lenData = length(minXPca);
-splitTrainVec = zeros(lenData, 1)+splitTrain;
-matrixXPcaGPU = gpuArray.zeros(splitTrain, lenData);
+lenDataPca = length(minXPca);
+splitTrainVec = zeros(lenDataPca, 1)+splitTrain;
+matrixXPcaGPU = gpuArray.zeros(splitTrain, lenDataPca);
 
 % 初始化轴向量
-for i=1:lenData
+for i=1:lenDataPca
     matrixXPcaGPU(:, i) = linspace(minXPca(i), maxXPca(i), splitTrain)';
 end
 
 % 初始化结果集
-mTestTmpPca = splitTrain^lenData;
+mTestTmpPca = splitTrain^lenDataPca;
 XTestTmpPcaRealGPU = gpuArray.zeros(mTestTmpPca, n+1);
 XTestTmpPcaRealGPU(:, 1) = 1;
 XTestTmpPcaRealGPU(1:splitTrain, 2) = matrixXPcaGPU(:, 1);
-for i=2:lenData
+for i=2:lenDataPca
     XTestTmpPcaRealGPU(1:splitTrain^i, 2:i+1) = [
         repeatMatrix(XTestTmpPcaRealGPU(1:splitTrain^(i-1), 2:i), splitTrain) ...
         multiMatrix(matrixXPcaGPU(:,i), splitTrain^(i-1)) ...
@@ -121,6 +121,8 @@ end
 % data
 minX = min(XOrigin(:, 1:min(end,3)));
 maxX = max(XOrigin(:, 1:min(end,3)));
+
+lenData = size(minX, 2);
 
 matrixXGPU = gpuArray.zeros(splitTrain, lenData);
 
