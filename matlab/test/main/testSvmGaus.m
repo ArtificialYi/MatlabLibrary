@@ -54,7 +54,7 @@ mVal = size(XVal, 1);
 mTest = size(XTest, 1);
 
 % 归一化数据
-[XTrainNorm, data2normFunc] = data2featureWithNormalize(XTrain, p);
+[XTrainNorm, data2normFunc] = data2featureWithNormalize(XTrain, 1);
 nTrain = size(XTrainNorm, 2);
 XOriginNorm = data2normFunc(XOrigin);
 XValNorm = data2normFunc(XVal);
