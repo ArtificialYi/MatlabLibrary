@@ -9,7 +9,7 @@ thetaInit = gather(thetaInitGPU);
 lambda = gather(lambdaGPU);
 pred = gather(predGPU);
 
-options = optimoptions('fminunc', 'Display', 'on', 'MaxIter', maxIter);
+options = optimoptions('fminunc', 'Display', 'iter', 'MaxIter', maxIter);
 
 func = @(t) logisticRegCostFunc(X, Y, t, lambda, pred);
 
