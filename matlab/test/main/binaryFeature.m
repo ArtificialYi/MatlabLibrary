@@ -36,7 +36,7 @@ function XBinary = data2binaryData(XOrigin, recoverVecTmp, recoverMatrixTmp)
     dataBinaryTmp = zeros(m, 0);
     for j=1:size(recoverMatrixTmp, 1)
         lenVec = recoverMatrixTmp(j, 3) - recoverMatrixTmp(j, 2) + 1;
-        dataBinaryTmp(:, lenVec) = XOrigin(:, recoverMatrixTmp(j, 1)) == ...
+        dataBinaryTmp(:, end+1:end+lenVec) = XOrigin(:, recoverMatrixTmp(j, 1)) == ...
             recoverVecTmp(recoverMatrixTmp(j, 2):recoverMatrixTmp(j, 3))';
     end
     XBinary = [XOrigin dataBinaryTmp];
