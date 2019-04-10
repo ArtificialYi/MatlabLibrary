@@ -105,6 +105,10 @@ pcaSumVec = gather(pcaSumVecGPU);
 [thetaOriginGPU, ~] = ...
     logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
 
+% 原始模型结果
+predYOriginGPU = logisticHypothesis(XOriginNormPcaRealGPU, thetaOriginGPU, predGPU);
+predYOrigin = gather(predYOriginGPU);
+
 % 测试集预测
 predYTestGPU = logisticHypothesis(XTestNormPcaRealGPU, thetaOriginGPU, predGPU);
 predYTest = gather(predYTestGPU);
@@ -127,7 +131,7 @@ fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', ...
-    'pcaVec', 'pcaSumVec', 'predYTest', ...
+    'pcaVec', 'pcaSumVec', 'predYTest', 'predYOrigin', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec');
 fprintf('保存完毕\n');
 end
