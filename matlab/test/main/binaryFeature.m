@@ -1,7 +1,7 @@
 function [XFeature, func] = binaryFeature(X, lenMax)
 %binaryFeature 将所有枚举型特征扩充为2进制特征
 
-[mX, nX] = size(X, 1);
+[mX, nX] = size(X);
 
 matrixFeatureTmp = zeros(mX,0);
 
