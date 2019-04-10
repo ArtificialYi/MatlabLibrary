@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testComp_20190410194929.mat'];
+fileName = ['data/', 'data_testComp_20190410200804.mat'];
 load(fileName);
 
 posFlag = 1;
