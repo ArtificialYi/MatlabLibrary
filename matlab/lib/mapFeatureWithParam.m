@@ -11,6 +11,7 @@ function XNormPolyNorm = ...
 showHy(indexNorm, 'indexNorm');
 showHy(muNorm, 'muNorm');
 showHy(X, 'X');
+disp(indexNorm);
 % 清除常量&减去平均值
 XMu = bsxfun(@minus, X(:, indexNorm), muNorm);
 showHy(XMu, 'XMu');
