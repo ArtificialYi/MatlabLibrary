@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = testComp(p, lambda, pLeft, pRight, maxIter)
+function [outputArg1,outputArg2] = testComp(p, lambda, pLeft, pRight, maxIter, isTrain)
 %testComp 比赛用的函数
 
 %% str2double
@@ -7,6 +7,7 @@ p = str2double(p);
 lambda = str2double(lambda);
 pLeft = str2double(pLeft);
 pRight = str2double(pRight);
+isTrain = str2double(isTrain);
 
 %% 先读取数据
 data = load('resource/pfm_data.mat');
@@ -160,54 +161,57 @@ pErrorVecGPU = gpuArray(pVec);
 pLambdaVecGPU = gpuArray(pVec);
 KVecGPU = gpuArray(pVec);
 
-for i=1:length(pVec)
-    fprintf('开始多项式最优化:%d\n', pVec(i));
-    
-    % 多项式&归一化数据
-    [XTrainNormTmp, data2normFunc] = data2featureWithNormalize(XTrain, pVec(i));
-    nTmp = size(XTrainNormTmp, 2);
-    XValNormTmp = data2normFunc(XVal);
-    fprintf('归一化完毕\n');
-    
-    % 转GPU
-    XTrainNormTmpGPU = gpuArray(XTrainNormTmp);
-    XValNormTmpGPU = gpuArray(XValNormTmp);
-    nTmpGPU = gpuArray(nTmp);
-    fprintf('转GPU完毕\n');
-    
-    % 数据pca化
-    [UTrainTmpGPU, STrainTmpGPU] = pcaTrainGPU(XTrainNormTmpGPU);
-    KGPU = nTmpGPU;
-    STrainVecTmp = diag(STrainTmpGPU);
-    for j=1:length(STrainVecTmp)
-        if STrainVecTmp(j) == 0
-            KGPU = j - 1;
-            break;
+if isTrain
+    for i=1:length(pVec)
+        fprintf('开始多项式最优化:%d\n', pVec(i));
+
+        % 多项式&归一化数据
+        [XTrainNormTmp, data2normFunc] = data2featureWithNormalize(XTrain, pVec(i));
+        nTmp = size(XTrainNormTmp, 2);
+        XValNormTmp = data2normFunc(XVal);
+        fprintf('归一化完毕\n');
+
+        % 转GPU
+        XTrainNormTmpGPU = gpuArray(XTrainNormTmp);
+        XValNormTmpGPU = gpuArray(XValNormTmp);
+        nTmpGPU = gpuArray(nTmp);
+        fprintf('转GPU完毕\n');
+
+        % 数据pca化
+        [UTrainTmpGPU, STrainTmpGPU] = pcaTrainGPU(XTrainNormTmpGPU);
+        KGPU = nTmpGPU;
+        STrainVecTmp = diag(STrainTmpGPU);
+        for j=1:length(STrainVecTmp)
+            if STrainVecTmp(j) == 0
+                KGPU = j - 1;
+                break;
+            end
         end
+        XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, KGPU);
+        XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, KGPU);
+        fprintf('数据PCA完毕:%d->%d\n', nTmpGPU, KGPU);
+
+        % 添加常量数据
+        XTrainNormTmpPcaRealGPU = [ones(mTrain, 1) XTrainNormTmpPcaGPU];
+        XValNormTmpPcaRealGPU = [ones(mVal, 1) XValNormTmpPcaGPU];
+        thetaInitTmpGPU = gpuArray.zeros(KGPU+1, 1);
+        fprintf('添加常量变量，开始计算\n');
+
+        % 开始计算
+        [lambdaCurrentGPU, errorCurrentGPU] = ...
+            logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
+            XValNormTmpPcaRealGPU, YValGPU, ...
+            thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
+        fprintf('已找到最优组合:%d, %f, %f\n', pVec(i), lambdaCurrentGPU, errorCurrentGPU);
+
+        % 储存结果
+        pLambdaVecGPU(i) = lambdaCurrentGPU;
+        pErrorVecGPU(i) = errorCurrentGPU;
+        KVecGPU(i) = KGPU;
+        fprintf('数据已存储\n');
     end
-    XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, KGPU);
-    XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, KGPU);
-    fprintf('数据PCA完毕:%d->%d\n', nTmpGPU, KGPU);
-    
-    % 添加常量数据
-    XTrainNormTmpPcaRealGPU = [ones(mTrain, 1) XTrainNormTmpPcaGPU];
-    XValNormTmpPcaRealGPU = [ones(mVal, 1) XValNormTmpPcaGPU];
-    thetaInitTmpGPU = gpuArray.zeros(KGPU+1, 1);
-    fprintf('添加常量变量，开始计算\n');
-    
-    % 开始计算
-    [lambdaCurrentGPU, errorCurrentGPU] = ...
-        logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
-        XValNormTmpPcaRealGPU, YValGPU, ...
-        thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
-    fprintf('已找到最优组合:%d, %f, %f\n', pVec(i), lambdaCurrentGPU, errorCurrentGPU);
-    
-    % 储存结果
-    pLambdaVecGPU(i) = lambdaCurrentGPU;
-    pErrorVecGPU(i) = errorCurrentGPU;
-    KVecGPU(i) = KGPU;
-    fprintf('数据已存储\n');
 end
+
 %% 得到最优解
 % 最小值所在索引
 indexMinVecGPU = indexMinForMulti(pErrorVecGPU);
