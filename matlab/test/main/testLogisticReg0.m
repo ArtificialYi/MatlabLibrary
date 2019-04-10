@@ -175,6 +175,7 @@ predYDataTmp_DMulti = reshape(predYDataTmp, splitTrainDataVec);
 % 测试集预测
 predYTestGPU = logisticHypothesis(XTestNormPcaRealGPU, thetaOriginGPU, predGPU);
 
+
 %% 学习曲线
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...

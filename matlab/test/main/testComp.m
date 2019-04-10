@@ -73,6 +73,24 @@ splitLearningCurveGPU = gpuArray(splitLearningCurve);
 %% pca提取
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
 
+% pca-gpu
+XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, nGPU);
+XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, nGPU);
+XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, nGPU);
+XTestNormPcaGPU = data2pca(XTestNormGPU, UTrainGPU, nGPU);
+
+% pca-cpu
+XOriginNormPca = gather(XOriginNormPcaGPU);
+XTrainNormPca = gather(XTrainNormPcaGPU);
+XValNormPca = gather(XValNormPcaGPU);
+XTestNormPca = gather(XTestNormPcaGPU);
+
+% 真实数据
+XOriginNormPcaRealGPU = [ones(m, 1) XOriginNormPcaGPU];
+XTrainNormPcaRealGPU = [ones(mTrain, 1) XTrainNormPcaGPU];
+XValNormPcaRealGPU = [ones(mVal, 1) XValNormPcaGPU];
+XTestNormPcaRealGPU = [ones(mTest, 1) XTestNormPcaGPU];
+
 % pcaVec
 pcaVecGPU = diag(STrainGPU);
 pcaSumVecGPU = pcaVecGPU;
@@ -83,6 +101,33 @@ end
 pcaVec = gather(pcaVecGPU);
 pcaSumVec = gather(pcaSumVecGPU);
 
+%% 基础训练模型
+[thetaOriginGPU, ~] = ...
+    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
+
+% 测试集预测
+predYTestGPU = logisticHypothesis(XTestNormPcaRealGPU, thetaOriginGPU, predGPU);
+predYTest = gather(predYTestGPU);
+
+%% 学习曲线
+[errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
+    logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
+        thetaInitGPU, lambdaGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
+% 学习曲线的结果
+predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixLearnGPU, predGPU);
+predYLearnDataTmp = gather(predYLearnTmpGPU);
+showHy(predYLearnDataTmp, 'predYLearnDataTmp');
+showHy(splitTrain, 'splitTrain');
+showHy(splitLearningCurve, 'splitLearningCurve');
+predYLearnDataTmp_3D = reshape(predYLearnDataTmp, splitTrain, splitTrain, splitLearningCurve);
+
+% 画图
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitLearnVec = gather(realSplitLearnVecGPU);
+thetaMatrixLearn = gather(thetaMatrixLearnGPU);
+    
+    
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testComp_%s.mat', datestr(now, 'yyyymmddHHMMss'));
@@ -90,7 +135,8 @@ fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', ...
-    'pcaVec', 'pcaSumVec');
+    'pcaVec', 'pcaSumVec', 'predYTest', ...
+    'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D');
 fprintf('保存完毕\n');
 end
 
