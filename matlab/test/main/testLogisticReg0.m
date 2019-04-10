@@ -15,7 +15,7 @@ XOrigin = data.XOrigin;
 YOrigin = data.YOrigin;
 XTest = data.XTest;
 
-m = size(XOrigin, 1);
+[m, nOrigin] = size(XOrigin);
 
 trainPoint = 0.7;
 valPoint = 0.3;
@@ -151,7 +151,9 @@ for i=2:lenData
     ];
 end
 % 多项式&特征归一
-XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpNormPcaRealGPU(:, 2:end));
+% 获取data的原始数据集
+XDataTmpOrigin = [XDataTmpNormPcaRealGPU(:, 2:lenData+1) ones(mDataTmp, nOrigin-lenData)]
+XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpOrigin);
 
 % 转pca
 XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTrainGPU, nGPU);
