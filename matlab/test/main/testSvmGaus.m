@@ -95,12 +95,16 @@ kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, gu);
 
 KOriginGPU = kernelFunc(XOriginNormGPU, XOriginNormGPU);
 CTrainGPU = gpuArray(C);
-alphaTrainGPU = gpuArray.zeros(mTrain, 1);
+alphaOriginGPU = gpuArray.zeros(mOrigin, 1);
 tolTrainGPU = gpuArray(tol);
 maxIterTrainGPU = gpuArray(maxIter);
 
+showHy(KOriginGPU, 'KOriginGPU');
+showHy(YOriginGPU, 'YOriginGPU');
+showHy(alphaOriginGPU, 'alphaOriginGPU');
+
 modelOriginGPU = ...
-    svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaTrainGPU, tolTrainGPU, maxIterTrainGPU);
+    svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaOriginGPU, tolTrainGPU, maxIterTrainGPU);
 
 % 原始模型结果
 KOrigin = gather(KOriginGPU);
