@@ -14,8 +14,9 @@ data = load('resource/pfm_data.mat');
 % 获取原始数据
 XOrigin = data.XOrigin;
 YOrigin = data.YOrigin;
-XTest = data.XTest;
+XTestOrigin = data.XTest;
 
+%% 开始逻辑回归
 [mOrigin, nOrigin] = size(XOrigin);
 
 trainPoint = 0.7;
@@ -24,12 +25,24 @@ pred = 1e-16;
 
 % 切成训练集、交叉验证集、测试集
 indexVecRand = randperm(mOrigin);
-[XTrain, XVal, ~] = ...
+[XTrainSplit, XValSplit, ~] = ...
     splitData(XOrigin, indexVecRand, trainPoint, valPoint);
 [YTrain, YVal, ~] = ...
     splitData(YOrigin, indexVecRand, trainPoint, valPoint);
 
-% 获取基础数据
+%% 特征扩充
+% 将所有枚举型特征扩充为2进制特征
+lenMax = 30;
+[XTrainBinary, data2binaryFunc] = binaryFeature(XTrainSplit, lenMax);
+XValBinary = data2binaryFunc(XValSplit);
+XTestBinary = data2binaryFunc(XTestOrigin);
+
+%% 最终计算数据准备
+XTrain = XTrainBinary;
+XVal = XValBinary;
+XTest = XTestBinary;
+
+%% 获取基础数据
 mTrain = size(XTrain, 1);
 mVal = size(XVal, 1);
 mTest = size(XTest, 1);
