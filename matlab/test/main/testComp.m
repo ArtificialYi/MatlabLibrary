@@ -1,13 +1,15 @@
-function [outputArg1,outputArg2] = testComp(p, lambda, pLeft, pRight, maxIter, isTrain)
+function [outputArg1,outputArg2] = testComp(C, gu, guLeft, guRight, maxIter, isTrain)
 %testComp 比赛用的函数
 
-%% str2double
+% 初始化数据
+gu = str2double(gu);
+C = str2double(C);
 maxIter = str2double(maxIter);
-p = str2double(p);
-lambda = str2double(lambda);
-pLeft = str2double(pLeft);
-pRight = str2double(pRight);
+guLeft = str2double(guLeft);
+guRight = str2double(guRight);
 isTrain = str2double(isTrain);
+
+tol = 1e-8;
 
 %% 先读取数据
 data = load('resource/pfm_data.mat');
@@ -15,9 +17,10 @@ data = load('resource/pfm_data.mat');
 % 获取原始数据
 XOrigin = data.XOrigin;
 YOrigin = data.YOrigin;
+YOrigin(YOrigin==0)=-1;
 XTestOrigin = data.XTest;
 
-%% 开始逻辑回归
+%% 开始SVM基础
 [mOrigin, nOrigin] = size(XOrigin);
 
 trainPoint = 0.7;
@@ -87,16 +90,26 @@ splitLearningCurve = 50;
 splitLearningCurveGPU = gpuArray(splitLearningCurve);
 
 %% 基础训练模型
-[thetaOriginGPU, ~] = ...
-    logisticRegTrainGPU(XOriginNormRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
+% 获取核结果
+kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, gu);
+
+KOriginGPU = kernelFunc(XOriginNormGPU, XOriginNormGPU);
+CTrainGPU = gpuArray(C);
+alphaTrainGPU = gpuArray.zeros(mTrain, 1);
+tolTrainGPU = gpuArray(tol);
+maxIterTrainGPU = gpuArray(maxIter);
+
+modelOriginGPU = ...
+    svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaTrainGPU, tolTrainGPU, maxIterTrainGPU);
 
 % 原始模型结果
-predYOriginGPU = logisticHypothesis(XOriginNormRealGPU, thetaOriginGPU, predGPU);
-predYOrigin = gather(predYOriginGPU);
+KOrigin = gather(KOriginGPU);
+predYOrigin = (modelOriginGPU.cpu.alpha .* YOrigin)'*KOrigin'+modelOriginGPU.cpu.b;
 
 % 测试集预测
-predYTestGPU = logisticHypothesis(XTestNormRealGPU, thetaOriginGPU, predGPU);
-predYTest = gather(predYTestGPU);
+KTestOriginGPU = kernelFunc(XOriginNormGPU, XTestNormGPU);
+KTestOrigin = gather(KTestOriginGPU);
+predYTest = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestOrigin'+modelOriginGPU.cpu.b;
 
 %% 学习曲线
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
