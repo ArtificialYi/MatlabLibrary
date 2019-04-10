@@ -5,13 +5,14 @@ function [K] = svmKernelGaussian(X1, X2, gu)
 m1 = size(X1, 1);
 m2 = size(X2, 1);
 
-% 获取高斯核准备数据
-X1Multi = multiMatrix(X1, m2);
-X2Repeat = repeatMatrix(X2, m1);
+K = X2(:, 1) + X1(:, 1)';
 
-% 开始计算
-XVec = exp(-sum((X2Repeat - X1Multi).^2, 2)./(2*gu^2));
+for i=1:m2
+    for j=1:m1
+        vecTmp = X2(i, :) - X1(j, :);
+        K(i, j) = exp(-vecTmp*vecTmp'/(2*gu^2));
+    end
+end
 
-K = reshape(XVec, m1, m2)';
 end
 
