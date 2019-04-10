@@ -18,8 +18,6 @@ for i=1:nX
         
         % 恢复用数据
         recoverMatrix(end+1, :) = [i, lenRecoverV+1, lenRecoverV+lenVTrainTmp];
-        showHy(VTrainTmp, 'VTrainTmp');
-        showHy(recoverVec, 'recoverVec');
         recoverVec(end+1:end+lenVTrainTmp) = VTrainTmp(:);
         lenRecoverV = length(recoverVec);
     end

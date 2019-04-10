@@ -99,10 +99,6 @@ alphaOriginGPU = gpuArray.zeros(mOrigin, 1);
 tolTrainGPU = gpuArray(tol);
 maxIterTrainGPU = gpuArray(maxIter);
 
-showHy(KOriginGPU, 'KOriginGPU');
-showHy(YOriginGPU, 'YOriginGPU');
-showHy(alphaOriginGPU, 'alphaOriginGPU');
-
 modelOriginGPU = ...
     svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaOriginGPU, tolTrainGPU, maxIterTrainGPU);
 
@@ -118,12 +114,29 @@ predYTest = (modelOriginGPU.cpu.alpha .* YOrigin)'*KTestOrigin'+modelOriginGPU.c
 % 训练的模型结果
 modelOriginCPU = modelOriginGPU.cpu;
 
+%% 学习曲线
+CLearnGPU = gpuArray(C);
+tolLearnGPU = gpuArray(tol);
+maxIterLearnGPU = gpuArray(maxIter);
+splitLearnGPU = gpuArray(50);
+
+[errorTrainLearnGPU, errorValLearnGPU, realSplitVecLearnGPU] = ...
+    svmLearningCurveGPU(XTrainNormGPU, YTrainGPU, ...
+    XValNormGPU, YValGPU, CLearnGPU, ...
+    tolLearnGPU, maxIterLearnGPU, splitLearnGPU, kernelFunc);
+
+% 学习曲线CPU数据
+errorTrainLearn = gather(errorTrainLearnGPU);
+errorValLearn = gather(errorValLearnGPU);
+realSplitVecLearn = gather(realSplitVecLearnGPU);
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testSvmGaus_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
-    'YOrigin', 'YTrain', 'YVal', 'predYOrigin', 'predYTest', 'modelOriginCPU');
+    'YOrigin', 'YTrain', 'YVal', 'predYOrigin', 'predYTest', 'modelOriginCPU', ...
+    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn');
 fprintf('保存完毕\n');
 end
