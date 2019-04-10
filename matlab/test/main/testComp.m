@@ -51,7 +51,7 @@ nTrainGPU = gpuArray(nTrain);
 predGPU = gpuArray(pred);
 
 % 真实数据
-XOriginNormRealGPU = [ones(m, 1) XOriginNormGPU];
+XOriginNormRealGPU = [ones(mOrigin, 1) XOriginNormGPU];
 XTrainNormRealGPU = [ones(mTrain, 1) XTrainNormGPU];
 XValNormRealGPU = [ones(mVal, 1) XValNormGPU];
 XTestNormRealGPU = [ones(mTest, 1) XTestNormGPU];
