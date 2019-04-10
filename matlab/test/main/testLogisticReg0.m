@@ -152,8 +152,7 @@ for i=2:lenData
 end
 % 多项式&特征归一
 % 获取data的原始数据集
-XDataTmpOrigin = [XDataTmpNormPcaRealGPU(:, 2:lenData+1) ones(mDataTmp, nOrigin-lenData)]
-XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc(XDataTmpOrigin);
+XDataTmpNormPcaRealGPU(:, 2:end) = data2normFunc([XDataTmpNormPcaRealGPU(:, 2:lenData+1) ones(mDataTmp, nOrigin-lenData)]);
 
 % 转pca
 XDataTmpNormPcaRealGPU(:,2:end) = data2pca(XDataTmpNormPcaRealGPU(:,2:end), UTrainGPU, nGPU);
