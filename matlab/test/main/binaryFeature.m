@@ -14,7 +14,8 @@ for i=1:nX
     lenVTrainTmp = length(VTrainTmp);
     if lenVTrainTmp > 2 && lenVTrainTmp < lenMax
         matrixTrainTmp = VTrainTmp' == X(:, i);
-        matrixFeatureTmp(:, lenVTrainTmp) = matrixTrainTmp;
+        showHy(matrixTrainTmp, 'matrixTrainTmp');
+        matrixFeatureTmp(:, end+1:end+lenVTrainTmp-1) = matrixTrainTmp;
         
         % 恢复用数据
         recoverMatrix(end+1, :) = [i, lenRecoverV+1, lenRecoverV+lenVTrainTmp];
