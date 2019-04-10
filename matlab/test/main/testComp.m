@@ -1,5 +1,12 @@
-function [outputArg1,outputArg2] = testComp()
+function [outputArg1,outputArg2] = testComp(p, lambda, maxIter)
 %testComp 比赛用的函数
+
+%% str2double
+maxIter = str2double(maxIter);
+p = str2double(p);
+lambda = str2double(lambda);
+%pLeft = str2double(pLeft);
+%pRight = str2double(pRight);
 
 %% 先读取数据
 data = load('resource/pfm_data.mat');
