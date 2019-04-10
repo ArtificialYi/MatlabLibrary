@@ -149,7 +149,6 @@ if isTrain
         % 储存结果
         pLambdaVecGPU(i) = lambdaCurrentGPU;
         pErrorVecGPU(i) = errorCurrentGPU;
-        KVecGPU(i) = KGPU;
         fprintf('数据已存储\n');
     end
 end
@@ -162,17 +161,14 @@ indexMinGPU = indexMinVecGPU(1);
 % 最优解
 lambdaMinGPU = pLambdaVecGPU(indexMinGPU);
 errorMinGPU = pErrorVecGPU(indexMinGPU);
-KVecGPU = KVecGPU(indexMinGPU);
 
 % 所有解-CPU
 pLambdaVec = gather(pLambdaVecGPU);
 pErrorVec = gather(pErrorVecGPU);
-KVec = gather(KVecGPU);
 
 % 最优解-CPU
 lambdaMin = gather(lambdaMinGPU);
 errorMin = gather(errorMinGPU);
-KMin = gather(KVecGPU);
 pMin = pVec(gather(indexMinGPU));
 
 %% save
@@ -183,7 +179,7 @@ save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', 'predYOrigin', 'predYTest', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', ...
-    'lambdaMin', 'errorMin', 'KMin', 'pMin', 'pLambdaVec', 'pErrorVec');
+    'lambdaMin', 'errorMin', 'pMin', 'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');
 end
 
