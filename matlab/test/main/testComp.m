@@ -80,71 +80,27 @@ YValGPU = gpuArray(YVal);
 % 默认参数
 lambdaGPU = gpuArray(lambda);
 maxIterGPU = gpuArray(maxIter);
+thetaInitGPU = gpuArray.zeros(nTrainGPU+1, 1);
 
 % 学习曲线
 splitLearningCurve = 50;
 splitLearningCurveGPU = gpuArray(splitLearningCurve);
 
-%% pca提取
-[UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
-
-% pca-gpu
-SVecTmp = diag(STrainGPU);
-KGPU = length(SVecTmp);
-for j=1:length(SVecTmp)
-    if SVecTmp(j) == 0
-        KGPU = j - 1;
-        break;
-    end
-end
-fprintf('pca提取结果:%d->%d\n', length(STrainGPU), KGPU);
-thetaInitGPU = gpuArray.zeros(KGPU+1, 1);
-XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, KGPU);
-XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, KGPU);
-XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, KGPU);
-XTestNormPcaGPU = data2pca(XTestNormGPU, UTrainGPU, KGPU);
-
-% pca-cpu
-XOriginNormPca = gather(XOriginNormPcaGPU);
-XTrainNormPca = gather(XTrainNormPcaGPU);
-XValNormPca = gather(XValNormPcaGPU);
-XTestNormPca = gather(XTestNormPcaGPU);
-
-% 真实数据
-XOriginNormPcaRealGPU = [ones(mOrigin, 1) XOriginNormPcaGPU];
-XTrainNormPcaRealGPU = [ones(mTrain, 1) XTrainNormPcaGPU];
-XValNormPcaRealGPU = [ones(mVal, 1) XValNormPcaGPU];
-XTestNormPcaRealGPU = [ones(mTest, 1) XTestNormPcaGPU];
-
-% pcaVec
-pcaVecGPU = diag(STrainGPU);
-pcaSumVecGPU = pcaVecGPU;
-for i=2:length(pcaSumVecGPU)
-    pcaSumVecGPU(i) = pcaSumVecGPU(i-1)+pcaVecGPU(i);
-end
-
-pcaVec = gather(pcaVecGPU);
-pcaSumVec = gather(pcaSumVecGPU);
-
 %% 基础训练模型
-showHy(XOriginNormPcaRealGPU, 'XOriginNormPcaRealGPU');
-showHy(YOriginGPU, 'YOriginGPU');
-showHy(thetaInitGPU, 'thetaInitGPU');
-
 [thetaOriginGPU, ~] = ...
-    logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
+    logisticRegTrainGPU(XOriginNormRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
 
 % 原始模型结果
-predYOriginGPU = logisticHypothesis(XOriginNormPcaRealGPU, thetaOriginGPU, predGPU);
+predYOriginGPU = logisticHypothesis(XOriginNormRealGPU, thetaOriginGPU, predGPU);
 predYOrigin = gather(predYOriginGPU);
 
 % 测试集预测
-predYTestGPU = logisticHypothesis(XTestNormPcaRealGPU, thetaOriginGPU, predGPU);
+predYTestGPU = logisticHypothesis(XTestNormRealGPU, thetaOriginGPU, predGPU);
 predYTest = gather(predYTestGPU);
 
 %% 学习曲线
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
-    logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
+    logisticRegLearningCurveGPU(XTrainNormRealGPU, YTrainGPU, XValNormRealGPU, YValGPU, ...
         thetaInitGPU, lambdaGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
 
 % 画图
@@ -177,30 +133,16 @@ if isTrain
         nTmpGPU = gpuArray(nTmp);
         fprintf('转GPU完毕\n');
 
-        % 数据pca化
-        [UTrainTmpGPU, STrainTmpGPU] = pcaTrainGPU(XTrainNormTmpGPU);
-        KGPU = nTmpGPU;
-        STrainVecTmp = diag(STrainTmpGPU);
-        for j=1:length(STrainVecTmp)
-            if STrainVecTmp(j) == 0
-                KGPU = j - 1;
-                break;
-            end
-        end
-        XTrainNormTmpPcaGPU = data2pca(XTrainNormTmpGPU, UTrainTmpGPU, KGPU);
-        XValNormTmpPcaGPU = data2pca(XValNormTmpGPU, UTrainTmpGPU, KGPU);
-        fprintf('数据PCA完毕:%d->%d\n', nTmpGPU, KGPU);
-
         % 添加常量数据
-        XTrainNormTmpPcaRealGPU = [ones(mTrain, 1) XTrainNormTmpPcaGPU];
-        XValNormTmpPcaRealGPU = [ones(mVal, 1) XValNormTmpPcaGPU];
-        thetaInitTmpGPU = gpuArray.zeros(KGPU+1, 1);
+        XTrainNormTmpRealGPU = [ones(mTrain, 1) XTrainNormTmpGPU];
+        XValNormTmpRealGPU = [ones(mVal, 1) XValNormTmpGPU];
+        thetaInitTmpGPU = gpuArray.zeros(nTmpGPU+1, 1);
         fprintf('添加常量变量，开始计算\n');
 
         % 开始计算
         [lambdaCurrentGPU, errorCurrentGPU] = ...
-            logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
-            XValNormTmpPcaRealGPU, YValGPU, ...
+            logisticRegFindCurrentMinLambda(XTrainNormTmpRealGPU, YTrainGPU, ...
+            XValNormTmpRealGPU, YValGPU, ...
             thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
         fprintf('已找到最优组合:%d, %f, %f\n', pVec(i), lambdaCurrentGPU, errorCurrentGPU);
 
@@ -240,7 +182,6 @@ fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', ...
-    'pcaVec', 'pcaSumVec', 'predYTest', 'predYOrigin', ...
     'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', ...
     'lambdaMin', 'errorMin', 'KMin', 'pMin', 'pLambdaVec', 'pErrorVec');
 fprintf('保存完毕\n');

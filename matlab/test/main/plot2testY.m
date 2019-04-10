@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testComp_20190410172159.mat'];
+fileName = ['data/', 'data_testComp_20190410194929.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -26,6 +26,8 @@ predYOrigin(predYOrigin>=0.5)=1;
 predYOrigin(predYOrigin<0.5)=0;
 tpTn = sum(predYOrigin==YOrigin);
 fprintf('%d个对的, pred:%f\n', tpTn, tpTn/size(YOrigin, 1));
+predYTest(predYTest>=0.5)=1;
+predYTest(predYTest<0.5)=0;
 
 %% 
 plotInitFunc = @(paramRowNum, paramOrigin, paramTrain, paramVal, paramStr) ...
