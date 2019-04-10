@@ -34,10 +34,12 @@ indexVecRand = randperm(mOrigin);
 % 将所有枚举型特征扩充为2进制特征
 lenMax = 30;
 [XTrainBinary, data2binaryFunc] = binaryFeature(XTrainSplit, lenMax);
+XOriginBinary = data2binaryFunc(XOrigin);
 XValBinary = data2binaryFunc(XValSplit);
 XTestBinary = data2binaryFunc(XTestOrigin);
 
 %% 最终计算数据准备
+XOrigin = XOriginBinary;
 XTrain = XTrainBinary;
 XVal = XValBinary;
 XTest = XTestBinary;
