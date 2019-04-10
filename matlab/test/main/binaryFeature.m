@@ -13,12 +13,14 @@ for i=1:nX
     VTrainTmp = unique(X(:, i));
     lenVTrainTmp = length(VTrainTmp);
     if lenVTrainTmp > 2 && lenVTrainTmp < lenMax
-        matrixTrainTmp = VTrainTmp' == X(:, i);
+        matrixTrainTmp = VTrainTmp(:)' == X(:, i);
         matrixFeatureTmp(:, end+1:end+lenVTrainTmp) = matrixTrainTmp;
         
         % 恢复用数据
         recoverMatrix(end+1, :) = [i, lenRecoverV+1, lenRecoverV+lenVTrainTmp];
-        recoverVec(end:end+lenVTrainTmp-1) = VTrainTmp(:);
+        showHy(VTrainTmp, 'VTrainTmp');
+        showHy(recoverVec, 'recoverVec');
+        recoverVec(end+1:end+lenVTrainTmp) = VTrainTmp(:);
         lenRecoverV = length(recoverVec);
     end
 end
