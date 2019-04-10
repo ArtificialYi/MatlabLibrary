@@ -10,7 +10,7 @@ function XNormPolyNorm = ...
 
 % 清除常量&减去平均值
 XMu = bsxfun(@minus, X(:, indexNorm), muNorm);
-showHy(XMu, 'XMu');
+
 % 除去标准差
 XNorm = bsxfun(@rdivide, XMu, sigmaNorm);
 
