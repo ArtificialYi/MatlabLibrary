@@ -86,7 +86,7 @@ XValNormPca = gather(XValNormPcaGPU);
 XTestNormPca = gather(XTestNormPcaGPU);
 
 % 真实数据
-XOriginNormPcaRealGPU = [ones(m, 1) XOriginNormPcaGPU];
+XOriginNormPcaRealGPU = [ones(mOrigin, 1) XOriginNormPcaGPU];
 XTrainNormPcaRealGPU = [ones(mTrain, 1) XTrainNormPcaGPU];
 XValNormPcaRealGPU = [ones(mVal, 1) XValNormPcaGPU];
 XTestNormPcaRealGPU = [ones(mTest, 1) XTestNormPcaGPU];
