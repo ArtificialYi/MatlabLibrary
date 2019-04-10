@@ -81,7 +81,7 @@ YTrainGPU = gpuArray(YTrain);
 YValGPU = gpuArray(YVal);
 
 % 默认参数
-lambdaGPU = gpuArray(lambda);
+%lambdaGPU = gpuArray(lambda);
 maxIterGPU = gpuArray(maxIter);
 thetaInitGPU = gpuArray.zeros(nTrainGPU+1, 1);
 
