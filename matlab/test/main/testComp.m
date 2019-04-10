@@ -113,13 +113,6 @@ predYTest = gather(predYTestGPU);
 [errorTrainLearnGPU, errorValLearnGPU, realSplitLearnVecGPU, thetaMatrixLearnGPU] = ...
     logisticRegLearningCurveGPU(XTrainNormPcaRealGPU, YTrainGPU, XValNormPcaRealGPU, YValGPU, ...
         thetaInitGPU, lambdaGPU, maxIterGPU, predGPU, splitLearningCurveGPU);
-% 学习曲线的结果
-predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixLearnGPU, predGPU);
-predYLearnDataTmp = gather(predYLearnTmpGPU);
-showHy(predYLearnDataTmp, 'predYLearnDataTmp');
-showHy(splitTrain, 'splitTrain');
-showHy(splitLearningCurve, 'splitLearningCurve');
-predYLearnDataTmp_3D = reshape(predYLearnDataTmp, splitTrain, splitTrain, splitLearningCurve);
 
 % 画图
 errorTrainLearn = gather(errorTrainLearnGPU);
@@ -135,7 +128,7 @@ save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', ...
     'pcaVec', 'pcaSumVec', 'predYTest', ...
-    'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec', 'predYLearnDataTmp_3D');
+    'errorTrainLearn', 'errorValLearn', 'realSplitLearnVec');
 fprintf('保存完毕\n');
 end
 
