@@ -183,6 +183,9 @@ predYTestGPU = logisticHypothesis(XTestNormPcaRealGPU, thetaOriginGPU, predGPU);
 % 学习曲线的结果
 predYLearnTmpGPU = logisticHypothesis(XDataTmpNormPcaRealGPU, thetaMatrixLearnGPU, predGPU);
 predYLearnDataTmp = gather(predYLearnTmpGPU);
+showHy(predYLearnDataTmp, 'predYLearnDataTmp');
+showHy(splitTrain, 'splitTrain');
+showHy(splitLearningCurve, 'splitLearningCurve');
 predYLearnDataTmp_3D = reshape(predYLearnDataTmp, splitTrain, splitTrain, splitLearningCurve);
 
 % 画图
