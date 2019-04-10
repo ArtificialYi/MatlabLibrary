@@ -3,11 +3,10 @@ function [lambdaCurrentGPU, errorMinCurrentGPU] = ...
     thetaInitGPU, maxIterGPU, predGPU, predLambdaGPU)
 %logisticRegFindCurrentMinLambda 逻辑回归找到当前最优lambda
 
-splitLambdaInitGPU = gpuArray(11);
 splitLambdaCurrentGPU = gpuArray(21);
 
 %% 先用等比数列找到范围
-lambdaVecCurrentGPU = logspace(gpuArray(-5), gpuArray(5), splitLambdaInitGPU);
+lambdaVecCurrentGPU = logspace(gpuArray(-5), gpuArray(5), splitLambdaCurrentGPU);
 lambdaLeftCurrentGPU = lambdaVecCurrentGPU(1);
 lambdaRightCurrentGPU = lambdaVecCurrentGPU(end);
 

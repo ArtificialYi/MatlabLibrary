@@ -3,7 +3,7 @@ clear; close all; clc;
 
 %% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testComp_20190410171111.mat'];
+fileName = ['data/', 'data_testComp_20190410172159.mat'];
 load(fileName);
 
 posFlag = 1;
@@ -19,6 +19,13 @@ posTrain = find(YTrain == posFlag);
 negTrain = find(YTrain == negFlag);
 posVal = find(YVal == posFlag); 
 negVal = find(YVal == negFlag);
+
+
+%% 训练结果
+predYOrigin(predYOrigin>=0.5)=1;
+predYOrigin(predYOrigin<0.5)=0;
+tpTn = sum(predYOrigin==YOrigin);
+fprintf('%d个对的, pred:%f\n', tpTn, tpTn/size(YOrigin, 1));
 
 %% 
 plotInitFunc = @(paramRowNum, paramOrigin, paramTrain, paramVal, paramStr) ...
@@ -58,7 +65,7 @@ legend('训练集', '交叉验证集');
 xlabel('数量');
 ylabel('误差');
 fprintf('学习曲线\n');
-%%
+%% 画出当前自由
 subplot(2, 2, 2);
 plot(1:length(pcaVec), pcaSumVec/pcaSumVec(end));
 title('pca曲线');
