@@ -1,13 +1,13 @@
 %% 初始化环境
 clear; close all; clc;
 
-%% 读取数据
 % 读取数据
-fileName = ['data/', 'data_testComp_20190410234926.mat'];
+% 读取数据
+fileName = ['data/', 'data_testSvmGaus_20190411023145.mat'];
 load(fileName);
 
 posFlag = 1;
-negFlag = 0;
+negFlag = -1;
 high = (posFlag+negFlag)/2;
 
 markSize = 4;
@@ -22,12 +22,12 @@ negVal = find(YVal == negFlag);
 
 
 %% 训练结果
-predYOrigin(predYOrigin>=0.5)=1;
-predYOrigin(predYOrigin<0.5)=0;
-tpTn = sum(predYOrigin==YOrigin);
+predYOrigin(predYOrigin>=0)=1;
+predYOrigin(predYOrigin<0)=-1;
+tpTn = sum(predYOrigin(:)==YOrigin(:));
 fprintf('%d个对的, pred:%f\n', tpTn, tpTn/size(YOrigin, 1));
-predYTest(predYTest>=0.5)=1;
-predYTest(predYTest<0.5)=0;
+predYTest(predYTest>=0)=1;
+predYTest(predYTest<0)=0;
 
 %% 
 plotInitFunc = @(paramRowNum, paramOrigin, paramTrain, paramVal, paramStr) ...

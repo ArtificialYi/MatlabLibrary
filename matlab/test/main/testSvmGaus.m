@@ -91,9 +91,11 @@ splitLearningCurveGPU = gpuArray(splitLearningCurve);
 
 %% 基础训练模型
 % 获取核结果
+fprintf('基础训练模型\n');
 kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, gu);
 
 KOriginGPU = kernelFunc(XOriginNormGPU, XOriginNormGPU);
+fprintf('高斯核计算结束\n');
 CTrainGPU = gpuArray(C);
 alphaOriginGPU = gpuArray.zeros(mOrigin, 1);
 tolTrainGPU = gpuArray(tol);
@@ -149,7 +151,9 @@ if isTrain
         pause(1);
         kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
         KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+        fprintf('高斯核-Train-计算结束\n');
         KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+        fprintf('高斯核-Val-计算结束\n');
 
         [CCurrentGPU, errorMinCurrentGPU] = ...
             svmFindCurrentMinC(KTrainGPU, YTrainGPU, ...
