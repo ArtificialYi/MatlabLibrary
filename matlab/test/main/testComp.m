@@ -73,9 +73,10 @@ splitLearningCurveGPU = gpuArray(splitLearningCurve);
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
 
 % pca-gpu
-KGPU = length(STrainGPU);
-for j=1:length(STrainGPU)
-    if STrainGPU(j) == 0
+SVecTmp = diag(STrainGPU);
+KGPU = length(SVecTmp);
+for j=1:length(SVecTmp)
+    if SVecTmp(j) == 0
         KGPU = j - 1;
         break;
     end
@@ -162,8 +163,9 @@ for i=1:length(pVec)
     % 数据pca化
     [UTrainTmpGPU, STrainTmpGPU] = pcaTrainGPU(XTrainNormTmpGPU);
     KGPU = nTmpGPU;
-    for j=1:length(STrainTmpGPU)
-        if STrainTmpGPU(j) == 0
+    STrainVecTmp = diag(STrainTmpGPU);
+    for j=1:length(STrainVecTmp)
+        if STrainVecTmp(j) == 0
             KGPU = j - 1;
             break;
         end
@@ -183,7 +185,7 @@ for i=1:length(pVec)
         logisticRegFindCurrentMinLambda(XTrainNormTmpPcaRealGPU, YTrainGPU, ...
         XValNormTmpPcaRealGPU, YValGPU, ...
         thetaInitTmpGPU, maxIterGPU, predGPU, predLambdaGPU);
-    fprintf('已找到最优组合:%f, %f\n', lambdaCurrentGPU, errorCurrentGPU);
+    fprintf('已找到最优组合:%d, %f, %f\n', pVec(i), lambdaCurrentGPU, errorCurrentGPU);
     
     % 储存结果
     pLambdaVecGPU(i) = lambdaCurrentGPU;
