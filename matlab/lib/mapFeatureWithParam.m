@@ -8,8 +8,12 @@ function XNormPolyNorm = ...
 % muNorm, sigmaNorm, indexNorm 第一次归一化所需参数
 % muPoly, sigmaPoly, indexPoly 第二次归一化所需参数
 
+showHy(indexNorm, 'indexNorm');
+showHy(muNorm, 'muNorm');
+showHy(X, 'X');
 % 清除常量&减去平均值
 XMu = bsxfun(@minus, X(:, indexNorm), muNorm);
+showHy(XMu, 'XMu');
 % 除去标准差
 XNorm = bsxfun(@rdivide, XMu, sigmaNorm);
 
