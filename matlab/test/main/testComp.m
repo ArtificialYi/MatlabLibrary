@@ -1,11 +1,10 @@
-function [outputArg1,outputArg2] = testComp(p, lambda, K, pLeft, pRight, maxIter)
+function [outputArg1,outputArg2] = testComp(p, lambda, pLeft, pRight, maxIter)
 %testComp 比赛用的函数
 
 %% str2double
 maxIter = str2double(maxIter);
 p = str2double(p);
 lambda = str2double(lambda);
-K = str2double(K);
 pLeft = str2double(pLeft);
 pRight = str2double(pRight);
 
@@ -63,10 +62,8 @@ YTrainGPU = gpuArray(YTrain);
 YValGPU = gpuArray(YVal);
 
 % 默认参数
-thetaInitGPU = gpuArray.zeros(nTrain+1, 1);
 lambdaGPU = gpuArray(lambda);
 maxIterGPU = gpuArray(maxIter);
-KGPU = gpuArray(K);
 
 % 学习曲线
 splitLearningCurve = 50;
@@ -83,6 +80,8 @@ for j=1:length(STrainGPU)
         break;
     end
 end
+fprintf('pca提取结果:%d->%d\n', length(STrainGPU), KGPU);
+thetaInitGPU = gpuArray.zeros(KGPU+1, 1);
 XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, KGPU);
 XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, KGPU);
 XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, KGPU);
@@ -111,6 +110,10 @@ pcaVec = gather(pcaVecGPU);
 pcaSumVec = gather(pcaSumVecGPU);
 
 %% 基础训练模型
+showHy(XOriginNormPcaRealGPU, 'XOriginNormPcaRealGPU');
+showHy(YOriginGPU, 'YOriginGPU');
+showHy(thetaInitGPU, 'thetaInitGPU');
+
 [thetaOriginGPU, ~] = ...
     logisticRegTrainGPU(XOriginNormPcaRealGPU, YOriginGPU, thetaInitGPU, lambdaGPU, maxIterGPU, predGPU);
 
