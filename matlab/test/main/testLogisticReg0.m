@@ -103,8 +103,8 @@ pcaSumVec = gather(pcaSumVecGPU);
 %% 边界线数据准备
 splitTrain = 101;
 %% pca边界
-minXPca = min(XOriginNormPca(:, 1:min(end,3)));
-maxXPca = max(XOriginNormPca(:, 1:min(end,3)));
+minXPca = min(XOriginNormPca(:, 1:min(end,2)));
+maxXPca = max(XOriginNormPca(:, 1:min(end,2)));
 
 lenDataPca = length(minXPca);
 splitTrainPcaVec = zeros(1, lenDataPca)+splitTrain;
@@ -128,8 +128,8 @@ end
 matrixXPca = gather(matrixXPcaGPU);
 
 %% data边界
-minX = min(XOrigin(:, 1:min(end,3)));
-maxX = max(XOrigin(:, 1:min(end,3)));
+minX = min(XOrigin(:, 1:min(end,2)));
+maxX = max(XOrigin(:, 1:min(end,2)));
 
 lenData = size(minX, 2);
 splitTrainDataVec = zeros(1, lenData)+splitTrain;
