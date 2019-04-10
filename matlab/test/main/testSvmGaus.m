@@ -130,6 +130,44 @@ errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitVecLearn = gather(realSplitVecLearnGPU);
 
+%% 查找最优解
+% 尝试找到全局最优C&gu
+guVec = linspace(guLeft, guRight, 21);
+guVec = guVec(2:end);
+mGu = size(guVec, 2);
+
+predCurrentGPU = gpuArray(1e-3);
+tolCurrentGPU = gpuArray(tol);
+maxIterCurrentGPU = gpuArray(maxIter);
+
+errorMinVec = zeros(mGu, 1);
+CMinVec = zeros(mGu, 1);
+
+if isTrain
+    for i=1:length(guVec)
+        fprintf('1s后执行gu:%f\n', guVec(i));
+        pause(1);
+        kernelFunc = @(X1, X2) svmKernelGaussian(X1, X2, guVec(i));
+        KTrainGPU = kernelFunc(XTrainNormGPU, XTrainNormGPU);
+        KValGPU = kernelFunc(XTrainNormGPU, XValNormGPU);
+
+        [CCurrentGPU, errorMinCurrentGPU] = ...
+            svmFindCurrentMinC(KTrainGPU, YTrainGPU, ...
+            KValGPU, YValGPU, tolCurrentGPU, maxIterCurrentGPU, predCurrentGPU);
+        errorMinVec(i) = gather(errorMinCurrentGPU);
+        CMinVec(i) = gather(CCurrentGPU);
+    end
+end
+
+% 找到最优C&gu
+indexMinVec = indexMinForMulti(errorMinVec);
+
+guMinVec = guVec(indexMinVec);
+CMinVec = CMinVec(indexMinVec);
+% 直接用最大的那个就完事了
+guMin = guMinVec(end);
+CMin = CMinVec(end);
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testSvmGaus_%s.mat', datestr(now, 'yyyymmddHHMMss'));
@@ -137,6 +175,7 @@ fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
     'XOrigin', 'XTrain', 'XVal', 'XTest', ...
     'YOrigin', 'YTrain', 'YVal', 'predYOrigin', 'predYTest', 'modelOriginCPU', ...
-    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn');
+    'realSplitVecLearn', 'errorTrainLearn', 'errorValLearn', ...
+    'guMin', 'CMin', 'guMinVec', 'CMinVec');
 fprintf('保存完毕\n');
 end
