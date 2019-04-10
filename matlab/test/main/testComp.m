@@ -76,8 +76,12 @@ splitLearningCurveGPU = gpuArray(splitLearningCurve);
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
 
 % pca-gpu
-if KGPU == 0
-    KGPU = nTrainGPU;
+KGPU = length(STrainGPU);
+for j=1:length(STrainGPU)
+    if STrainGPU(j) == 0
+        KGPU = j - 1;
+        break;
+    end
 end
 XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, KGPU);
 XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, KGPU);
