@@ -74,10 +74,10 @@ splitLearningCurveGPU = gpuArray(splitLearningCurve);
 [UTrainGPU, STrainGPU] = pcaTrainGPU(XTrainNormGPU);
 
 % pca-gpu
-XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, nGPU);
-XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, nGPU);
-XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, nGPU);
-XTestNormPcaGPU = data2pca(XTestNormGPU, UTrainGPU, nGPU);
+XOriginNormPcaGPU = data2pca(XOriginNormGPU, UTrainGPU, nTrainGPU);
+XTrainNormPcaGPU = data2pca(XTrainNormGPU, UTrainGPU, nTrainGPU);
+XValNormPcaGPU = data2pca(XValNormGPU, UTrainGPU, nTrainGPU);
+XTestNormPcaGPU = data2pca(XTestNormGPU, UTrainGPU, nTrainGPU);
 
 % pca-cpu
 XOriginNormPca = gather(XOriginNormPcaGPU);
@@ -126,8 +126,7 @@ errorTrainLearn = gather(errorTrainLearnGPU);
 errorValLearn = gather(errorValLearnGPU);
 realSplitLearnVec = gather(realSplitLearnVecGPU);
 thetaMatrixLearn = gather(thetaMatrixLearnGPU);
-    
-    
+
 %% save
 % 获取文件名
 fileName = sprintf('data/data_testComp_%s.mat', datestr(now, 'yyyymmddHHMMss'));
