@@ -9,7 +9,7 @@ guLeft = str2double(guLeft);
 guRight = str2double(guRight);
 isTrain = str2double(isTrain);
 
-tol = 1e-8;
+tol = 1e-5;
 
 %% 先读取数据
 data = load('resource/pfm_data.mat');
