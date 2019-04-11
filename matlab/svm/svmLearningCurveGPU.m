@@ -35,9 +35,10 @@ for i=1:realSplitGPU
     
     realSplitVecGPU(i) = currentIndexGPU;
     
-    errorTrainGPU(i) = svmCost(KTrainTmpGPU, YTmpGPU, KTrainTmpGPU, YTmpGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
-    errorValGPU(i) = svmCost(KTrainTmpGPU, YTmpGPU, KValTmpGPU, YValGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
-    fprintf('学习曲线-当前数据量:%d, %f\n', currentIndexGPU, errorValGPU(i));
+    [errorTrainGPU(i), pointTrain] = svmCost(KTrainTmpGPU, YTmpGPU, KTrainTmpGPU, YTmpGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
+    [errorValGPU(i), pointVal] = svmCost(KTrainTmpGPU, YTmpGPU, KValTmpGPU, YValGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
+    fprintf('学习曲线-当前数据量:%d, %f, %f, %f\n', ...
+        currentIndexGPU, errorValGPU(i), pointTrain, pointVal);
 end
 
 end
