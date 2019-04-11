@@ -21,7 +21,7 @@ while CRightCurrentGPU - CLeftCurrentGPU > predCurrentGPU
         svmTrainGPUForCVec(KTrainGPU, YTrainGPU, KValGPU, YValGPU, CVecCurrentGPU(2:end-1), tolCurrentGPU, maxIterCurrentGPU);
     % 将左右极限拼上去
     errorValCurrentTmpGPU = [0 0 errorLeft;errorValCurrentTmpGPU;0 0 errorRight];
-    indexCurrentGPU = indexMinForVec(errorValCurrentTmpGPU(:, 3));
+    indexCurrentGPU = indexMinForMulti(errorValCurrentTmpGPU(:, 3));
     if length(indexCurrentGPU) > 1
         indexCurrentGPU = indexCurrentGPU(length(indexCurrentGPU));
     end
