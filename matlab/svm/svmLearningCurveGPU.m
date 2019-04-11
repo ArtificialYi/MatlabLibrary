@@ -25,7 +25,6 @@ realSplitVecGPU = gpuArray.zeros(realSplitGPU, 1);
 
 for i=1:realSplitGPU
     currentIndexGPU = floor(mGPU * i / realSplitGPU);
-    fprintf('学习曲线-当前数据量:%d\n', currentIndexGPU);
     XTmpGPU = XGPU(1:currentIndexGPU, :);
     YTmpGPU = YGPU(1:currentIndexGPU);
     alphaTmpGPU = gpuArray.zeros(currentIndexGPU, 1);
@@ -38,6 +37,7 @@ for i=1:realSplitGPU
     
     errorTrainGPU(i) = svmCost(KTrainTmpGPU, YTmpGPU, KTrainTmpGPU, YTmpGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
     errorValGPU(i) = svmCost(KTrainTmpGPU, YTmpGPU, KValTmpGPU, YValGPU, modelTmpGPU.gpu.alpha, modelTmpGPU.gpu.b, 0);
+    fprintf('学习曲线-当前数据量:%d, %f\n', currentIndexGPU, errorValGPU(i));
 end
 
 end
