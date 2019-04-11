@@ -101,8 +101,10 @@ alphaOriginGPU = gpuArray.zeros(mOrigin, 1);
 tolTrainGPU = gpuArray(tol);
 maxIterTrainGPU = gpuArray(maxIter);
 
+tic;
 modelOriginGPU = ...
     svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaOriginGPU, tolTrainGPU, maxIterTrainGPU);
+fprintf('第一次训练结果为:%f\n', toc);
 
 % 原始模型结果
 KOrigin = gather(KOriginGPU);
