@@ -101,10 +101,8 @@ alphaOriginGPU = gpuArray.zeros(mOrigin, 1);
 tolTrainGPU = gpuArray(tol);
 maxIterTrainGPU = gpuArray(maxIter);
 
-tic
 modelOriginGPU = ...
     svmTrainGPU(KOriginGPU, YOriginGPU, CTrainGPU, alphaOriginGPU, tolTrainGPU, maxIterTrainGPU);
-fprintf('本次训练运行时间:%f\n', toc);
 
 % 原始模型结果
 KOrigin = gather(KOriginGPU);
@@ -136,8 +134,8 @@ realSplitVecLearn = gather(realSplitVecLearnGPU);
 
 %% 查找最优解
 % 尝试找到全局最优C&gu
-guVec = linspace(guLeft, guRight, 21);
-guVec = guVec(2:end);
+guVec = logspace(guLeft, guRight, 11);
+guVec = guVec(1:end);
 mGu = size(guVec, 2);
 
 predCurrentGPU = gpuArray(1e-3);
