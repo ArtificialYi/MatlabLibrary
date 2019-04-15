@@ -3,16 +3,16 @@ clear; close all; clc;
 
 % 读取数据
 % 读取数据
-fileName = ['data/', 'data_testSvmGaus_20190411023145.mat'];
+fileName = ['data/', 'data_testSvmGaus_20190411175630.mat'];
 load(fileName);
 
 posFlag = 1;
 negFlag = -1;
 high = (posFlag+negFlag)/2;
 
-markSize = 4;
 
 % 数据准备
+markSize = 4;
 posOrigin = find(YOrigin == posFlag); 
 negOrigin = find(YOrigin == negFlag);
 posTrain = find(YTrain == posFlag); 
