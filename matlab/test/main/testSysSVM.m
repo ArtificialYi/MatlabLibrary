@@ -88,7 +88,8 @@ if isTrain
     end
     
     %% 查找当前最优解
-    vecGu = logspace(guLeft, guRight, 11);
+    vecGu = linspace(guLeft, guRight, 101);
+    vecGu = vecGu(2:end);
     seed = floor(rand()*1e9);
     svmFunc = @(paramC, paramGu) valLossSVM(XOriginBinaryRand, YOriginRand, ...
         paramC, paramGu, maxIter, seed);
