@@ -102,7 +102,7 @@ if isTrain
         CPred = 1e-3;
         % 1. 先用等比数列查找范围
         split = 11;
-        vecC = logspace(guLeft, guRight, split);
+        vecC = logspace(-5, 5, split);
         CLeft = vecC(1);
         CRight = vecC(end);
         indexCurrent = 1;
