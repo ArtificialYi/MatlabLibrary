@@ -87,11 +87,6 @@ if isTrain
         vecErrorVal(i) = hingeLossVal;
     end
     
-    %% 打印学习曲线
-    figure(2);
-    plot(vecSplit, vecErrorTrain, vecSplit, vecErrorVal);
-    legend('训练集', '交叉验证集');
-    
     %% 查找当前最优解
     vecGu = logspace(guLeft, guRight, 11);
     seed = floor(rand()*1e9);
@@ -113,11 +108,11 @@ if isTrain
 
         % 2. 将左右极限保存下来
         [errorCLeft, errorCLeftTrain] = svmFunc(vecC(1), vecGu(i));
-        if errorCLeftTrain > 0.1
+        if errorCLeftTrain > 0.09
             errorCLeft = errorCLeft + 1;
         end
         [errorCRight, errorCRightTrain] = svmFunc(vecC(end), vecGu(i));
-        if errorCRightTrain > 0.1
+        if errorCRightTrain > 0.09
             errorCRight = errorCRight + 1;
         end
         
@@ -126,7 +121,7 @@ if isTrain
             errorCVec = vecC;
             for j=2:length(vecC)-1
                 [errorCVec(j), errorTrain] = svmFunc(vecC(j), vecGu(i));
-                if errorTrain > 0.1
+                if errorTrain > 0.09
                     errorCVec(j) = errorCVec(j) + 1;
                 end
                 fprintf('当前C:%f, %f, %f\n', vecC(j), errorCVec(j), errorTrain);
@@ -167,6 +162,15 @@ if isTrain
     
     
 end
+
+% 获取文件名
+fileName = sprintf('data/data_testSvmGaus_%s.mat', datestr(now, 'yyyymmddHHMMss'));
+fprintf('正在保存文件:%s\n', fileName(6:end));
+save(fileName, ...
+    'predRes', 'lossRes', ...
+    'vecSplit', 'vecErrorTrain', 'vecErrorVal', ...
+    'minGu', 'minC', 'minError');
+fprintf('保存完毕\n');
 
 function [errorVal, errorTrain] = valLossSVM(paramX, paramY, paramC, paramGu, maxIter, seed)
     MdlSVM = fitcsvm(paramX, paramY, ...
