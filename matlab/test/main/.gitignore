@@ -4,5 +4,6 @@
 # 忽略当前目录下的所有数据文件
 data/*.mat
 data/*.txt
+data/*.csv
 ./*.mat
 ./*.txt
