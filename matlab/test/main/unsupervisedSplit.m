@@ -7,7 +7,7 @@ KMax = floor(sqrt(m));
 
 errorElbowVec = zeros(KMax, 1);
 
-YMatrixGPU = zeros(m, KMax);
+YMatrixGPU = gpuArray.zeros(m, KMax);
 % 手肘法
 for i=1:KMax
     [~, YTmpGPU, errorTmpGPU] = func(XGPU, i);
