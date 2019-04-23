@@ -8,8 +8,8 @@ nBinaryNew = size(colIndexMatrix, 1);
 
 % 点矩阵初始化
 centroidsMatrix = size(nBinaryNew * KMax, p);
-centroidsIndexMatrix = size(nBinaryNew, 2);
-KResMatrix = size(mNorm, nBinaryNew);
+centroidsIndexMatrix = zeros(nBinaryNew, 2);
+KResMatrix = zeros(mNorm, nBinaryNew);
 
 indexBegin = 1;
 for i=1:nBinaryNew
@@ -19,7 +19,7 @@ for i=1:nBinaryNew
     
     centroidsMatrix(indexBegin:indexBegin+K-1, :) = gather(centroidsGPU);
     centroidsIndexMatrix(i, :) = [indexBegin, indexBegin+K-1];
-    KResMatrix(:, i) = YGPU;
+    KResMatrix(:, i) = gather(YGPU);
     indexBegin = indexBegin + K;
 end
 centroidsMatrix = centroidsMatrix(1:indexBegin-1, :);

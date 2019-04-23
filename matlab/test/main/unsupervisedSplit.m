@@ -28,7 +28,7 @@ end
 [~, rightVec] = matrixMove(errorElbowVec);
 rightVec(rightVec==0) = 1e8;
 disp(errorElbowVec);
-disp(errorElbowVec.*(1:KMax)');
+disp(errorElbowVec.*((1:KMax).^2)');
 vecTmp = errorElbowVec ./ rightVec
 indexMin = indexMinForMulti(vecTmp);
 K = indexMin(1);
