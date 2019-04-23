@@ -12,6 +12,10 @@ centroidsMatrixGPU = gpuArray.zeros((1+KMax)*KMax/2, n);
 indexBegin = 1;
 for i=1:KMax
     [centroidsTmpGPU, YTmpGPU, errorTmpGPU, KGPU] = func(XGPU, i);
+    if KGPU < i
+        errorElbowVec(i:KMax) = errorElbowVec(i);
+        break;
+    end
     
     indexEnd = indexBegin + i - 1;
     centroidsMatrixGPU(indexBegin:indexEnd, :) = centroidsTmpGPU;
@@ -19,10 +23,6 @@ for i=1:KMax
     indexBegin = indexEnd + 1;
     
     errorElbowVec(i) = gather(errorTmpGPU);
-    if KGPU < i
-        errorElbowVec(i+1:KMax) = errorElbowVec(i);
-        break;
-    end
 end
 
 [~, rightVec] = matrixMove(errorElbowVec);
