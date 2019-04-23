@@ -1,5 +1,5 @@
 function [centroids, KReal] = findInitPointRand(XGPU, KGPU)
-%findPointRand 在X上寻找K个初始点，使用最远距离方案
+%findPointRand 在X上寻找K个初始点
 
 [~, n] = size(XGPU);
 
