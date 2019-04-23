@@ -28,10 +28,13 @@ end
 [~, rightVec] = matrixMove(errorElbowVec);
 rightVec(rightVec==0) = 1e8;
 disp(errorElbowVec);
-disp(errorElbowVec.*((1:KMax).^2)');
 vecTmp = errorElbowVec ./ rightVec
 indexMin = indexMinForMulti(vecTmp);
 K = indexMin(1);
+
+vecTmp2 = errorElbowVec.*((1:KMax))'
+[~, rightVec2] = matrixMove(vecTmp2);
+vecTmp3 = vecTmp2 ./ rightVec2
 
 % 将点集合、分布集合、集群个数返回
 YGPU = YMatrixGPU(:, K);
