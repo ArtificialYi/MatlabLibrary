@@ -31,12 +31,15 @@ indexVecRand = randperm(mOrigin);
 [YTrain, YVal, ~] = ...
     splitData(YOrigin, indexVecRand, trainPoint, valPoint);
 
-% 特征扩充
+%% 特征扩充
 % 将所有枚举型特征扩充为2进制特征
 lenMax = 30;
 [XOriginBinary, data2binaryFunc] = binaryFeature(XOrigin, lenMax);
 XTrainBinary = data2binaryFunc(XTrainSplit);
 XValBinary = data2binaryFunc(XValSplit);
+
+% 将所有特征离散化-K-means
+
 
 %% 使用SVM基础训练
 rng('shuffle');
