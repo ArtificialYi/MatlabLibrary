@@ -19,10 +19,12 @@ for i=1:KMax
     end
 end
 
-[~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
-[~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
+[leftVec, rightVec] = matrixMove(errorElbowVec);
+rightVec(rightVec==0) = 1e8;
+vecTmp = leftVec ./ rightVec;
+indexMin = indexMinForMulti(vecTmp);
+K = indexMin(1) + 1;
 
-[~, K] = max(dV2ErrorElbowVec);
 YGPU = YMatrixGPU(:, K);
 disp(errorElbowVec);
 fprintf('预计的K值为:%d\n', K);
