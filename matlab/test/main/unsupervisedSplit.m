@@ -10,9 +10,12 @@ errorElbowVec = zeros(KMax, 1);
 YMatrixGPU = gpuArray.zeros(m, KMax);
 % 手肘法
 for i=1:KMax
-    [~, YTmpGPU, errorTmpGPU] = func(XGPU, i);
+    [~, YTmpGPU, errorTmpGPU, KGPU] = func(XGPU, i);
     YMatrixGPU(:, i) = YTmpGPU;
     errorElbowVec(i) = gather(errorTmpGPU);
+    if KGPU < i
+        break;
+    end
 end
 
 [~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
@@ -20,6 +23,8 @@ end
 
 [~, K] = max(dV2ErrorElbowVec);
 YGPU = YMatrixGPU(:, K);
+
+fprintf('预计的K值为:%d\n', K);
 
 end
 
