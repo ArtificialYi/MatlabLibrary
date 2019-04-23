@@ -19,11 +19,11 @@ for i=1:KMax
     end
 end
 
-[leftVec, rightVec] = matrixMove(errorElbowVec);
+[~, rightVec] = matrixMove(errorElbowVec);
 rightVec(rightVec==0) = 1e8;
-vecTmp = leftVec ./ rightVec;
+vecTmp = errorElbowVec ./ rightVec;
 indexMin = indexMinForMulti(vecTmp);
-K = indexMin(1) + 1;
+K = indexMin(1);
 
 YGPU = YMatrixGPU(:, K);
 disp(errorElbowVec);
