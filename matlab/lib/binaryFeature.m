@@ -7,7 +7,7 @@ colIndexMatrix = vec2subMatrix(1:nNorm, p);
 nBinaryNew = size(colIndexMatrix, 1);
 
 % 点矩阵初始化
-centroidsMatrix = gpuArray.size(nBinaryNew * KMax, p);
+centroidsMatrix = size(nBinaryNew * KMax, p);
 centroidsIndexMatrix = size(nBinaryNew, 2);
 KResMatrix = size(mNorm, nBinaryNew);
 
@@ -17,7 +17,7 @@ for i=1:nBinaryNew
     fprintf('当前特征离散化进度:%d, %d\n', nBinaryNew, i);
     [centroidsGPU, YGPU, K] = unsupervisedSplit(X(:, colIndexMatrix(i, :)), splitFunc, KMax);
     
-    centroidsMatrix(indexBegin:indexBegin+K-1, :) = centroidsGPU;
+    centroidsMatrix(indexBegin:indexBegin+K-1, :) = gather(centroidsGPU);
     centroidsIndexMatrix(i, :) = [indexBegin, indexBegin+K-1];
     KResMatrix(:, i) = YGPU;
     indexBegin = indexBegin + K;
