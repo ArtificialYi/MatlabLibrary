@@ -4,6 +4,7 @@ function [centroids, KReal] = findInitPointRand(XGPU, KGPU)
 [~, n] = size(XGPU);
 
 centroids = gpuArray.zeros(KGPU, n);
+KReal = KGPU;
 
 for i=1:KGPU
     m = size(XGPU, 1);
