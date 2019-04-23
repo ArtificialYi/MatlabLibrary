@@ -32,35 +32,45 @@ indexVecRand = randperm(mOrigin);
     splitData(YOrigin, indexVecRand, trainPoint, valPoint);
 
 %% 特征扩充
-% 将所有枚举型特征扩充为2进制特征
-lenMax = 30;
-[XOriginBinary, data2binaryFunc] = binaryFeature(XOrigin, lenMax);
-XTrainBinary = data2binaryFunc(XTrainSplit);
-XValBinary = data2binaryFunc(XValSplit);
+%% 将所有特征离散化-K-means
+% 特征归一化
+[XOriginNorm, data2normFuncOrigin] = data2featureWithNormalize(XOrigin, 1);
 
-% 将所有特征离散化-K-means
+% 特征离散化
+kMeansFunc = @(paramX, paramK) kMeansTrainRandGPU(paramX, paramK, maxIter);
+kMeansPredFunc = @(paramX, paramCentroids) kMeansTrainGPU(paramX, paramCentroids, 1);
+KMax = 30;
+p = 1;
+% 离散化函数
+[XOriginNormBinaryP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMeansFunc, kMeansPredFunc);
+% 01化函数
+XOriginNormBinaryP1_01 = K201(XOriginNormBinaryP1);
+
+% 最终特征归一化
+XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
+[XOriginFinalNorm, data2normFuncFinal] = data2featureWithNormalize(XOriginFinal, 1);
 
 
 %% 使用SVM基础训练
 rng('shuffle');
-SVMModel = fitcsvm(XOriginBinary, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
+SVMModel = fitcsvm(XOriginFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
-[predY, scoreOrigin] = predict(SVMModel, XOriginBinary);
+[predY, scoreOrigin] = predict(SVMModel, XOriginFinalNorm);
 CVSVMModel = crossval(SVMModel);
 classLoss = kfoldLoss(CVSVMModel);
 fprintf('%f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
-lossRes = loss(SVMModel, XOriginBinary, YOrigin, 'LossFun','binodeviance');
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
 fprintf('二项异常:%f\n', lossRes);
-lossRes = loss(SVMModel, XOriginBinary, YOrigin, 'LossFun','hinge');
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
 if isTrain
     %% 学习曲线
     % 0. 将数据随机化
-    XOriginBinaryRand = XOriginBinary(indexVecRand, :);
+    XOriginBinaryRand = XOriginFinalNorm(indexVecRand, :);
     YOriginRand = YOrigin(indexVecRand);
     
     numSplit = ceil(sqrt(mOrigin));

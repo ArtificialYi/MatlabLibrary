@@ -1,43 +1,42 @@
-function [XFeature, func] = binaryFeature(X, lenMax)
+function [KResMatrix, func] = binaryFeature(X, KMax, p, splitFunc, predFunc)
 %binaryFeature 将所有枚举型特征扩充为2进制特征
 
-[mX, nX] = size(X);
+[mNorm, nNorm] = size(X);
+% 列矩阵
+colIndexMatrix = vec2subMatrix(1:nNorm, p);
+nBinaryNew = size(colIndexMatrix, 1);
 
-matrixFeatureTmp = zeros(mX,0);
+% 点矩阵初始化
+centroidsMatrix = size(nBinaryNew * KMax, p);
+centroidsIndexMatrix = size(nBinaryNew, 2);
+KResMatrix = size(mNorm, nBinaryNew);
 
-recoverMatrix = zeros(0, 3);
-recoverVec = zeros(0, 1);
-lenRecoverV = 0;
-
-for i=1:nX
-    VTrainTmp = unique(X(:, i));
-    lenVTrainTmp = length(VTrainTmp);
-    if lenVTrainTmp > 2 && lenVTrainTmp < lenMax
-        matrixTrainTmp = VTrainTmp(:)' == X(:, i);
-        matrixFeatureTmp(:, end+1:end+lenVTrainTmp) = matrixTrainTmp;
-        
-        % 恢复用数据
-        recoverMatrix(end+1, :) = [i, lenRecoverV+1, lenRecoverV+lenVTrainTmp];
-        recoverVec(end+1:end+lenVTrainTmp) = VTrainTmp(:);
-        lenRecoverV = length(recoverVec);
-    end
+indexBegin = 1;
+for i=1:nBinaryNew
+    % 某个需要计算集群的数据集，存储点矩阵、分布向量、
+    [centroidsGPU, YGPU, K] = unsupervisedSplit(X(:, colIndexMatrix(i, :)), splitFunc, KMax);
+    
+    centroidsMatrix(indexBegin:indexBegin+K-1, :) = centroidsGPU;
+    centroidsIndexMatrix(i, :) = [indexBegin, indexBegin+K-1];
+    KResMatrix(:, i) = YGPU;
+    indexBegin = indexBegin + K;
 end
-
-% 扩充后的特征
-XFeature = [X matrixFeatureTmp];
+centroidsMatrix = centroidsMatrix(1:indexBegin-1, :);
 
 % 扩展用的函数
-func = @(paramX) data2binaryData(paramX, recoverVec, recoverMatrix);
-function XBinary = data2binaryData(XOrigin, recoverVecTmp, recoverMatrixTmp)
-    m = size(XOrigin, 1);
+func = @(paramX) data2binaryData(paramX, colIndexMatrix, centroidsIndexMatrix, centroidsMatrix, predFunc);
+function XBinary = data2binaryData(XTest, colIndexMatrixTmp, centroidsIndexMatrixTmp, centroidsMatrixTmp, funcTmp)
+    mXTest = size(XTest, 1);
+    nBinary = size(colIndexMatrixTmp, 1);
     
-    dataBinaryTmp = zeros(m, 0);
-    for j=1:size(recoverMatrixTmp, 1)
-        lenVec = recoverMatrixTmp(j, 3) - recoverMatrixTmp(j, 2) + 1;
-        dataBinaryTmp(:, end+1:end+lenVec) = XOrigin(:, recoverMatrixTmp(j, 1)) == ...
-            recoverVecTmp(recoverMatrixTmp(j, 2):recoverMatrixTmp(j, 3))';
+    % 给XBinary赋值
+    XBinary = zeros(mXTest, nBinary);
+    for j=1:nBinary
+        indexVec = centroidsIndexMatrixTmp(j, :);
+        centroidsTmp = centroidsMatrixTmp(indexVec(1):indexVec(2), :);
+        [~, KPred] = funcTmp(XTest(:, colIndexMatrixTmp(j, :)), centroidsTmp);
+        XBinary(:, j) = KPred;
     end
-    XBinary = [XOrigin dataBinaryTmp];
 end
 
 end
