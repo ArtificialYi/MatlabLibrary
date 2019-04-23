@@ -50,7 +50,6 @@ XOriginNormBinaryP1_01 = K201(XOriginNormBinaryP1);
 XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
 [XOriginFinalNorm, data2normFuncFinal] = data2featureWithNormalize(XOriginFinal, 1);
 
-
 %% 使用SVM基础训练
 rng('shuffle');
 SVMModel = fitcsvm(XOriginFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
@@ -101,7 +100,7 @@ if isTrain
     end
     
     %% 查找当前最优解
-    vecGu = linspace(guLeft, guRight, 101);
+    vecGu = linspace(guLeft, guRight, guSplit);
     vecGu = vecGu(2:end);
     seed = floor(rand()*1e9);
     svmFunc = @(paramC, paramGu) valLossSVM(XOriginBinaryRand, YOriginRand, ...
