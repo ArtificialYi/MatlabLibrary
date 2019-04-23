@@ -17,6 +17,7 @@ for i=1:KMax
         break;
     end
 end
+errorElbowVec(KGPU+1:KMax) = errorElbowVec(KGPU);
 
 [~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
 [~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
