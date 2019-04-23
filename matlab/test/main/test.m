@@ -2,8 +2,8 @@
 clear; close all; clc;
 
 %% 先读取数据
-begin = 0.84;
-vec = (ceil(350*begin):floor(350*(begin+0.01)))';
-fprintf('%.6f %d\n', [vec/350 vec]');
+vec = [1 0.5 0.3 0.2 0.1 0];
+vec2 = 1:6;
 
-plot(vec, vec/350);
+plot(vec2, vec);
+

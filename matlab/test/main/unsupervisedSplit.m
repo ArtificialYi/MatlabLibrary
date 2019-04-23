@@ -14,17 +14,17 @@ for i=1:KMax
     YMatrixGPU(:, i) = YTmpGPU;
     errorElbowVec(i) = gather(errorTmpGPU);
     if KGPU < i
+        errorElbowVec(i+1:KMax) = errorElbowVec(i);
         break;
     end
 end
-errorElbowVec(KGPU+1:KMax) = errorElbowVec(KGPU);
 
 [~, dV1ErrorElbowVec] = indexMinForMulti(errorElbowVec);
 [~, dV2ErrorElbowVec] = indexMinForMulti(dV1ErrorElbowVec);
 
 [~, K] = max(dV2ErrorElbowVec);
 YGPU = YMatrixGPU(:, K);
-
+disp(errorElbowVec);
 fprintf('预计的K值为:%d\n', K);
 
 end
