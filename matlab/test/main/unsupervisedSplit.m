@@ -27,14 +27,15 @@ end
 
 [~, rightVec] = matrixMove(errorElbowVec);
 rightVec(rightVec==0) = 1e8;
-vecTmp = errorElbowVec ./ rightVec;
+disp(errorElbowVec);
+disp(errorElbowVec.*(1:KMax)');
+vecTmp = errorElbowVec ./ rightVec
 indexMin = indexMinForMulti(vecTmp);
 K = indexMin(1);
 
 % 将点集合、分布集合、集群个数返回
 YGPU = YMatrixGPU(:, K);
 centroidsGPU = centroidsMatrixGPU(K*(K-1)/2+1:K*(K+1)/2, :);
-disp(errorElbowVec);
 fprintf('预计的K值为:%d\n', K);
 
 end

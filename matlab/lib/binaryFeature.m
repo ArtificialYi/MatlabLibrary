@@ -7,13 +7,14 @@ colIndexMatrix = vec2subMatrix(1:nNorm, p);
 nBinaryNew = size(colIndexMatrix, 1);
 
 % 点矩阵初始化
-centroidsMatrix = size(nBinaryNew * KMax, p);
+centroidsMatrix = gpuArray.size(nBinaryNew * KMax, p);
 centroidsIndexMatrix = size(nBinaryNew, 2);
 KResMatrix = size(mNorm, nBinaryNew);
 
 indexBegin = 1;
 for i=1:nBinaryNew
-    % 某个需要计算集群的数据集，存储点矩阵、分布向量、
+    % 某个需要计算集群的数据集，存储点矩阵、分布向量
+    fprintf('当前特征离散化进度:%d, %d\n', nBinaryNew, i);
     [centroidsGPU, YGPU, K] = unsupervisedSplit(X(:, colIndexMatrix(i, :)), splitFunc, KMax);
     
     centroidsMatrix(indexBegin:indexBegin+K-1, :) = centroidsGPU;
