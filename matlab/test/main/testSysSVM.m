@@ -52,13 +52,29 @@ XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
 
 %% 使用SVM基础训练
 rng('shuffle');
+% 原始特征
+SVMModel = fitcsvm(XOriginNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
+    'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
+
+[predY, scoreOrigin] = predict(SVMModel, XOriginFinalNorm);
+CVSVMModel = crossval(SVMModel);
+classLoss = kfoldLoss(CVSVMModel);
+fprintf('原始特征: %f\n', classLoss);
+predRes = sum(predY==YOrigin)/size(YOrigin, 1);
+fprintf('准确率:%f\n', predRes);
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
+fprintf('二项异常:%f\n', lossRes);
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
+fprintf('铰链:%f\n', lossRes);
+
+% 离散化特征
 SVMModel = fitcsvm(XOriginFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
 [predY, scoreOrigin] = predict(SVMModel, XOriginFinalNorm);
 CVSVMModel = crossval(SVMModel);
 classLoss = kfoldLoss(CVSVMModel);
-fprintf('%f\n', classLoss);
+fprintf('离散化特征: %f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
 lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
@@ -172,8 +188,6 @@ if isTrain
     minC = vecMinC(indexCurrent);
     minError = vecMinError(indexCurrent);
     fprintf('最小gu:%f\n最优C:%f\n最小error:%f\n', minGu, minC, minError);
-    
-    
 end
 
 % 获取文件名

@@ -25,16 +25,23 @@ for i=1:KMax
     errorElbowVec(i) = gather(errorTmpGPU);
 end
 
-[~, rightVec] = matrixMove(errorElbowVec);
-rightVec(rightVec==0) = 1e8;
-disp(errorElbowVec);
-vecTmp = errorElbowVec ./ rightVec
-indexMin = indexMinForMulti(vecTmp);
-K = indexMin(1);
-
-vecTmp2 = errorElbowVec.*((1:KMax))'
-[~, rightVec2] = matrixMove(vecTmp2);
-vecTmp3 = vecTmp2 ./ rightVec2
+% 找到最小值
+[errorMin, indexMin] = min(errorElbowVec);
+% 如果可以完美分割所有集合
+if errorMin == 0
+    K = indexMin;
+else
+    % 先计算每个点的斜率（导数）
+    errorElbowVec2 = errorElbowVec.*((1:KMax))';
+    % 先计算每个点的斜率（导数）
+    [~, ~, errorDv] = indexMinForMulti(errorElbowVec2);
+    % 通过斜率计算夹角，如果小于0，+pi
+    thetaVec = atan(errorDv);
+    % 计算夹角的斜率(导数),找到所有大于0的斜率中，最大的
+    [~, ~, thetaDv] = indexMinForMulti(thetaVec);
+    % 取最大值即为手肘法的K值
+    [~, K] = max(thetaDv);
+end
 
 % 将点集合、分布集合、集群个数返回
 YGPU = YMatrixGPU(:, K);

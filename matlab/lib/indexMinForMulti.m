@@ -1,10 +1,13 @@
-function [indexMinVec, dVMatrix] = indexMinForMulti(M3)
+function [indexMinVec, dVMatrix, dVVec] = indexMinForMulti(M3)
 %indexMinFor3 流式多维数组中的最小值所在的索引
 %   此处显示详细说明
 
 % 多轴长度
 lenVec = size(M3);
 n = length(lenVec);
+
+dVVec = M3;
+dVVec(:) = 0;
 
 % 初始化结果函数
 dVMatrix = M3;
@@ -16,11 +19,17 @@ for i=1:n
     % 翻转第一个轴
     [M3Left, M3Right] = matrixMove(M3Tmp);
     % 求导后继续左右横跳
-    M3dV = M3Right - M3Left;
+    M3dV = (M3Right - M3Left)/2;
+    % 边缘值*2
+    M3dV(1) = M3dV(1)*2;
+    M3dV(end) = M3dV(end)*2;
+    
     [M3dVLeft, M3dVRight] = matrixMove(M3dV);
     % 转化为牛顿导数
-    M3dVReal = abs((4*M3dV+M3dVLeft+M3dVRight)/6);
+    M3dVReal = -(4*M3dV+M3dVLeft+M3dVRight)/6;
+    
     % 导数结果
+    dVVec(:) = dVVec(:) + M3dVReal(:);
     dVMatrix(:) = dVMatrix(:)+M3dVReal(:).^2;
 end
 
