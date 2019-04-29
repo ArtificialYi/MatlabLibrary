@@ -47,7 +47,9 @@ p = 1;
 XOriginNormMeansP1_01 = K201(XOriginNormMeansP1);
 
 % medoids-离散化函数
-[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMedoidsTrain, kMedoidsPred);
+kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
+kMedoidsPredFunc = @(paramX, paramCentroids) kMedoidsPred(paramX, paramCentroids);
+[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMedoidsTrainFunc, kMedoidsPredFunc);
 % medoids-01化函数
 XOriginNormMedoidsP1_01 = K201(XOriginNormMedoidsP1);
 
