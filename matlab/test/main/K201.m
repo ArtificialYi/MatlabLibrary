@@ -1,7 +1,7 @@
 function [X01] = K201(XK)
 %K201 将枚举数据转成01数组
 
-[mXK, nXK] = size(XK, 2);
+[mXK, nXK] = size(XK);
 
 KVec = max(XK);
 nX01 = sum(KVec);
