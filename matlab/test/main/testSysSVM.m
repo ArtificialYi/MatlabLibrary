@@ -51,7 +51,7 @@ XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
 [XOriginFinalNorm, data2normFuncFinal] = data2featureWithNormalize(XOriginFinal, 1);
 
 % 保存离散化数据
-save('data/pfm_data_means.mat', 'XOriginNormBinaryP1_01');
+save('data/pfm_data_means.mat', 'XOriginNormBinaryP1', 'XOriginNormBinaryP1_01');
 
 %% 使用SVM基础训练
 rng('shuffle');
