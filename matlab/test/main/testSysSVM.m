@@ -50,6 +50,9 @@ XOriginNormBinaryP1_01 = K201(XOriginNormBinaryP1);
 XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
 [XOriginFinalNorm, data2normFuncFinal] = data2featureWithNormalize(XOriginFinal, 1);
 
+% 保存离散化数据
+save('data/pfm_data_means.mat', 'XOriginNormBinaryP1_01');
+
 %% 使用SVM基础训练
 rng('shuffle');
 % 原始特征
@@ -82,17 +85,25 @@ fprintf('二项异常:%f\n', lossRes);
 lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
+
+%% 找到最优解
+minGu = 1e-8;
+minC = 1e5;
+minError = 0;
+
+% 学习曲线X
+numSplit = ceil(sqrt(mOrigin));
+vecSplit = floor((1:numSplit)*mOrigin/numSplit);
+
+% 学习曲线Y
+vecErrorTrain = zeros(numSplit, 1);
+vecErrorVal = zeros(numSplit, 1);
+    
 if isTrain
     %% 学习曲线
     % 0. 将数据随机化
     XOriginBinaryRand = XOriginFinalNorm(indexVecRand, :);
     YOriginRand = YOrigin(indexVecRand);
-    
-    numSplit = ceil(sqrt(mOrigin));
-    vecSplit = floor((1:numSplit)*mOrigin/numSplit);
-    
-    vecErrorTrain = zeros(numSplit, 1);
-    vecErrorVal = zeros(numSplit, 1);
     
     for i=1:length(vecSplit)
         % 1. 将不同的数据集放入训练器，查看训练集的结果和交叉验证集的结果
