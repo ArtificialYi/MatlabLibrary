@@ -60,8 +60,10 @@ XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1_01];
 [XOriginMedoidsFinalNorm, data2normFuncMedoidsFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
 
 % 保存离散化数据
+fprintf('离散化数据开始保存\n');
 save('data/pfm_data_means.mat', 'XOriginNormMeansP1', 'XOriginNormMeansP1_01', ...
     'XOriginNormMedoidsP1', 'XOriginNormMedoidsP1_01');
+fprintf('保存完毕\n');
 
 %% 使用SVM基础训练
 rng('shuffle');
