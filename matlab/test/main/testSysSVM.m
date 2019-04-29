@@ -41,17 +41,24 @@ kMeansFunc = @(paramX, paramK) kMeansTrainRandGPU(paramX, paramK, maxIter);
 kMeansPredFunc = @(paramX, paramCentroids) kMeansTrainGPU(paramX, paramCentroids, 1);
 KMax = 30;
 p = 1;
-% 离散化函数
-[XOriginNormBinaryP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMeansFunc, kMeansPredFunc);
-% 01化函数
-XOriginNormBinaryP1_01 = K201(XOriginNormBinaryP1);
+% means-离散化函数
+[XOriginNormMeansP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMeansFunc, kMeansPredFunc);
+% means-01化函数
+XOriginNormMeansP1_01 = K201(XOriginNormMeansP1);
+
+% medoids-离散化函数
+[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMedoidsTrain, kMedoidsPred);
+% medoids-01化函数
+XOriginNormMedoidsP1_01 = K201(XOriginNormMedoidsP1);
 
 % 最终特征归一化
-XOriginFinal = [XOriginNorm XOriginNormBinaryP1_01];
-[XOriginFinalNorm, data2normFuncFinal] = data2featureWithNormalize(XOriginFinal, 1);
+XOriginMeansFinal = [XOriginNorm XOriginNormMeansP1_01];
+[XOriginMeansFinalNorm, data2normFuncMeansFinal] = data2featureWithNormalize(XOriginMeansFinal, 1);
+XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1_01];
+[XOriginMedoidsFinalNorm, data2normFuncMedoidsFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
 
 % 保存离散化数据
-save('data/pfm_data_means.mat', 'XOriginNormBinaryP1', 'XOriginNormBinaryP1_01');
+save('data/pfm_data_means.mat', 'XOriginNormMeansP1_01', 'XOriginNormMedoidsP1_01');
 
 %% 使用SVM基础训练
 rng('shuffle');
@@ -70,14 +77,14 @@ fprintf('二项异常:%f\n', lossRes);
 lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
-% 离散化特征
-SVMModel = fitcsvm(XOriginFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
+% means离散化特征
+SVMModel = fitcsvm(XOriginMeansFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
-[predY, scoreOrigin] = predict(SVMModel, XOriginFinalNorm);
+[predY, scoreOrigin] = predict(SVMModel, XOriginMeansFinalNorm);
 CVSVMModel = crossval(SVMModel);
 classLoss = kfoldLoss(CVSVMModel);
-fprintf('离散化特征: %f\n', classLoss);
+fprintf('means-离散化特征: %f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
 lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
@@ -85,6 +92,20 @@ fprintf('二项异常:%f\n', lossRes);
 lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
+% medoids离散化特征
+SVMModel = fitcsvm(XOriginMedoidsFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
+    'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
+
+[predY, scoreOrigin] = predict(SVMModel, XOriginMedoidsFinalNorm);
+CVSVMModel = crossval(SVMModel);
+classLoss = kfoldLoss(CVSVMModel);
+fprintf('medoids-离散化特征: %f\n', classLoss);
+predRes = sum(predY==YOrigin)/size(YOrigin, 1);
+fprintf('准确率:%f\n', predRes);
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
+fprintf('二项异常:%f\n', lossRes);
+lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
+fprintf('铰链:%f\n', lossRes);
 
 %% 找到最优解
 minGu = 1e-8;
