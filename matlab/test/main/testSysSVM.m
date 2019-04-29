@@ -59,7 +59,7 @@ rng('shuffle');
 SVMModel = fitcsvm(XOriginNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
-[predY, scoreOrigin] = predict(SVMModel, XOriginFinalNorm);
+[predY, scoreOrigin] = predict(SVMModel, XOriginNorm);
 CVSVMModel = crossval(SVMModel);
 classLoss = kfoldLoss(CVSVMModel);
 fprintf('原始特征: %f\n', classLoss);
