@@ -38,16 +38,18 @@ indexVecRand = randperm(mOrigin);
 
 % 特征离散化
 KMax = 45;
-p = 1;
 % medoids-离散化函数
 kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
 kMedoidsPredFunc = @(paramX, paramCentroids) kMedoidsPred(paramX, paramCentroids);
-[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, p, kMedoidsTrainFunc, kMedoidsPredFunc);
+[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, 1, kMedoidsTrainFunc, kMedoidsPredFunc);
+[XOriginNormMedoidsP2, data2binaryP2] = binaryFeature(XOriginNorm, KMax, 2, kMedoidsTrainFunc, kMedoidsPredFunc);
 % medoids-01化函数
 XOriginNormMedoidsP1_01 = K201(XOriginNormMedoidsP1);
+XOriginNormMedoidsP2_01 = K201(XOriginNormMedoidsP2);
 
 % 最终特征归一化
-XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1 XOriginNormMedoidsP1_01];
+XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1 XOriginNormMedoidsP1_01 ...
+    XOriginNormMedoidsP2 XOriginNormMedoidsP2_01];
 [XOriginMedoidsFinalNorm, data2normFuncMeansFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
 
 % 保存离散化数据
