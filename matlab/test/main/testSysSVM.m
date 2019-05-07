@@ -11,11 +11,11 @@ maxIter = str2double(maxIter);
 isTrain = str2double(isTrain);
 
 %% 先读取数据
-data = load('resource/ex6data2.mat');
+data = load('resource/pfm_data.mat');
 
 % 获取原始数据
-XOrigin = data.X;
-YOrigin = data.Y;
+XOrigin = data.XOrigin;
+YOrigin = data.YOrigin;
 YOrigin(YOrigin==0)=-1;
 
 [mOrigin, nOrigin] = size(XOrigin);
