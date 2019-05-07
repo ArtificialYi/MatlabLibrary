@@ -37,7 +37,7 @@ indexVecRand = randperm(mOrigin);
 [XOriginNorm, data2normFuncOrigin] = data2featureWithNormalize(XOrigin, 1);
 
 % 特征离散化
-KMax = 45;
+KMax = 65;
 % medoids-离散化函数
 kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
 kMedoidsPredFunc = @(paramX, paramCentroids) kMedoidsPred(paramX, paramCentroids);
