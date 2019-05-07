@@ -37,7 +37,7 @@ indexVecRand = randperm(mOrigin);
 [XOriginNorm, data2normFuncOrigin] = data2featureWithNormalize(XOrigin, 1);
 
 % 特征离散化
-KMax = 30;
+KMax = 45;
 p = 1;
 % medoids-离散化函数
 kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
@@ -60,14 +60,14 @@ fprintf('保存完毕\n');
 rng('shuffle');
 % 原始特征
 % 基本svm训练
-fprintf('训练原始特征归一化');
+fprintf('训练原始特征归一化\n');
 SVMModel = fitcsvm(XOriginNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
 predY = predict(SVMModel, XOriginNorm);
-fprintf('交叉训练原始特征归一化');
+fprintf('交叉训练原始特征归一化\n');
 CVSVMModel = crossval(SVMModel, 'KFold', 5);
-fprintf('kFold损失');
+fprintf('kFold损失\n');
 classLoss = kfoldLoss(CVSVMModel);
 
 fprintf('原始特征预测: %f\n', classLoss);
@@ -79,13 +79,13 @@ lossRes = kfoldLoss(CVSVMModel, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
 % medoids离散化特征
-fprintf('训练离散化特征归一化');
+fprintf('训练离散化特征归一化\n');
 SVMModel2 = fitcsvm(XOriginMedoidsFinalNorm, YOrigin, 'Standardize', true, 'KernelFunction', 'RBF', ...
     'BoxConstraint', C, 'KernelScale', gu, 'IterationLimit', maxIter);
 
-fprintf('交叉训练离散化特征归一化');
+fprintf('交叉训练离散化特征归一化\n');
 [predY2, ~] = predict(SVMModel2, XOriginMedoidsFinalNorm);
-fprintf('kFold损失');
+fprintf('kFold损失\n');
 CVSVMModel2 = crossval(SVMModel2, 'KFold', 5);
 classLoss = kfoldLoss(CVSVMModel2);
 
