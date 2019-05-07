@@ -1,9 +1,12 @@
 function [centroids, KReal] = findInitPointRand(XGPU, KGPU)
 %findPointRand 在X上寻找K个初始点
 
-[~, n] = size(XGPU);
+m = size(XGPU, 1);
 
-centroids = gpuArray.zeros(KGPU, n);
+tmp = zeros(KGPU, m);
+
+% 获取一个 K * n 的缓存矩阵
+centroids = tmp * XGPU;
 KReal = KGPU;
 
 for i=1:KGPU
@@ -14,7 +17,7 @@ for i=1:KGPU
         break;
     end
     % 从现有的XGPU中随机取出一行
-    indexTmp = ceil(rand()*m);
+    indexTmp = randperm(m, 1);
     centroids(i, :) = XGPU(indexTmp, :);
     % 移除已经成为中心点的点
     XGPU(all(XGPU==centroids(i, :),2), :) = [];
