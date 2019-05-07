@@ -11,11 +11,11 @@ maxIter = str2double(maxIter);
 isTrain = str2double(isTrain);
 
 %% 先读取数据
-data = load('resource/pfm_data.mat');
+data = load('resource/ex6data2.mat');
 
 % 获取原始数据
-XOrigin = data.XOrigin;
-YOrigin = data.YOrigin;
+XOrigin = data.X;
+YOrigin = data.Y;
 YOrigin(YOrigin==0)=-1;
 
 [mOrigin, nOrigin] = size(XOrigin);
@@ -77,9 +77,9 @@ classLoss = kfoldLoss(CVSVMModel);
 fprintf('原始特征: %f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
+lossRes = loss(SVMModel, XOriginNorm, YOrigin, 'LossFun','binodeviance');
 fprintf('二项异常:%f\n', lossRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
+lossRes = loss(SVMModel, XOriginNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
 % means离散化特征
@@ -92,9 +92,9 @@ classLoss = kfoldLoss(CVSVMModel);
 fprintf('means-离散化特征: %f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
+lossRes = loss(SVMModel, XOriginMeansFinalNorm, YOrigin, 'LossFun','binodeviance');
 fprintf('二项异常:%f\n', lossRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
+lossRes = loss(SVMModel, XOriginMeansFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
 % medoids离散化特征
@@ -107,9 +107,9 @@ classLoss = kfoldLoss(CVSVMModel);
 fprintf('medoids-离散化特征: %f\n', classLoss);
 predRes = sum(predY==YOrigin)/size(YOrigin, 1);
 fprintf('准确率:%f\n', predRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','binodeviance');
+lossRes = loss(SVMModel, XOriginMedoidsFinalNorm, YOrigin, 'LossFun','binodeviance');
 fprintf('二项异常:%f\n', lossRes);
-lossRes = loss(SVMModel, XOriginFinalNorm, YOrigin, 'LossFun','hinge');
+lossRes = loss(SVMModel, XOriginMedoidsFinalNorm, YOrigin, 'LossFun','hinge');
 fprintf('铰链:%f\n', lossRes);
 
 %% 找到最优解

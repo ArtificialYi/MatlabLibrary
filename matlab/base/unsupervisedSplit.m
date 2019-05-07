@@ -6,8 +6,8 @@ function [centroidsGPU, YGPU, K] = unsupervisedSplit(XGPU, func, KMax)
 
 errorElbowVec = zeros(KMax, 1);
 
-YMatrixGPU = gpuArray.zeros(m, KMax);
-centroidsMatrixGPU = gpuArray.zeros((1+KMax)*KMax/2, n);
+YMatrix = zeros(m, KMax);
+centroidsMatrix = zeros((1+KMax)*KMax/2, n);
 % 手肘法
 indexBegin = 1;
 for i=1:KMax
@@ -18,8 +18,8 @@ for i=1:KMax
     end
     
     indexEnd = indexBegin + i - 1;
-    centroidsMatrixGPU(indexBegin:indexEnd, :) = centroidsTmpGPU;
-    YMatrixGPU(:, i) = YTmpGPU;
+    centroidsMatrix(indexBegin:indexEnd, :) = centroidsTmpGPU;
+    YMatrix(:, i) = YTmpGPU;
     indexBegin = indexEnd + 1;
     
     errorElbowVec(i) = gather(errorTmpGPU);
@@ -44,8 +44,8 @@ else
 end
 
 % 将点集合、分布集合、集群个数返回
-YGPU = YMatrixGPU(:, K);
-centroidsGPU = centroidsMatrixGPU(K*(K-1)/2+1:K*(K+1)/2, :);
+YGPU = YMatrix(:, K);
+centroidsGPU = centroidsMatrix(K*(K-1)/2+1:K*(K+1)/2, :);
 fprintf('预计的K值为:%d\n', K);
 
 end
