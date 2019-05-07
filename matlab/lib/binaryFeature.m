@@ -7,7 +7,7 @@ colIndexMatrix = vec2subMatrix(1:nNorm, p);
 nBinaryNew = size(colIndexMatrix, 1);
 
 % 点矩阵初始化
-centroidsMatrix = size(nBinaryNew * KMax, p);
+centroidsMatrix = zeros(nBinaryNew * KMax, p);
 centroidsIndexMatrix = zeros(nBinaryNew, 2);
 KResMatrix = zeros(mNorm, nBinaryNew);
 

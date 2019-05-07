@@ -32,7 +32,7 @@ if errorMin == 0
     K = indexMin;
 else
     % 先计算每个点的斜率（导数）
-    errorElbowVec2 = errorElbowVec.*((1:KMax))';
+    errorElbowVec2 = errorElbowVec.*((1:KMax).^(1/n))';
     % 先计算每个点的斜率（导数）
     [~, ~, errorDv] = indexMinForMulti(errorElbowVec2);
     % 通过斜率计算夹角，如果小于0，+pi
