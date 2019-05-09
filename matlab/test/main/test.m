@@ -37,16 +37,8 @@ hist(XOrigin(:, 2), 32);
 [XOriginNorm, data2normFuncOrigin] = data2featureWithNormalize(XOrigin, 1);
 
 % 特征离散化-means
-kMeansFunc = @(paramX, paramK) kMeansTrainRandCPU(paramX, paramK, maxIter);
-kMeansPredFunc = @(paramX, paramCentroids) kMeansTrainCPU(paramX, paramCentroids, 1);
 KMax = 18;
 p = 1;
-% 离散化函数-means
-[XOriginNormMeansP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, 1, kMeansFunc, kMeansPredFunc);
-[XOriginNormMeansP2, data2binaryP2] = binaryFeature(XOriginNorm, KMax, 2, kMeansFunc, kMeansPredFunc);
-% 01化函数-means
-XOriginNormMeansP1_01 = K201(XOriginNormMeansP1);
-XOriginNormMeansP2_01 = K201(XOriginNormMeansP2);
 
 % 特征离散化-medoids
 kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
@@ -56,11 +48,11 @@ kMedoidsPredFunc = @(paramX, paramCentroids) kMedoidsPred(paramX, paramCentroids
 [XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, 1, kMedoidsTrainFunc, kMedoidsPredFunc);
 [XOriginNormMedoidsP2, data2binaryP2] = binaryFeature(XOriginNorm, KMax, 2, kMedoidsTrainFunc, kMedoidsPredFunc);
 % 01化函数-medoids
-XOriginNormMedoidsP1_01 = K201(XOriginNormMedoidsP1);
-XOriginNormMedoidsP2_01 = K201(XOriginNormMedoidsP2);
+[XOriginNormMedoidsP1_01, data201P1] = K201(XOriginNormMedoidsP1);
+[XOriginNormMedoidsP2_01, data201P2] = K201(XOriginNormMedoidsP2);
 
 % 数据渲染-2
-KPlot = max(XOriginNormMeansP2);
+KPlot = max(XOriginNormMedoidsP2);
 plotVec = ["r+", "b+", "g+", "k+", "y+", "c+"];
 [centroids, predY, errorMin, KReal] = kMedoidsTrain(XOrigin, KPlot);
 
@@ -71,3 +63,24 @@ for i=1:KReal
     plot(centroids(i, 1), centroids(i, 2), 'ko', 'MarkerSize', 7);
 end
 hold off;
+
+%% 将medoids数据
+% 最终特征归一化
+XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1 XOriginNormMedoidsP1_01 ...
+    XOriginNormMedoidsP2 XOriginNormMedoidsP2_01];
+[XOriginMedoidsFinalNorm, data2normFuncMeansFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
+
+% 数据转移
+XOriginNormTmp = data2normFuncOrigin(XOrigin);
+XOriginNormMedoidsP1Tmp = data2binaryP1(XOriginNormTmp);
+XOriginNormMedoidsP2Tmp = data2binaryP2(XOriginNormTmp);
+% 离散01化
+XOriginNormMedoidsP1_01Tmp = data201P1(XOriginNormMedoidsP1Tmp);
+XOriginNormMedoidsP2_01Tmp = data201P2(XOriginNormMedoidsP2);
+
+% 最终归一化
+XOriginMedoidsFinalTmp = [XOriginNormTmp XOriginNormMedoidsP1Tmp XOriginNormMedoidsP1_01Tmp ...
+    XOriginNormMedoidsP2Tmp XOriginNormMedoidsP2_01Tmp];
+XOriginMedoidsFinalNormTmp = data2normFuncMeansFinal(XOriginMedoidsFinalTmp);
+
+%% 

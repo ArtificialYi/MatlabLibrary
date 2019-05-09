@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = testSysSVM(C, gu, guLeft, guRight, guSplit, maxIter, isTrain)
+function [outputArg1,outputArg2] = testSysSVMPre(C, gu, guLeft, guRight, guSplit, maxIter, isTrain)
 %testSysSVM 使用系统自带的分类器
 
 % 初始化数据
@@ -53,8 +53,9 @@ XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1 XOriginNormMedoidsP1_01 
 [XOriginMedoidsFinalNorm, data2normFuncMeansFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
 
 % 保存离散化数据
+fileName = sprintf('data/data_testSysSVMPre_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('离散化数据开始保存\n');
-save('data/pfm_data_means.mat', ...
+save(fileName, ...
     'XOriginNormMedoidsP1', 'XOriginNormMedoidsP1_01', 'XOriginMedoidsFinalNorm');
 fprintf('保存完毕\n');
 
@@ -117,7 +118,7 @@ if isTrain
     % 0. 将数据随机化
     XOriginBinaryRand = XOriginFinalNorm(indexVecRand, :);
     YOriginRand = YOrigin(indexVecRand);
-    
+
     for i=1:length(vecSplit)
         % 1. 将不同的数据集放入训练器，查看训练集的结果和交叉验证集的结果
         MdlLearn = fitcsvm(XOriginBinaryRand(1:vecSplit(i), :), YOriginRand(1:vecSplit(i)), ...
@@ -138,7 +139,7 @@ if isTrain
         vecErrorTrain(i) = hingeLossTrain;
         vecErrorVal(i) = hingeLossVal;
     end
-    
+
     %% 查找当前最优解
     vecGu = linspace(guLeft, guRight, guSplit);
     vecGu = vecGu(2:end);
@@ -214,7 +215,7 @@ if isTrain
     fprintf('最小gu:%f\n最优C:%f\n最小error:%f\n', minGu, minC, minError);
 end
 
-% 获取文件名
+%% 获取文件名
 fileName = sprintf('data/data_testSvmGaus_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('正在保存文件:%s\n', fileName(6:end));
 save(fileName, ...
