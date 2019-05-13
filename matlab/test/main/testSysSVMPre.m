@@ -32,31 +32,15 @@ indexVecRand = randperm(mOrigin);
     splitData(YOrigin, indexVecRand, trainPoint, valPoint);
 
 %% 特征扩充
-%% 将所有特征离散化-K-means
-% 特征归一化
-[XOriginNorm, data2normFuncOrigin] = data2featureWithNormalize(XOrigin, 1);
-
-% 特征离散化
+%% 将所有特征离散化-K-mean
 KMax = 65;
-% medoids-离散化函数
-kMedoidsTrainFunc = @(paramX, paramK) kMedoidsTrain(paramX, paramK);
-kMedoidsPredFunc = @(paramX, paramCentroids) kMedoidsPred(paramX, paramCentroids);
-[XOriginNormMedoidsP1, data2binaryP1] = binaryFeature(XOriginNorm, KMax, 1, kMedoidsTrainFunc, kMedoidsPredFunc);
-[XOriginNormMedoidsP2, data2binaryP2] = binaryFeature(XOriginNorm, KMax, 2, kMedoidsTrainFunc, kMedoidsPredFunc);
-% medoids-01化函数
-XOriginNormMedoidsP1_01 = K201(XOriginNormMedoidsP1);
-XOriginNormMedoidsP2_01 = K201(XOriginNormMedoidsP2);
-
-% 最终特征归一化
-XOriginMedoidsFinal = [XOriginNorm XOriginNormMedoidsP1 XOriginNormMedoidsP1_01 ...
-    XOriginNormMedoidsP2 XOriginNormMedoidsP2_01];
-[XOriginMedoidsFinalNorm, data2normFuncMeansFinal] = data2featureWithNormalize(XOriginMedoidsFinal, 1);
+p = 2;
+[XOriginNorm, data2norm] = featureEngineer(XOrigin, KMax, p);
 
 % 保存离散化数据
 fileName = sprintf('data/data_testSysSVMPre_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('离散化数据开始保存\n');
-save(fileName, ...
-    'XOriginNormMedoidsP1', 'XOriginNormMedoidsP1_01', 'XOriginMedoidsFinalNorm');
+save(fileName, 'XOriginNorm');
 fprintf('保存完毕\n');
 
 %% 使用SVM基础训练
