@@ -1,18 +1,16 @@
 function [outputArg1,outputArg2] = ...
-    testSysSVMPtr(C, gu, maxIter, isTrain, guLeft, guRight, guSplit)
+    testSysSVMPtr(C, gu, maxIter, isTrain)
 %testSysSVMPtr SVM训练数据&找到最优解
 
 % 初始化数据
 gu = str2double(gu);
 C = str2double(C);
-guLeft = str2double(guLeft);
-guRight = str2double(guRight);
-guSplit = str2double(guSplit);
 maxIter = str2double(maxIter);
 isTrain = str2double(isTrain);
 
 %% 先读取数据
 data0 = load('resource/pfm_data.mat');
+data1 = load('data/data_testSysSVMPre_20190513194643.mat');
 
 XOrigin = data0.XOrigin;
 YOrigin = data0.YOrigin;
@@ -65,20 +63,25 @@ fprintf('铰链:%f\n', lossRes);
 
 %% 查找最优值
 seed = floor(rand()*1e9);
-pred = 1e-3;
+predGu = 1e-3;
+predC = 1e-3;
 svmFuncWithGuC = @(paramC, paramGu) valLossSVM(XOriginNorm, YOrigin, ...
     paramC, paramGu, maxIter, seed);
 
-[errorVal, errorTrain] = svmFuncWithGuC(C, gu);
+guMin = 1e5;
+CMin = 1e5;
+errorMin = 1e5;
+
 if isTrain
-    % 获取gu列表
-    vecGu = logspace(guLeft, guRight, guSplit);
-    
-    % 找到最优gu和最优gu对应的C
-    guTmp = 1;
-    svmFunCWithC = @(paramC) svmFuncWithGuC(paramC, guTmp);
-    [CMinTmp, errorMinTmp] = svmTrainCPUForFindC(svmFunCWithC, pred);
+    [guMin, CMin, errorMin] = svmTrainCPUForFindGuC(svmFuncWithGuC, predGu, predC);
 end
+
+% 保存最优训练结果
+fileName = sprintf('data/data_testSysSVMPtr_%s.mat', datestr(now, 'yyyymmddHHMMss'));
+fprintf('离散化数据开始保存\n');
+fprintf('正在保存文件:%s\n', fileName(6:end));
+save(fileName, 'guMin', 'CMin', 'errorMin');
+fprintf('保存完毕\n');
 
 function [errorVal, errorTrain] = valLossSVM(paramX, paramY, paramC, paramGu, maxIter, seed)
     rng(seed);

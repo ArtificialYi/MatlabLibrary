@@ -3,7 +3,6 @@ function [CMin, errorMin] = svmTrainCPUForFindC(func, pred)
 
 % 先用等比数列找到范围
 split = 11;
-indexMin = split;
 CVec = logspace(-5, 5, split);
 CLeft = CVec(1);
 CRight = CVec(end);
