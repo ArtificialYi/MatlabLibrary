@@ -16,6 +16,7 @@ data = load('resource/pfm_data.mat');
 % 获取原始数据
 XOrigin = data.XOrigin;
 YOrigin = data.YOrigin;
+XTest = data.XTest;
 YOrigin(YOrigin==0)=-1;
 
 [mOrigin, nOrigin] = size(XOrigin);
@@ -36,11 +37,12 @@ indexVecRand = randperm(mOrigin);
 KMax = 65;
 p = 2;
 [XOriginNorm, data2norm] = featureEngineer(XOrigin, KMax, p);
+XTestNorm = data2norm(XTest);
 
 % 保存离散化数据
 fileName = sprintf('data/data_testSysSVMPre_%s.mat', datestr(now, 'yyyymmddHHMMss'));
 fprintf('离散化数据开始保存\n');
-save(fileName, 'XOriginNorm');
+save(fileName, 'XOriginNorm', 'XTestNorm', 'data2norm');
 fprintf('保存完毕\n');
 
 %% 使用SVM基础训练
