@@ -17,8 +17,8 @@ YOrigin = data0.YOrigin;
 XTest = data0.XTest;
 YOrigin(YOrigin==0) = -1;
 
-XOriginNorm = XOrigin;
-XTestNorm = XTest;
+XOriginNorm = data1.XOriginNorm;
+XTestNorm = data1.XOriginNorm;
 
 %% 使用SVM基础训练
 rng('shuffle');
