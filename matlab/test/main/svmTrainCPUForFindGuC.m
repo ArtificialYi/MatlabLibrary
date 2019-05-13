@@ -1,7 +1,7 @@
 function [guMin, CMin, errorMin] = svmTrainCPUForFindGuC(func, predGu, predC)
 %svmTrainCPUForFindGuC 使用SVM查找gu和C
 
-split = 11;
+split = 21;
 indexMin = split;
 
 guVec = logspace(-5, 5, split);
